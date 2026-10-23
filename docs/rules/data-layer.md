@@ -13,7 +13,7 @@ data/
   local/          (thêm khi cần) dao/, database/, entity/, datasource/
   mapper/         extension toDomain() / toEntity() / toDto()
   repository/     XRepositoryImpl
-  util/           withCatching, mapError
+  util/           withCatching, withLocalCatching, mapError
   di/             DataModule
 ```
 
@@ -57,6 +57,18 @@ single<ProfileRemoteDataSource> { ProfileRemoteDataSourceImpl(get()) }
 single<ProfileRepository> { ProfileRepositoryImpl(get(), get()) }
 ```
 
+### Nguồn theo flavor (fixtures)
+
+Một interface có thể có hai impl cùng nói DTO: `CatalogRemoteDataSourceImpl` (Ktor) và
+`CatalogAssetDataSourceImpl` (đọc `assets/fixtures/`, chỉ flavor `dev` mang file). `DataModule` chọn theo
+`AppConfig.useFixtures`. Impl asset thiếu file phải ném `ApiException(404)` để chuỗi lỗi giống hệt mạng.
+Golden test của `:data` đọc đúng thư mục `app/src/dev/assets` (Variant API trong `data/build.gradle.kts`), không copy.
+
+### Cache in-memory + single-flight
+
+Dữ liệu nhiều màn cùng cần lúc mở app (catalog) cache trong repository `single`, gọi đồng thời chỉ ra nguồn
+**một lần** (`Mutex`) — host chặn 403 khi bị gọi dồn. Không cache kết quả lỗi, để Retry gọi lại được.
+
 ## Trách nhiệm từng tầng
 
 | Tầng | Làm | Không làm |
@@ -67,6 +79,9 @@ single<ProfileRepository> { ProfileRepositoryImpl(get(), get()) }
 
 `withCatching` = `withContext(Dispatchers.IO)` + `runCatching` + **ném tiếp `CancellationException`**.
 Repository là chỗ **duy nhất** có try/catch.
+Ghi Room/DataStore dùng `withLocalCatching { }` (→ `DomainException.Unknown`): `toDomainException()`
+dịch `IOException` thành `Network`, sai với lỗi file local. Đường ghi cũng trả `Result<Unit>`, không
+để exception lọt lên ViewModel.
 
 ## Mapper
 

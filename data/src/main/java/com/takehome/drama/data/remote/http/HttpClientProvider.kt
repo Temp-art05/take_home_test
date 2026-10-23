@@ -25,6 +25,8 @@ val defaultJson = Json {
     isLenient = true
     encodeDefaults = true
     explicitNulls = false
+    // `"isFree": null` vào field non-null → lấy default thay vì ném, nếu không SkipInvalidList bỏ cả tập/show.
+    coerceInputValues = true
 }
 
 /** [engine] để test thay bằng `MockEngine`; app dùng mặc định OkHttp. */

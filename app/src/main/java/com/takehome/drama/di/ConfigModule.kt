@@ -14,6 +14,7 @@ val configModule = module {
             baseUrl = BuildConfig.BASE_URL,
             isDebug = BuildConfig.IS_DEBUG,
             isDevFlavor = BuildConfig.IS_DEV_FLAVOR,
+            useFixtures = BuildConfig.USE_FIXTURES,
             versionCode = BuildConfig.VERSION_CODE,
             versionName = BuildConfig.VERSION_NAME,
         )

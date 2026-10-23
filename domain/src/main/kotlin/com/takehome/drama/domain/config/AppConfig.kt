@@ -12,6 +12,8 @@ data class AppConfig(
     val baseUrl: String,
     val isDebug: Boolean,
     val isDevFlavor: Boolean,
+    /** Đọc catalogue từ fixtures trong assets thay vì gọi mạng (flavor dev). */
+    val useFixtures: Boolean,
     val versionCode: Int,
     val versionName: String,
 )

@@ -52,12 +52,15 @@ android {
             dimension = "environment"
             // Không có applicationIdSuffix/versionNameSuffix: Firebase chỉ đăng ký một app, dev và prod dùng chung package và versionName.
             buildConfigField("boolean", "IS_DEV_FLAVOR", "true")
+            // Dev đọc fixtures trong src/dev/assets: host thật trả 403 nếu bị gọi liên tục.
+            buildConfigField("boolean", "USE_FIXTURES", "true")
             stringBuildConfig("BASE_URL", "https://flowdrama.luonluon.com/flowdrama/api/")
         }
 
         create("prod") {
             dimension = "environment"
             buildConfigField("boolean", "IS_DEV_FLAVOR", "false")
+            buildConfigField("boolean", "USE_FIXTURES", "false")
             stringBuildConfig("BASE_URL", "https://flowdrama.luonluon.com/flowdrama/api/")
         }
     }
