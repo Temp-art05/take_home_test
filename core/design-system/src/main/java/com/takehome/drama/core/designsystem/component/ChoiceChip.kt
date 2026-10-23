@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.takehome.drama.core.designsystem.ext.applyIf
 import com.takehome.drama.core.designsystem.theme.AppTheme
@@ -25,6 +26,7 @@ fun ChoiceChip(
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    verticalPadding: Dp = 7.dp,
 ) {
     val shape = AppTheme.shapes.full
     val colors = MaterialTheme.colorScheme
@@ -35,7 +37,7 @@ fun ChoiceChip(
             .applyIf(selected) { background(colors.surfaceContainerHighest, shape) }
             .applyIf(!selected) { border(1.dp, colors.outline, shape) }
             .selectable(selected = selected, role = Role.Tab, onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 7.dp),
+            .padding(horizontal = 14.dp, vertical = verticalPadding),
         contentAlignment = Alignment.Center,
     ) {
         Text(

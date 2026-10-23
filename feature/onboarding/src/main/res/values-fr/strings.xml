@@ -1,0 +1,43 @@
+<resources>
+    <string name="onboarding_step">ÉTAPE %1$d / %2$d</string>
+    <string name="onboarding_continue">Continuer</string>
+    <string name="onboarding_skip">Passer</string>
+
+    <!-- SCR-0001 Splash -->
+    <string name="onboarding_splash_tag">Séries courtes</string>
+
+    <!-- SCR-0002 Language -->
+    <string name="onboarding_language_title">Votre langue</string>
+    <string name="onboarding_language_body">Choisie d\'après votre téléphone. Modifiable à tout moment dans Paramètres.</string>
+
+    <!-- SCR-0003 Value prop -->
+    <string name="onboarding_value_prop_title">Tous les épisodes ouverts.\nL\'histoire coule, tout simplement.</string>
+    <string name="onboarding_value_prop_body">Des milliers de séries courtes, gratuites de l\'ép. 1 au final. Pas de pièces, pas d\'abonnement, aucun barrage au milieu de votre nuit.</string>
+    <string name="onboarding_pill_full_seasons">Saisons complètes</string>
+    <string name="onboarding_pill_no_signup">Sans inscription</string>
+    <string name="onboarding_pill_short">Épisodes de 2 min</string>
+    <string name="onboarding_step_into_flow">Entrez dans le flow</string>
+
+    <!-- SCR-0004 Taste picker -->
+    <string name="onboarding_taste_title">Quelle ambiance ce soir ?</string>
+    <string name="onboarding_taste_body">Choisissez une émotion – on versera les bonnes histoires dans votre flow.</string>
+    <string name="onboarding_mood_rage">Rage</string>
+    <string name="onboarding_mood_swoon">Frisson d\'amour</string>
+    <string name="onboarding_mood_cry">Larmes</string>
+    <string name="onboarding_mood_thrill">Suspense</string>
+    <string name="onboarding_fine_tune">Affiner (facultatif)</string>
+    <string name="onboarding_more_chips">+ %1$d de plus</string>
+
+    <!-- SCR-0005 Notification pre-prompt -->
+    <string name="onboarding_notification_title">Votre flow, trois fois par jour</string>
+    <string name="onboarding_notification_body">Une notif discrète à chaque ouverture. Jamais de spam – désactivable dans Paramètres.</string>
+    <string name="onboarding_ping_title">%1$s · %2$s</string>
+    <string name="onboarding_ping_morning">Gorgée du matin</string>
+    <string name="onboarding_ping_morning_body">Résumés de 2 min des épisodes d\'hier soir</string>
+    <string name="onboarding_ping_lunch">Pause déj\'</string>
+    <string name="onboarding_ping_lunch_body">Un arc court qui tient en 20 minutes</string>
+    <string name="onboarding_ping_night">Flow du soir</string>
+    <string name="onboarding_ping_night_body">Nouveaux épisodes de vos séries, prêts à lancer</string>
+    <string name="onboarding_turn_on_notifications">Activer les notifications</string>
+    <string name="onboarding_not_now">Plus tard</string>
+</resources>

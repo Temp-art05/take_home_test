@@ -1,13 +1,43 @@
 <resources>
-    <string name="onboarding_splash_title">Splash</string>
-    <string name="onboarding_language_title">Your language</string>
-    <string name="onboarding_value_prop_title">Every episode open</string>
-    <string name="onboarding_taste_title">How should tonight feel?</string>
-    <string name="onboarding_notification_title">Your flow runs three times a day</string>
+    <string name="onboarding_step">STEP %1$d / %2$d</string>
     <string name="onboarding_continue">Continue</string>
-    <string name="onboarding_step_into_flow">Step into the flow</string>
     <string name="onboarding_skip">Skip</string>
+
+    <!-- SCR-0001 Splash -->
+    <string name="onboarding_splash_tag">Short Drama Series</string>
+
+    <!-- SCR-0002 Language -->
+    <string name="onboarding_language_title">Your language</string>
+    <string name="onboarding_language_body">We matched this to your phone. Change it anytime in Settings.</string>
+
+    <!-- SCR-0003 Value prop -->
+    <string name="onboarding_value_prop_title">Every episode open.\nThe story just flows.</string>
+    <string name="onboarding_value_prop_body">Thousands of short dramas, free from Ep. 1 to the finale. No coins, no plans, no dam in the middle of your night.</string>
+    <string name="onboarding_pill_full_seasons">Full seasons</string>
+    <string name="onboarding_pill_no_signup">No sign-up</string>
+    <string name="onboarding_pill_short">2-min episodes</string>
+    <string name="onboarding_step_into_flow">Step into the flow</string>
+
+    <!-- SCR-0004 Taste picker -->
+    <string name="onboarding_taste_title">How should tonight feel?</string>
+    <string name="onboarding_taste_body">Pick a feeling first – we\'ll pour the right stories into your flow.</string>
+    <string name="onboarding_mood_rage">Rage</string>
+    <string name="onboarding_mood_swoon">Swoon</string>
+    <string name="onboarding_mood_cry">Cry</string>
+    <string name="onboarding_mood_thrill">Thrill</string>
+    <string name="onboarding_fine_tune">Fine-tune (optional)</string>
+    <string name="onboarding_more_chips">+ %1$d more</string>
+
+    <!-- SCR-0005 Notification pre-prompt -->
+    <string name="onboarding_notification_title">Your flow runs three times a day</string>
+    <string name="onboarding_notification_body">One quiet ping when each window opens. Never spam – off anytime in Settings.</string>
+    <string name="onboarding_ping_title">%1$s · %2$s</string>
+    <string name="onboarding_ping_morning">Morning sip</string>
+    <string name="onboarding_ping_morning_body">2-min recaps of last night\'s episodes</string>
+    <string name="onboarding_ping_lunch">Lunch splash</string>
+    <string name="onboarding_ping_lunch_body">One short arc that fits in 20 minutes</string>
+    <string name="onboarding_ping_night">Night flow</string>
+    <string name="onboarding_ping_night_body">New episodes of your shows, ready to run</string>
     <string name="onboarding_turn_on_notifications">Turn on notifications</string>
     <string name="onboarding_not_now">Not now</string>
-    <string name="onboarding_skip_to_home">Skip onboarding</string>
 </resources>

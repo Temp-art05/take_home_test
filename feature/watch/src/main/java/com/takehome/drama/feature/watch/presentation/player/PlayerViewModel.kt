@@ -6,22 +6,32 @@ import androidx.navigation.toRoute
 import com.takehome.drama.core.media.EpisodeFeedPlayer
 import com.takehome.drama.core.media.EpisodeFeedPlayerFactory
 import com.takehome.drama.core.media.FeedItem
+import com.takehome.drama.core.media.PlaybackProgress
+import com.takehome.drama.core.media.PlaybackSpeed
 import com.takehome.drama.core.media.PlaybackState
+import com.takehome.drama.core.media.progress
 import com.takehome.drama.core.ui.foundation.error.toErrorRes
 import com.takehome.drama.core.ui.foundation.vm.BaseViewModel
 import com.takehome.drama.domain.model.Catalog
 import com.takehome.drama.domain.model.Episode
 import com.takehome.drama.domain.model.Show
 import com.takehome.drama.domain.model.WatchProgress
+import com.takehome.drama.domain.model.findShow
 import com.takehome.drama.domain.repository.UserPreferencesRepository
-import com.takehome.drama.domain.usecase.catalog.CatalogUseCase
-import com.takehome.drama.domain.usecase.history.WatchProgressUseCase
+import com.takehome.drama.domain.usecase.catalog.GetCatalogUseCase
+import com.takehome.drama.domain.usecase.catalog.ResolveContentLanguageUseCase
+import com.takehome.drama.domain.usecase.history.GetResumePositionUseCase
+import com.takehome.drama.domain.usecase.history.ObserveShowProgressUseCase
+import com.takehome.drama.domain.usecase.history.SaveWatchProgressUseCase
 import com.takehome.drama.domain.usecase.watch.EndAction
-import com.takehome.drama.domain.usecase.watch.EpisodesUseCase
+import com.takehome.drama.domain.usecase.watch.GetEndActionUseCase
+import com.takehome.drama.domain.usecase.watch.GetEpisodeGridUseCase
+import com.takehome.drama.domain.usecase.watch.GetEpisodeRangesUseCase
+import com.takehome.drama.domain.usecase.watch.GetShowEpisodesUseCase
+import com.takehome.drama.domain.usecase.watch.PickVideoSourceUseCase
 import com.takehome.drama.domain.usecase.watch.PlaybackQualityPolicy
 import com.takehome.drama.feature.watch.R
 import com.takehome.drama.feature.watch.navigation.PlayerScreenProvider.Player
-import com.takehome.drama.feature.watch.presentation.player.model.PlaybackSpeed
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerPage
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerSheet
 import java.util.Locale
@@ -32,6 +42,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -46,9 +57,16 @@ import kotlinx.coroutines.launch
  */
 class PlayerViewModel(
     private val savedStateHandle: SavedStateHandle,
-    private val catalogUseCase: CatalogUseCase,
-    private val episodesUseCase: EpisodesUseCase,
-    private val watchProgressUseCase: WatchProgressUseCase,
+    private val getCatalog: GetCatalogUseCase,
+    private val getShowEpisodes: GetShowEpisodesUseCase,
+    private val resolveContentLanguage: ResolveContentLanguageUseCase,
+    private val pickVideoSource: PickVideoSourceUseCase,
+    private val getEpisodeGrid: GetEpisodeGridUseCase,
+    private val getEpisodeRanges: GetEpisodeRangesUseCase,
+    private val getEndAction: GetEndActionUseCase,
+    private val getResumePosition: GetResumePositionUseCase,
+    private val saveWatchProgress: SaveWatchProgressUseCase,
+    private val observeShowProgress: ObserveShowProgressUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
     playerFactory: EpisodeFeedPlayerFactory,
 ) : BaseViewModel<PlayerIntent, PlayerViewState, PlayerSingleEvent>() {
@@ -58,10 +76,14 @@ class PlayerViewModel(
 
     val player: EpisodeFeedPlayer = playerFactory.create()
 
-    /** Vị trí phát tách khỏi [viewState]: chỉ thanh track đọc, mỗi tick không recompose cả màn. */
-    val positionMs: StateFlow<Long> = player.state
-        .map { it.positionMs }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), 0)
+    /**
+     * Tiến độ tách khỏi [viewState]: chỉ thanh track đọc, mỗi tick không recompose cả màn. Gắn với tập nó đo
+     * ([PlaybackProgress]) để lật sang tập mới không vẽ vị trí tập trước.
+     */
+    val playbackProgress: StateFlow<PlaybackProgress> = player.state
+        .map { it.progress }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), PlaybackProgress())
 
     private var catalog: Catalog? = null
     private var show: Show? = null
@@ -129,9 +151,9 @@ class PlayerViewModel(
     private fun load() {
         updateState { copy(isLoading = true, errorRes = null) }
         viewModelScope.launch {
-            val episodesResult = async { episodesUseCase.load(showId) }
-            val loadedCatalog = catalogUseCase.load().getOrElse { return@launch fail(it.toErrorRes()) }
-            val loadedShow = catalogUseCase.findShow(loadedCatalog, showId)
+            val episodesResult = async { getShowEpisodes(showId) }
+            val loadedCatalog = getCatalog().getOrElse { return@launch fail(it.toErrorRes()) }
+            val loadedShow = loadedCatalog.findShow(showId)
                 ?: return@launch fail(R.string.watch_show_not_found)
             val loaded = episodesResult.await().getOrElse { return@launch fail(it.toErrorRes()) }
             if (loaded.episodes.isEmpty()) return@launch fail(R.string.watch_error_no_source)
@@ -140,7 +162,7 @@ class PlayerViewModel(
             catalog = loadedCatalog
             show = loadedShow
             episodes = loaded.episodes
-            contentLanguage = catalogUseCase.resolveContentLanguage(
+            contentLanguage = resolveContentLanguage(
                 saved = preferences.contentLanguage,
                 deviceLanguage = Locale.getDefault().language,
                 catalog = loadedCatalog,
@@ -150,7 +172,7 @@ class PlayerViewModel(
                     isLoading = false,
                     posterUrl = loadedShow.posterUrl,
                     episodeTotal = episodes.size,
-                    ranges = episodesUseCase.ranges(episodes),
+                    ranges = getEpisodeRanges(episodes),
                     autoplayNext = preferences.autoplayNextEpisode,
                 )
             }
@@ -173,7 +195,7 @@ class PlayerViewModel(
             userPreferencesRepository.preferences.collect { updateState { copy(autoplayNext = it.autoplayNextEpisode) } }
         }
         viewModelScope.launch {
-            watchProgressUseCase.observeForShow(showId).collect {
+            observeShowProgress(showId).collect {
                 progress = it
                 refreshGrid()
                 refreshPages()
@@ -202,7 +224,7 @@ class PlayerViewModel(
                 isLiked = episode.index in likedEpisodes,
                 endAction = null,
                 errorRes = null,
-                selectedRange = episodesUseCase.rangeOf(ranges, episodes, episode.index),
+                selectedRange = getEpisodeRanges.rangeOf(ranges, episodes, episode.index),
                 languages = episode.sources.filterValues { it.isNotEmpty() }.keys.toList(),
             )
         }
@@ -214,7 +236,7 @@ class PlayerViewModel(
             return
         }
         openJob = viewModelScope.launch {
-            val start = positionMs ?: watchProgressUseCase.resumePosition(showId, episode.index)
+            val start = positionMs ?: getResumePosition(showId, episode.index)
             startPlayback(episode, start, playWhenReady = isScreenStarted)
             // Vào nền lúc còn đang nạp: quay lại thì phát như user mong đợi.
             if (!isScreenStarted) wasPlayingBeforeStop = true
@@ -228,7 +250,7 @@ class PlayerViewModel(
         player.setPlaylist(
             episodes.map { episode ->
                 val url = if (episode.isFree) {
-                    episodesUseCase.pickSource(episode, contentLanguage, defaultLanguage, preferred)?.url
+                    pickVideoSource(episode, contentLanguage, defaultLanguage, preferred)?.url
                 } else {
                     null
                 }
@@ -240,13 +262,13 @@ class PlayerViewModel(
     private fun startPlayback(episode: Episode, positionMs: Long, playWhenReady: Boolean) {
         val defaultLanguage = catalog?.defaultLanguage ?: return
         val preferred = currentState.quality ?: autoQualityCap
-        val source = episodesUseCase.pickSource(episode, contentLanguage, defaultLanguage, preferred)
+        val source = pickVideoSource(episode, contentLanguage, defaultLanguage, preferred)
             ?: return fail(R.string.watch_error_no_source)
         playingQuality = source.quality
         updateState {
             copy(
                 language = source.language,
-                qualities = episodesUseCase.qualitiesOf(episode, contentLanguage, defaultLanguage),
+                qualities = pickVideoSource.qualitiesOf(episode, contentLanguage, defaultLanguage),
             )
         }
         player.setCurrent(episodes.indexOf(episode), positionMs, playWhenReady)
@@ -274,7 +296,7 @@ class PlayerViewModel(
 
     private fun onEnded(playback: PlaybackState) {
         saveProgress(playback.durationMs, playback.durationMs)
-        val action = episodesUseCase.afterEnded(episodes, currentState.episodeIndex, currentState.autoplayNext)
+        val action = getEndAction(episodes, currentState.episodeIndex, currentState.autoplayNext)
         if (action is EndAction.PlayNext) {
             // Chỉ cuộn; tập kế mở khi trang dừng (PageSettled) như user tự vuốt. Đổi tập trước khi cuộn
             // thì trang cũ (player bị tua về 0) và top bar đổi giữa lúc trượt → flash.
@@ -329,9 +351,9 @@ class PlayerViewModel(
             updatedAt = System.currentTimeMillis(),
         )
         if (final) {
-            viewModelScope.launch(NonCancellable) { watchProgressUseCase.save(record) }
+            viewModelScope.launch(NonCancellable) { saveWatchProgress(record) }
         } else {
-            viewModelScope.launch { watchProgressUseCase.save(record) }
+            viewModelScope.launch { saveWatchProgress(record) }
         }
     }
 
@@ -399,7 +421,7 @@ class PlayerViewModel(
         updateState {
             copy(
                 sheet = PlayerSheet.Episodes,
-                selectedRange = episodesUseCase.rangeOf(ranges, episodes, episodeIndex),
+                selectedRange = getEpisodeRanges.rangeOf(ranges, episodes, episodeIndex),
             )
         }
     }
@@ -411,9 +433,14 @@ class PlayerViewModel(
             return
         }
         updateState { copy(sheet = PlayerSheet.None) }
-        if (index == currentState.episodeIndex && !currentState.playback.ended) return
+        if (index == currentState.episodeIndex) {
+            // Cùng trang, không cuộn: chỉ phát lại khi đã hết tập.
+            if (currentState.playback.ended) openEpisode(index, positionMs = 0)
+            return
+        }
         saveCurrentProgress()
-        openEpisode(index, positionMs = 0)
+        // Chỉ cuộn; tập mở ở PageSettled như vuốt tay / tự sang tập — lúc đó trang cũ đã khuất nên player của nó
+        // tua về 0 ngay mà không lộ ra màn (vuốt ngược lại không thấy khung hình cũ nhảy về đầu).
         sendEvent(PlayerSingleEvent.ScrollToEpisode(index))
     }
 
@@ -487,8 +514,8 @@ class PlayerViewModel(
     private fun refreshGrid() {
         updateState {
             copy(
-                cells = episodesUseCase.grid(episodes, progress, currentIndex = episodeIndex),
-                watchedCount = episodesUseCase.watchedCount(episodes, progress),
+                cells = getEpisodeGrid(episodes, progress, currentIndex = episodeIndex),
+                watchedCount = getEpisodeGrid.watchedCount(episodes, progress),
             )
         }
     }

@@ -1,6 +1,5 @@
 package com.takehome.drama.feature.main.presentation.language
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -92,18 +91,12 @@ private fun LanguageRow(
     ) {
         RadioButton(selected = selected, onClick = null)
         Text(
-            text = stringResource(locale.labelRes()),
+            text = locale.endonym ?: stringResource(R.string.language_system),
             style = AppTypography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(start = AppTheme.dimensions.s3),
         )
     }
-}
-
-@StringRes
-private fun AppLocale.labelRes(): Int = when (this) {
-    AppLocale.System -> R.string.language_system
-    AppLocale.English -> R.string.language_en
 }
 
 @PreviewLightDark

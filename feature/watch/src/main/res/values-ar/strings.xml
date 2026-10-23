@@ -1,0 +1,68 @@
+<resources>
+    <!-- Chung -->
+    <string name="watch_back">رجوع</string>
+    <string name="watch_retry">حاول مجددًا</string>
+    <string name="watch_episodes">الحلقات</string>
+    <string name="watch_episode_number">حلقة %1$d</string>
+    <string name="watch_episode_locked">الحلقة %1$d مقفلة</string>
+    <string name="watch_locked_cd">مقفلة</string>
+    <string name="watch_show_not_found">هذا المسلسل لم يعد متاحًا.</string>
+
+    <!-- SCR-0301 Show detail -->
+    <string name="watch_stat_episodes">الحلقات</string>
+    <string name="watch_stat_views">المشاهدات</string>
+    <string name="watch_more">المزيد</string>
+    <string name="watch_less">أقل</string>
+    <string name="watch_play_episode">شغّل الحلقة %1$d</string>
+    <string name="watch_continue_episode">تابع الحلقة %1$d</string>
+    <string name="watch_save_cd">حفظ في المكتبة</string>
+    <string name="watch_saved_cd">محفوظ في المكتبة</string>
+    <string name="watch_saved_to_library">تم الحفظ في مكتبتك</string>
+    <string name="watch_removed_from_library">تمت الإزالة من مكتبتك</string>
+    <string name="watch_range">%1$d–%2$d</string>
+    <string name="watch_episodes_error">تعذّر تحميل الحلقات.</string>
+
+    <!-- SCR-0302 Player -->
+    <string name="watch_player_episode_of">حلقة %1$d / %2$d</string>
+    <string name="watch_like_cd">إعجاب</string>
+    <string name="watch_speed">السرعة</string>
+    <string name="watch_speed_value">%1$s×</string>
+    <string name="watch_eps">الحلقات</string>
+    <string name="watch_more_lower">المزيد</string>
+    <string name="watch_less_lower">أقل</string>
+    <string name="watch_play_cd">تشغيل</string>
+    <string name="watch_pause_cd">إيقاف مؤقت</string>
+    <string name="watch_seek_cd">موضع التشغيل</string>
+    <string name="watch_locked_title">الحلقة %1$d مقفلة</string>
+    <string name="watch_locked_body">اختر حلقة مجانية لمتابعة المشاهدة.</string>
+    <string name="watch_next_up">التالي: الحلقة %1$d</string>
+    <string name="watch_play_next">شغّل الحلقة %1$d</string>
+    <string name="watch_show_finished">وصلت إلى النهاية</string>
+    <string name="watch_error_no_source">لا يمكن تشغيل هذه الحلقة الآن.</string>
+    <string name="watch_error_playback">تعذّر التشغيل — تحقّق من اتصالك.</string>
+
+    <!-- SCR-0604 Buffering -->
+    <string name="watch_loading">جارٍ التحميل…</string>
+    <string name="watch_quality_dropped">الشبكة بطيئة — تم الخفض إلى %1$s لمتابعة التشغيل</string>
+    <string name="watch_switch_back_hd">العودة إلى HD</string>
+
+    <!-- SCR-0303 Episode picker -->
+    <plurals name="watch_episode_count">
+        <item quantity="zero">%1$d حلقة</item>
+        <item quantity="one">%1$d حلقة</item>
+        <item quantity="two">%1$d حلقتان</item>
+        <item quantity="few">%1$d حلقات</item>
+        <item quantity="many">%1$d حلقة</item>
+        <item quantity="other">%1$d حلقة</item>
+    </plurals>
+    <string name="watch_episodes_summary">%1$s · شوهدت %2$d</string>
+
+    <!-- SCR-0304 Playback options -->
+    <string name="watch_playback_options">خيارات التشغيل</string>
+    <string name="watch_quality">الجودة</string>
+    <string name="watch_quality_auto">تلقائي</string>
+    <string name="watch_quality_auto_hint">حسب سرعة الشبكة</string>
+    <string name="watch_quality_more_data">يستهلك بيانات أكثر</string>
+    <string name="watch_language">اللغة</string>
+    <string name="watch_autoplay_next">تشغيل الحلقة التالية تلقائيًا</string>
+</resources>

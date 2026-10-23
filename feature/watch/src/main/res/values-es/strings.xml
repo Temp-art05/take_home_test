@@ -1,0 +1,65 @@
+<resources>
+    <!-- Chung -->
+    <string name="watch_back">Atrás</string>
+    <string name="watch_retry">Reintentar</string>
+    <string name="watch_episodes">Episodios</string>
+    <string name="watch_episode_number">Ep. %1$d</string>
+    <string name="watch_episode_locked">El episodio %1$d está bloqueado</string>
+    <string name="watch_locked_cd">Bloqueado</string>
+    <string name="watch_show_not_found">Esta serie ya no está disponible.</string>
+
+    <!-- SCR-0301 Show detail -->
+    <string name="watch_stat_episodes">Episodios</string>
+    <string name="watch_stat_views">Vistas</string>
+    <string name="watch_more">Más</string>
+    <string name="watch_less">Menos</string>
+    <string name="watch_play_episode">Ver ep. %1$d</string>
+    <string name="watch_continue_episode">Seguir ep. %1$d</string>
+    <string name="watch_save_cd">Guardar en Biblioteca</string>
+    <string name="watch_saved_cd">Guardada en Biblioteca</string>
+    <string name="watch_saved_to_library">Guardada en tu Biblioteca</string>
+    <string name="watch_removed_from_library">Quitada de tu Biblioteca</string>
+    <string name="watch_range">%1$d–%2$d</string>
+    <string name="watch_episodes_error">No se pudieron cargar los episodios.</string>
+
+    <!-- SCR-0302 Player -->
+    <string name="watch_player_episode_of">Ep. %1$d / %2$d</string>
+    <string name="watch_like_cd">Me gusta</string>
+    <string name="watch_speed">Velocidad</string>
+    <string name="watch_speed_value">%1$s×</string>
+    <string name="watch_eps">Eps.</string>
+    <string name="watch_more_lower">más</string>
+    <string name="watch_less_lower">menos</string>
+    <string name="watch_play_cd">Reproducir</string>
+    <string name="watch_pause_cd">Pausar</string>
+    <string name="watch_seek_cd">Posición de reproducción</string>
+    <string name="watch_locked_title">El ep. %1$d está bloqueado</string>
+    <string name="watch_locked_body">Elige un episodio gratis para seguir viendo.</string>
+    <string name="watch_next_up">Siguiente: ep. %1$d</string>
+    <string name="watch_play_next">Ver ep. %1$d</string>
+    <string name="watch_show_finished">Llegaste al final</string>
+    <string name="watch_error_no_source">Este episodio no se puede reproducir ahora.</string>
+    <string name="watch_error_playback">No se puede reproducir — revisa tu conexión.</string>
+
+    <!-- SCR-0604 Buffering -->
+    <string name="watch_loading">Cargando…</string>
+    <string name="watch_quality_dropped">Red lenta — bajamos a %1$s para seguir</string>
+    <string name="watch_switch_back_hd">Volver a HD</string>
+
+    <!-- SCR-0303 Episode picker -->
+    <plurals name="watch_episode_count">
+        <item quantity="one">%1$d ep.</item>
+        <item quantity="many">%1$d eps.</item>
+        <item quantity="other">%1$d eps.</item>
+    </plurals>
+    <string name="watch_episodes_summary">%1$s · %2$d vistos</string>
+
+    <!-- SCR-0304 Playback options -->
+    <string name="watch_playback_options">Opciones de reproducción</string>
+    <string name="watch_quality">Calidad</string>
+    <string name="watch_quality_auto">Auto</string>
+    <string name="watch_quality_auto_hint">Según la velocidad de la red</string>
+    <string name="watch_quality_more_data">Usa más datos</string>
+    <string name="watch_language">Idioma</string>
+    <string name="watch_autoplay_next">Reproducir el siguiente automáticamente</string>
+</resources>

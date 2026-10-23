@@ -28,7 +28,7 @@ data class PlayerViewState(
     val isLocked: Boolean = false,
     /**
      * Cờ phát đổi chậm. `positionMs`/`bufferedMs` luôn 0 ở đây: vị trí tick 500ms đi qua
-     * [PlayerViewModel.positionMs] để không recompose cả màn.
+     * [PlayerViewModel.playbackProgress] để không recompose cả màn.
      */
     val playback: PlaybackState = PlaybackState(),
     val speed: Float = 1f,

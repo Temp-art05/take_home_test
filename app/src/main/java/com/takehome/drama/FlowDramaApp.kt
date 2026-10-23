@@ -20,6 +20,7 @@ import com.takehome.drama.di.AppScope
 import com.takehome.drama.di.appModule
 import com.takehome.drama.di.configModule
 import com.takehome.drama.feature.main.di.mainModule
+import com.takehome.drama.feature.onboarding.di.onboardingModule
 import com.takehome.drama.feature.watch.di.watchModule
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
@@ -59,6 +60,7 @@ class FlowDramaApp : Application(), SingletonImageLoader.Factory {
                 // Dev: `adb shell run-as com.takehome.drama touch files/force_low_tier` (hoặc force_normal_tier) để ép mức máy.
                 mediaModule(tierOverride = ::devTierOverride),
                 skeletonModule,
+                onboardingModule,
                 mainModule,
                 watchModule,
             )

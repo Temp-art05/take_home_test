@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_network">İnternet bağlantısı yok. Lütfen ağını kontrol edip tekrar dene.</string>
+    <string name="error_timeout">İstek çok uzun sürdü. Lütfen tekrar dene.</string>
+    <string name="error_server">Bizim tarafta bir sorun oluştu. Lütfen daha sonra tekrar dene.</string>
+    <string name="error_unauthorized">Oturumunun süresi doldu. Lütfen tekrar giriş yap.</string>
+    <string name="error_unexpected">Bir şeyler ters gitti. Lütfen tekrar dene.</string>
+</resources>

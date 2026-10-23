@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_step">LANGKAH %1$d / %2$d</string>
+    <string name="onboarding_continue">Lanjut</string>
+    <string name="onboarding_skip">Lewati</string>
+    <string name="onboarding_splash_tag">Serial Drama Pendek</string>
+    <string name="onboarding_language_title">Bahasamu</string>
+    <string name="onboarding_language_body">Kami sesuaikan dengan ponselmu. Ubah kapan saja di Setelan.</string>
+    <string name="onboarding_value_prop_title">Semua episode terbuka.\nCeritanya terus mengalir.</string>
+    <string name="onboarding_value_prop_body">Ribuan drama pendek, gratis dari Ep. 1 sampai tamat. Tanpa koin, tanpa langganan, tanpa jeda di tengah malammu.</string>
+    <string name="onboarding_pill_full_seasons">Musim lengkap</string>
+    <string name="onboarding_pill_no_signup">Tanpa daftar</string>
+    <string name="onboarding_pill_short">Episode 2 menit</string>
+    <string name="onboarding_step_into_flow">Masuk ke alurnya</string>
+    <string name="onboarding_taste_title">Malam ini mau nuansa apa?</string>
+    <string name="onboarding_taste_body">Pilih perasaan dulu – kami isi alurmu dengan cerita yang pas.</string>
+    <string name="onboarding_mood_rage">Geram</string>
+    <string name="onboarding_mood_swoon">Baper</string>
+    <string name="onboarding_mood_cry">Sedih</string>
+    <string name="onboarding_mood_thrill">Tegang</string>
+    <string name="onboarding_fine_tune">Atur lebih detail (opsional)</string>
+    <string name="onboarding_more_chips">+ %1$d lagi</string>
+    <string name="onboarding_notification_title">Alurmu hadir tiga kali sehari</string>
+    <string name="onboarding_notification_body">Satu notifikasi tenang tiap jendela waktu dibuka. Tanpa spam – matikan kapan saja di Setelan.</string>
+    <string name="onboarding_ping_title">%1$s · %2$s</string>
+    <string name="onboarding_ping_morning">Seruput pagi</string>
+    <string name="onboarding_ping_morning_body">Rekap 2 menit episode semalam</string>
+    <string name="onboarding_ping_lunch">Cipratan siang</string>
+    <string name="onboarding_ping_lunch_body">Satu cerita pendek, cukup 20 menit</string>
+    <string name="onboarding_ping_night">Alur malam</string>
+    <string name="onboarding_ping_night_body">Episode baru serialmu, siap ditonton</string>
+    <string name="onboarding_turn_on_notifications">Aktifkan notifikasi</string>
+    <string name="onboarding_not_now">Nanti saja</string>
+</resources>

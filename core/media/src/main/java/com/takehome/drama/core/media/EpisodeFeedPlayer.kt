@@ -29,6 +29,16 @@ interface EpisodeFeedPlayer {
     /** Tắt khi màn vào nền: nhả player lân cận (decoder, RAM); bật lại thì chuẩn bị lại từ cache đĩa. */
     fun setPreloadActive(active: Boolean)
 
+    /**
+     * `false` = nhả **mọi** player (kể cả tập hiện tại): decoder, buffer RAM trả hết, chỉ còn cache đĩa.
+     * Dùng khi feed bị che hẳn (tab ẩn, mở Player từ tab) — trên máy yếu không bao giờ để hai pool cùng
+     * giữ decoder. `true` = dựng lại tập hiện tại + lân cận ở giây 0, **pause**; gọi [play] để phát.
+     */
+    fun setActive(active: Boolean)
+
+    /** Câm tập hiện tại và không giành audio focus (preview của Browse). */
+    fun setMuted(muted: Boolean)
+
     fun play()
 
     fun pause()
@@ -55,6 +65,11 @@ interface VideoSlot {
 data class FeedItem(val id: String, val url: String?)
 
 data class PlaybackState(
+    /**
+     * [FeedItem.id] mà các số đo bên dưới thuộc về; null = chưa có mục nào. UI so với mục của mình để không vẽ
+     * vị trí của tập trước trong khung đầu sau khi lật trang.
+     */
+    val itemId: String? = null,
     /** Đang thực sự chạy (đã sẵn sàng, không buffer, không pause). */
     val isPlaying: Boolean = false,
     /** User muốn phát — vẫn `true` khi đang buffer giữa chừng. */
@@ -74,3 +89,24 @@ data class PlaybackError(val message: String?)
 fun interface EpisodeFeedPlayerFactory {
     fun create(): EpisodeFeedPlayer
 }
+
+/**
+ * Vị trí + thời lượng **gắn với mục đo được** ([itemId]). Trang trong feed hỏi theo id của mình: lật sang
+ * tập mới mà player chưa kịp báo thì trang mới đọc 0 thay vì vị trí của tập trước (hết nháy % cũ → 0%).
+ */
+data class PlaybackProgress(
+    val itemId: String? = null,
+    val positionMs: Long = 0,
+    val durationMs: Long = 0,
+) {
+    fun positionFor(id: String): Long = if (id == itemId) positionMs else 0
+
+    fun durationFor(id: String): Long = if (id == itemId) durationMs else 0
+
+    fun fractionFor(id: String): Float {
+        val duration = durationFor(id)
+        return if (duration > 0) (positionFor(id).toFloat() / duration).coerceIn(0f, 1f) else 0f
+    }
+}
+
+val PlaybackState.progress: PlaybackProgress get() = PlaybackProgress(itemId, positionMs, durationMs)

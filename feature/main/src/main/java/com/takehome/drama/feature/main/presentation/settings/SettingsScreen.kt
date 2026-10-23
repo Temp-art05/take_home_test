@@ -1,7 +1,10 @@
 package com.takehome.drama.feature.main.presentation.settings
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import com.takehome.drama.core.designsystem.component.ScreenSkeleton
 import com.takehome.drama.core.designsystem.component.SkeletonAction
 import com.takehome.drama.core.navigation.core.NavigationRequest

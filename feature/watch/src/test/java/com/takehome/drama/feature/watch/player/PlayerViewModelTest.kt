@@ -6,20 +6,27 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import app.cash.turbine.test
+import com.takehome.drama.core.media.FakeFeedPlayer
+import com.takehome.drama.core.media.FakeFeedPlayer.Load
 import com.takehome.drama.core.media.PlaybackState
+import com.takehome.drama.domain.fake.FakeUserPreferencesRepository
+import com.takehome.drama.domain.fake.MainDispatcherRule
 import com.takehome.drama.domain.model.ShowEpisodes
 import com.takehome.drama.domain.model.UserPreferences
-import com.takehome.drama.domain.usecase.catalog.CatalogUseCase
-import com.takehome.drama.domain.usecase.history.WatchProgressUseCase
+import com.takehome.drama.domain.usecase.catalog.GetCatalogUseCase
+import com.takehome.drama.domain.usecase.catalog.ResolveContentLanguageUseCase
+import com.takehome.drama.domain.usecase.history.GetResumePositionUseCase
+import com.takehome.drama.domain.usecase.history.ObserveShowProgressUseCase
+import com.takehome.drama.domain.usecase.history.SaveWatchProgressUseCase
 import com.takehome.drama.domain.usecase.watch.EndAction
-import com.takehome.drama.domain.usecase.watch.EpisodesUseCase
+import com.takehome.drama.domain.usecase.watch.GetEndActionUseCase
+import com.takehome.drama.domain.usecase.watch.GetEpisodeGridUseCase
+import com.takehome.drama.domain.usecase.watch.GetEpisodeRangesUseCase
+import com.takehome.drama.domain.usecase.watch.GetShowEpisodesUseCase
+import com.takehome.drama.domain.usecase.watch.PickVideoSourceUseCase
 import com.takehome.drama.feature.watch.R
 import com.takehome.drama.feature.watch.fake.FakeCatalogRepository
-import com.takehome.drama.feature.watch.fake.FakeUserPreferencesRepository
-import com.takehome.drama.feature.watch.fake.FakeFeedPlayer
-import com.takehome.drama.feature.watch.fake.FakeFeedPlayer.Load
 import com.takehome.drama.feature.watch.fake.FakeWatchProgressRepository
-import com.takehome.drama.feature.watch.fake.MainDispatcherRule
 import com.takehome.drama.feature.watch.fake.SHOW_ID
 import com.takehome.drama.feature.watch.fake.progress
 import com.takehome.drama.feature.watch.fake.testCatalog
@@ -31,6 +38,8 @@ import com.takehome.drama.feature.watch.presentation.player.PlayerViewModel
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerSheet
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -60,11 +69,19 @@ class PlayerViewModelTest {
     private fun viewModel(
         episodeIndex: Int = 0,
         saved: Map<String, Any?> = emptyMap(),
+        handle: SavedStateHandle? = null,
     ) = PlayerViewModel(
-        savedStateHandle = SavedStateHandle(mapOf("showId" to SHOW_ID, "episodeIndex" to episodeIndex) + saved),
-        catalogUseCase = CatalogUseCase(catalogRepository),
-        episodesUseCase = EpisodesUseCase(catalogRepository),
-        watchProgressUseCase = WatchProgressUseCase(progressRepository),
+        savedStateHandle = handle ?: SavedStateHandle(mapOf("showId" to SHOW_ID, "episodeIndex" to episodeIndex) + saved),
+        getCatalog = GetCatalogUseCase(catalogRepository),
+        getShowEpisodes = GetShowEpisodesUseCase(catalogRepository),
+        resolveContentLanguage = ResolveContentLanguageUseCase(),
+        pickVideoSource = PickVideoSourceUseCase(),
+        getEpisodeGrid = GetEpisodeGridUseCase(),
+        getEpisodeRanges = GetEpisodeRangesUseCase(),
+        getEndAction = GetEndActionUseCase(),
+        getResumePosition = GetResumePositionUseCase(progressRepository),
+        saveWatchProgress = SaveWatchProgressUseCase(progressRepository),
+        observeShowProgress = ObserveShowProgressUseCase(progressRepository),
         userPreferencesRepository = preferences,
         playerFactory = { player },
     )
@@ -134,6 +151,18 @@ class PlayerViewModelTest {
     }
 
     @Test
+    fun `progress belongs to the episode it was measured on, so a new page never shows the old one`() = runTest(mainRule.dispatcher) {
+        val viewModel = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.playbackProgress.collect {} }
+        player.playing(positionMs = 40_000, durationMs = 100_000)
+        assertEquals(40_000L, viewModel.playbackProgress.value.positionFor("0"))
+        assertEquals(0L, viewModel.playbackProgress.value.positionFor("1"))
+        viewModel.processIntent(PlayerIntent.PageSettled(index = 1))
+        assertEquals(0L, viewModel.playbackProgress.value.positionFor("1"))
+        assertEquals(0L, viewModel.playbackProgress.value.positionFor("0"))
+    }
+
+    @Test
     fun `episode end with autoplay - marks it watched, scrolls first, plays the next one once the page settles`() = runTest(mainRule.dispatcher) {
         val viewModel = viewModel()
         viewModel.singleEvent.test {
@@ -192,10 +221,7 @@ class PlayerViewModelTest {
     @Test
     fun `speed tap cycles and survives process death`() = runTest(mainRule.dispatcher) {
         val handle = SavedStateHandle(mapOf("showId" to SHOW_ID, "episodeIndex" to 0))
-        val viewModel = PlayerViewModel(
-            handle, CatalogUseCase(catalogRepository), EpisodesUseCase(catalogRepository),
-            WatchProgressUseCase(progressRepository), preferences, { player },
-        )
+        val viewModel = viewModel(handle = handle)
         viewModel.processIntent(PlayerIntent.SpeedClick)
         assertEquals(1.5f, player.lastSpeed)
         assertEquals(1.5f, viewModel.viewState.value.speed)
@@ -236,8 +262,14 @@ class PlayerViewModelTest {
         assertEquals(PlayerSheet.Episodes, viewModel.viewState.value.sheet)
         assertEquals(1, player.loads.size)
 
-        viewModel.processIntent(PlayerIntent.EpisodeSelect(index = 3))
+        viewModel.singleEvent.test {
+            viewModel.processIntent(PlayerIntent.EpisodeSelect(index = 3))
+            assertEquals(PlayerSingleEvent.ScrollToEpisode(3), awaitItem())
+        }
         assertEquals(PlayerSheet.None, viewModel.viewState.value.sheet)
+        // Chưa nạp lúc trang còn trượt (trang cũ còn trên màn) — nạp khi trang mới đứng yên.
+        assertEquals(1, player.loads.size)
+        viewModel.processIntent(PlayerIntent.PageSettled(index = 3))
         assertEquals(url(3), player.loads.last().url)
     }
 
@@ -322,6 +354,7 @@ class PlayerViewModelTest {
         val viewModel = viewModel(episodeIndex = 1)
 
         viewModel.processIntent(PlayerIntent.EpisodeSelect(index = 2))
+        viewModel.processIntent(PlayerIntent.PageSettled(index = 2))
         slow.complete(Unit)
 
         assertEquals(url(2), player.loads.last().url)
@@ -348,10 +381,7 @@ class PlayerViewModelTest {
     @Test
     fun `swiping to the next page saves the previous episode and plays the new one`() = runTest(mainRule.dispatcher) {
         val handle = SavedStateHandle(mapOf("showId" to SHOW_ID, "episodeIndex" to 0))
-        val viewModel = PlayerViewModel(
-            handle, CatalogUseCase(catalogRepository), EpisodesUseCase(catalogRepository),
-            WatchProgressUseCase(progressRepository), preferences, { player },
-        )
+        val viewModel = viewModel(handle = handle)
         player.playing(positionMs = 21_000)
 
         viewModel.processIntent(PlayerIntent.PageSettled(index = 1))
@@ -385,6 +415,7 @@ class PlayerViewModelTest {
         progressRepository.save(progress(index = 2, positionMs = 40_000))
         val viewModel = viewModel()
         viewModel.processIntent(PlayerIntent.EpisodeSelect(index = 2))
+        viewModel.processIntent(PlayerIntent.PageSettled(index = 2))
         assertEquals(Load(url(2), 0, playWhenReady = true), player.loads.last())
     }
 

@@ -1,0 +1,96 @@
+<resources>
+    <string name="tab_home">Inicio</string>
+    <string name="tab_reels">Reels</string>
+    <string name="tab_browse">Explorar</string>
+    <string name="tab_library">Biblioteca</string>
+    <string name="tab_settings">Ajustes</string>
+
+    <!-- Chung -->
+    <string name="common_retry">Reintentar</string>
+    <string name="common_back">Atrás</string>
+    <string name="common_episode_number">Ep. %1$d</string>
+    <plurals name="common_episode_count">
+        <item quantity="one">%1$d ep.</item>
+        <item quantity="many">%1$d eps.</item>
+        <item quantity="other">%1$d eps.</item>
+    </plurals>
+    <string name="common_save_cd">Guardar en Biblioteca</string>
+    <string name="common_saved_cd">Guardada en Biblioteca</string>
+    <string name="common_saved_to_library">Guardada en tu Biblioteca</string>
+    <string name="common_removed_from_library">Quitada de tu Biblioteca</string>
+    <string name="status_complete">completa</string>
+    <string name="status_ongoing">en emisión</string>
+
+    <!-- Day Cycle (SCR-0101) -->
+    <string name="daypart_morning">Sorbo matutino</string>
+    <string name="daypart_lunch">Chapuzón de mediodía</string>
+    <string name="daypart_night">Flow nocturno</string>
+    <string name="daypart_morning_mood">sorbos cortos antes de empezar el día</string>
+    <string name="daypart_lunch_mood">arcos rápidos para tu descanso</string>
+    <string name="daypart_night_mood">episodios largos, luces apagadas</string>
+    <string name="daypart_morning_pitch">Resúmenes de 2 min de lo que viste</string>
+    <string name="daypart_lunch_pitch">Un arco corto · cabe en 20 min</string>
+    <string name="daypart_night_pitch">Episodios largos, luces apagadas</string>
+    <string name="home_daypart_line">%1$s · %2$s</string>
+    <string name="home_daypart_card">%1$s · %2$s</string>
+    <string name="home_pick_morning">ELEGIDA DE LA MAÑANA</string>
+    <string name="home_pick_lunch">ELEGIDA DEL MEDIODÍA</string>
+    <string name="home_pick_night">ELEGIDA DE ESTA NOCHE</string>
+    <string name="home_binge_ready">Para maratonear</string>
+    <string name="home_eps_complete">%1$s completos</string>
+    <string name="home_pick_up">Retoma tu flow</string>
+    <string name="home_also_flowing_morning">También fluye esta mañana</string>
+    <string name="home_also_flowing_lunch">También fluye al mediodía</string>
+    <string name="home_also_flowing_night">También fluye esta noche</string>
+    <string name="home_see_all">Ver todo</string>
+    <string name="home_notifications_cd">Notificaciones</string>
+
+    <!-- SCR-0201 Search -->
+    <string name="search_title">Buscar</string>
+    <string name="search_hint">Series, géneros…</string>
+    <string name="search_clear_cd">Borrar búsqueda</string>
+    <string name="search_matches">Resultados</string>
+    <string name="search_genres">Géneros</string>
+    <string name="search_popular">Populares ahora</string>
+    <string name="search_no_results">Nada en el flow para “%1$s”</string>
+
+    <!-- SCR-0202 Browse -->
+    <string name="browse_chip_all">Todo</string>
+    <string name="browse_hint">Toca un póster · la vista previa cambia arriba</string>
+    <string name="browse_preview_auto">VISTA PREVIA · auto</string>
+    <string name="browse_preview_tap">VISTA PREVIA · toca</string>
+    <string name="browse_play_preview_cd">Reproducir vista previa</string>
+    <string name="browse_play_ep_1">Ver ep. 1</string>
+
+    <!-- SCR-0203 Reels -->
+    <string name="reels_title_episode">%1$s · Ep. %2$d</string>
+    <plurals name="reels_watch_all">
+        <item quantity="one">Ver %1$d episodio</item>
+        <item quantity="many">Ver los %1$d episodios</item>
+        <item quantity="other">Ver los %1$d episodios</item>
+    </plurals>
+    <string name="reels_more">más</string>
+    <string name="reels_less">menos</string>
+    <string name="reels_like_cd">Me gusta</string>
+    <string name="reels_speed">Velocidad</string>
+    <string name="reels_speed_value">%1$s×</string>
+    <string name="reels_speed_cd">Velocidad de reproducción %1$s×</string>
+    <string name="reels_save">Guardar</string>
+    <string name="reels_play_cd">Reproducir</string>
+    <string name="reels_pause_cd">Pausar</string>
+    <string name="reels_error_clip">No se pudo cargar este reel.</string>
+    <string name="reels_error_playback">No se puede reproducir — revisa tu conexión.</string>
+    <string name="reels_unavailable">Esta serie no tiene episodios gratis para previsualizar.</string>
+
+    <string name="library_history">Historial</string>
+    <string name="library_saved">Guardadas</string>
+
+    <string name="skeleton_open_show">Abrir serie %1$s</string>
+    <string name="skeleton_play_show">Reproducir serie %1$s</string>
+    <string name="skeleton_open_history">Historial</string>
+    <string name="skeleton_open_saved">Guardadas</string>
+    <string name="skeleton_open_language">Idioma de la app</string>
+
+    <string name="language_title">Idioma</string>
+    <string name="language_system">Idioma del dispositivo</string>
+</resources>

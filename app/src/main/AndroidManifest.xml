@@ -19,6 +19,7 @@
         <!-- MainActivity -->
         <activity
             android:name="com.takehome.drama.MainActivity"
+            android:configChanges="locale|layoutDirection"
             android:exported="true"
             android:theme="@style/Theme.FlowDrama">
             <intent-filter>

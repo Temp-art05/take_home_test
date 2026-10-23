@@ -1,0 +1,7 @@
+<resources>
+    <string name="error_network">Pas de connexion Internet. Vérifiez votre réseau et réessayez.</string>
+    <string name="error_timeout">La requête a pris trop de temps. Veuillez réessayer.</string>
+    <string name="error_server">Un problème est survenu de notre côté. Réessayez plus tard.</string>
+    <string name="error_unauthorized">Votre session a expiré. Veuillez vous reconnecter.</string>
+    <string name="error_unexpected">Un problème est survenu. Veuillez réessayer.</string>
+</resources>

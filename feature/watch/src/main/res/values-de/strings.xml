@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_back">Zurück</string>
+    <string name="watch_retry">Erneut versuchen</string>
+    <string name="watch_episodes">Folgen</string>
+    <string name="watch_episode_number">Folge %1$d</string>
+    <string name="watch_episode_locked">Folge %1$d ist gesperrt</string>
+    <string name="watch_locked_cd">Gesperrt</string>
+    <string name="watch_show_not_found">Diese Serie ist nicht mehr verfügbar.</string>
+    <string name="watch_stat_episodes">Folgen</string>
+    <string name="watch_stat_views">Aufrufe</string>
+    <string name="watch_more">Mehr</string>
+    <string name="watch_less">Weniger</string>
+    <string name="watch_play_episode">Folge %1$d abspielen</string>
+    <string name="watch_continue_episode">Weiter mit Folge %1$d</string>
+    <string name="watch_save_cd">In Mediathek speichern</string>
+    <string name="watch_saved_cd">In Mediathek gespeichert</string>
+    <string name="watch_saved_to_library">In deiner Mediathek gespeichert</string>
+    <string name="watch_removed_from_library">Aus deiner Mediathek entfernt</string>
+    <string name="watch_range">%1$d–%2$d</string>
+    <string name="watch_episodes_error">Folgen konnten nicht geladen werden.</string>
+    <string name="watch_player_episode_of">Folge %1$d / %2$d</string>
+    <string name="watch_like_cd">Gefällt mir</string>
+    <string name="watch_speed">Tempo</string>
+    <string name="watch_speed_value">%1$s×</string>
+    <string name="watch_eps">Folgen</string>
+    <string name="watch_more_lower">mehr</string>
+    <string name="watch_less_lower">weniger</string>
+    <string name="watch_play_cd">Abspielen</string>
+    <string name="watch_pause_cd">Pause</string>
+    <string name="watch_seek_cd">Wiedergabeposition</string>
+    <string name="watch_locked_title">Folge %1$d ist gesperrt</string>
+    <string name="watch_locked_body">Wähl eine Gratisfolge, um weiterzuschauen.</string>
+    <string name="watch_next_up">Als Nächstes: Folge %1$d</string>
+    <string name="watch_play_next">Folge %1$d abspielen</string>
+    <string name="watch_show_finished">Du bist am Ende angekommen</string>
+    <string name="watch_error_no_source">Diese Folge kann gerade nicht abgespielt werden.</string>
+    <string name="watch_error_playback">Wiedergabe fehlgeschlagen — prüfe deine Verbindung.</string>
+    <string name="watch_loading">Wird geladen…</string>
+    <string name="watch_quality_dropped">Langsames Netz — auf %1$s gesenkt, damit es weiterläuft</string>
+    <string name="watch_switch_back_hd">Zurück zu HD</string>
+    <plurals name="watch_episode_count">
+        <item quantity="one">%1$d Folge</item>
+        <item quantity="other">%1$d Folgen</item>
+    </plurals>
+    <string name="watch_episodes_summary">%1$s · %2$d gesehen</string>
+    <string name="watch_playback_options">Wiedergabeoptionen</string>
+    <string name="watch_quality">Qualität</string>
+    <string name="watch_quality_auto">Auto</string>
+    <string name="watch_quality_auto_hint">Je nach Netzwerktempo</string>
+    <string name="watch_quality_more_data">Braucht mehr Daten</string>
+    <string name="watch_language">Sprache</string>
+    <string name="watch_autoplay_next">Nächste Folge autom. abspielen</string>
+</resources>

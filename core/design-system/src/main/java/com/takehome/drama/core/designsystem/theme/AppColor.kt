@@ -22,6 +22,9 @@ object AppColors {
         val text3 = Color(0xFF8F8172)
         val text4 = Color(0xFF5E5347)
         val border = Color(0xFF4A3325)
+
+        /** `.tb`: màu #04121C của mockup nhưng **đặc** (mockup 93% đè lên nội dung — user bác, bar nằm dưới nội dung). */
+        val tabBar = Color(0xFF04121C)
     }
 
     // Design chưa có bộ light ("Light needs a light token set, still to be designed") —
@@ -36,6 +39,7 @@ object AppColors {
         val text3 = Color(0xFF85725F)
         val text4 = Color(0xFFB3A291)
         val border = Color(0xFFE3CFBE)
+        val tabBar = Color(0xFFFFF8F2)
     }
 
     object Brand {
@@ -89,6 +93,54 @@ object AppColors {
         /** Art tối 50% lúc buffering (`filter: brightness(.5)`). */
         val bufferingDim = Color.Black.copy(alpha = 0.50f)
         val textShadow = Color.Black.copy(alpha = 0.60f)
+
+        /** Pill trên key art của SCR-0003 (trắng 10%, viền 16%). */
+        val glassSoft = Color.White.copy(alpha = 0.10f)
+        val glassSoftBorder = Color.White.copy(alpha = 0.16f)
+
+        /** Viền nút lưu trên preview Browse (18%). */
+        val glassBorderSoft = Color.White.copy(alpha = 0.18f)
+    }
+
+    /**
+     * Key art giả của mockup (`.art .a1`…`.a6`): nền gradient ấm khi poster chưa tải / lỗi (poster của
+     * fixtures trả 404). Mỗi bộ: màu đầu, màu cuối của gradient chéo và quầng sáng.
+     */
+    object Art {
+        data class Palette(val start: Color, val end: Color, val glow: Color)
+
+        val palettes = listOf(
+            Palette(Color(0xFF5A2E1B), Color(0xFF241209), Color(0x52FFAA6E)),
+            Palette(Color(0xFF6B3A4A), Color(0xFF2A1218), Color(0x42FF8CA0)),
+            Palette(Color(0xFF3D4A2A), Color(0xFF141A0C), Color(0x38D2E696)),
+            Palette(Color(0xFF7A5220), Color(0xFF2A1C0C), Color(0x47FFD28C)),
+            Palette(Color(0xFF2E4A5A), Color(0xFF101C24), Color(0x3D96C8F0)),
+            Palette(Color(0xFF5A2440), Color(0xFF22101A), Color(0x38FF96C8)),
+        )
+
+        /** Glow cam 14% sau logo Splash. */
+        val splashGlow = Brand.accent.copy(alpha = 0.14f)
+    }
+
+    /** Scrim trên key art, mờ dần **vào màu nền** `bg` (không phải đen) — Home hero, Browse, onboarding. */
+    object BgScrim {
+        private fun bg(alpha: Float) = Dark.bg.copy(alpha = alpha)
+
+        /** Hero Home: transparent 30% → bg .6 ở 62% → bg .96. */
+        val hero = Brush.verticalGradient(0.3f to Color.Transparent, 0.62f to bg(0.6f), 1f to bg(0.96f))
+
+        /** Preview dock Browse: bg .35 → trong → trong → bg .94 ở 92% → bg. */
+        val previewDock = Brush.verticalGradient(
+            0f to bg(0.35f), 0.26f to Color.Transparent, 0.52f to Color.Transparent, 0.92f to bg(0.94f), 1f to Dark.bg,
+        )
+
+        /** SCR-0002: bg .55 → .85 ở 34% → bg đặc ở 58%. */
+        val onboardingList = Brush.verticalGradient(0f to bg(0.55f), 0.34f to bg(0.85f), 0.58f to Dark.bg)
+
+        /** SCR-0003: bg .4 → trong 24–42% → bg .9 ở 68% → bg ở 92%. */
+        val valueProp = Brush.verticalGradient(
+            0f to bg(0.4f), 0.24f to Color.Transparent, 0.42f to Color.Transparent, 0.68f to bg(0.9f), 0.92f to Dark.bg,
+        )
     }
 
     /** CTA chính, progress, tab active, chữ DRAMA của wordmark — ngoài mấy chỗ đó không dùng. */
@@ -110,6 +162,13 @@ data class AppExtendedColors(
     val gradientCta: Brush,
     val scrimTop: Brush,
     val scrimBottom: Brush,
+    /** Nền tab bar `.tb` (93% đục, nội dung cuộn bên dưới). */
+    val tabBar: Color,
+    val splashGlow: Color = AppColors.Art.splashGlow,
+    val scrimHero: Brush = AppColors.BgScrim.hero,
+    val scrimPreviewDock: Brush = AppColors.BgScrim.previewDock,
+    val scrimOnboardingList: Brush = AppColors.BgScrim.onboardingList,
+    val scrimValueProp: Brush = AppColors.BgScrim.valueProp,
     val media: MediaColors = MediaColors(),
 )
 
@@ -130,6 +189,9 @@ data class MediaColors(
     val sheetScrim: Color = AppColors.Media.sheetScrim,
     val bufferingDim: Color = AppColors.Media.bufferingDim,
     val textShadow: Color = AppColors.Media.textShadow,
+    val glassSoft: Color = AppColors.Media.glassSoft,
+    val glassSoftBorder: Color = AppColors.Media.glassSoftBorder,
+    val glassBorderSoft: Color = AppColors.Media.glassBorderSoft,
     val background: Color = Color.Black,
 )
 
@@ -142,11 +204,13 @@ internal val DarkExtendedColors = AppExtendedColors(
     gradientCta = AppColors.gradientCta,
     scrimTop = AppColors.Scrim.top,
     scrimBottom = AppColors.Scrim.bottom,
+    tabBar = AppColors.Dark.tabBar,
 )
 
 internal val LightExtendedColors = DarkExtendedColors.copy(
     text3 = AppColors.Light.text3,
     text4 = AppColors.Light.text4,
+    tabBar = AppColors.Light.tabBar,
 )
 
 val LocalAppExtendedColors = staticCompositionLocalOf { DarkExtendedColors }

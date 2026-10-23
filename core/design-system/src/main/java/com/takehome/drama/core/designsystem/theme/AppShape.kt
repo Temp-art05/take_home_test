@@ -17,6 +17,14 @@ data class AppShape(
     val sheet: Shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp),
     /** Badge nhỏ (TONIGHT'S PICK, NEW). */
     val badge: Shape = RoundedCornerShape(6.dp),
+    /** Thẻ thông tin (khung giờ Home, thẻ ping SCR-0005) — 14dp. */
+    val card: Shape = RoundedCornerShape(14.dp),
+    /** Hero Home — 20dp. */
+    val hero: Shape = RoundedCornerShape(20.dp),
+    /** Poster lưới Browse — 10dp. */
+    val poster: Shape = RoundedCornerShape(10.dp),
+    /** Poster rail Home — 11dp. */
+    val posterRail: Shape = RoundedCornerShape(11.dp),
 )
 
 val LocalAppShape = staticCompositionLocalOf { AppShape() }

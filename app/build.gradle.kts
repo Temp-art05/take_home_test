@@ -25,7 +25,8 @@ android {
 
     androidResources {
         // Chỉ đóng gói locale thực sự hỗ trợ (thay cho resourceConfigurations đã deprecated)
-        localeFilters += listOf("en")
+        // Qualifier thư mục res (Indonesia = mã cũ `in`); khớp AppLocale + locales_config.xml.
+        localeFilters += listOf("en", "hi", "ta", "in", "ar", "fr", "es", "pt-rBR", "tr", "de")
     }
 
     buildFeatures {

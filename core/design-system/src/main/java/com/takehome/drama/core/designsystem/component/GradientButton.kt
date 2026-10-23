@@ -18,9 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
@@ -34,15 +36,19 @@ fun GradientButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    shape: Shape = AppTheme.shapes.full,
+    minHeight: Dp = AppTheme.dimensions.touchTarget,
     leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     PillButton(
         text = text,
         onClick = onClick,
-        modifier = modifier.background(AppTheme.colors.gradientCta, AppTheme.shapes.full),
+        modifier = modifier.background(AppTheme.colors.gradientCta, shape),
         enabled = enabled,
         contentColor = MaterialTheme.colorScheme.onPrimary,
         leadingIcon = leadingIcon,
+        shape = shape,
+        minHeight = minHeight,
     )
 }
 
@@ -115,12 +121,14 @@ private fun PillButton(
     enabled: Boolean,
     contentColor: Color,
     leadingIcon: (@Composable () -> Unit)?,
+    shape: Shape = AppTheme.shapes.full,
+    minHeight: Dp = AppTheme.dimensions.touchTarget,
 ) {
     val dimensions = AppTheme.dimensions
     Box(
         modifier = modifier
-            .defaultMinSize(minHeight = dimensions.touchTarget)
-            .clip(AppTheme.shapes.full)
+            .defaultMinSize(minHeight = minHeight)
+            .clip(shape)
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(horizontal = 22.dp),

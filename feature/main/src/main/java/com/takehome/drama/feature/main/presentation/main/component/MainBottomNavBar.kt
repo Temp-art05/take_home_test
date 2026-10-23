@@ -1,56 +1,76 @@
 package com.takehome.drama.feature.main.presentation.main.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
 import com.takehome.drama.feature.main.presentation.main.model.MainTab
 
 /**
- * Tab bar `.tb` của mockup: viền trên mảnh, tab active icon màu accent + nhãn tô gradient,
- * tab khác màu text-3. Gradient chỉ thuộc về tab active (quy tắc của design).
+ * Tab bar `.tb` của mockup: nền xanh-đen **đặc** ([AppTheme.colors.tabBar]), viền trên 1dp, padding 9/6/4, item
+ * cao tối thiểu 44dp, icon stroke 23dp. Tab chọn: stroke icon accent + nhãn tô gradient; tab khác text-3.
+ * Nằm **dưới** nội dung (MainScreen là Column), không đè như mockup `position:absolute` — user bác nhìn xuyên.
  */
 @Composable
 fun MainBottomNavBar(
     selectedTab: MainTab,
     onTabSelected: (MainTab) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
-
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            // Bar đè lên tab: chạm vào viền/padding/inset không được lọt xuống (Reels TogglePlay, cuộn Home).
+            // Pass Final: item đã nhận click ở pass Main trước đó.
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Final).consume()
+                }
+            }
+            .background(AppTheme.colors.tabBar),
+    ) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(MaterialTheme.colorScheme.outline),
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)
                 .navigationBarsPadding()
-                .padding(horizontal = 6.dp)
-                .padding(top = 9.dp, bottom = 4.dp)
+                .padding(start = 6.dp, end = 6.dp, top = 9.dp, bottom = 4.dp)
                 .selectableGroup(),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             MainTab.entries.forEach { tab ->
                 BottomNavItem(
@@ -69,7 +89,7 @@ private fun BottomNavItem(
     tab: MainTab,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val inactiveColor = AppTheme.colors.text3
     val labelStyle = if (isSelected) {
@@ -80,23 +100,22 @@ private fun BottomNavItem(
 
     Column(
         modifier = modifier
-            .defaultMinSize(minHeight = AppTheme.dimensions.touchTarget)
+            .defaultMinSize(minHeight = AppTheme.dimensions.tabItemMinHeight)
             .selectable(
                 selected = isSelected,
                 role = Role.Tab,
                 onClick = onClick,
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.tabItemGap, Alignment.CenterVertically),
     ) {
         Icon(
-            imageVector = if (isSelected) tab.selectedIcon else tab.unselectedIcon,
+            imageVector = tab.icon,
             // Nhãn bên dưới đã đọc tên tab cho TalkBack.
             contentDescription = null,
             modifier = Modifier.size(AppTheme.dimensions.tabIcon),
             tint = if (isSelected) MaterialTheme.colorScheme.primary else inactiveColor,
         )
-        Spacer(modifier = Modifier.height(AppTheme.dimensions.s1))
         Text(
             text = stringResource(tab.labelRes),
             style = labelStyle,
@@ -105,13 +124,10 @@ private fun BottomNavItem(
     }
 }
 
-@PreviewLightDark
+@Preview
 @Composable
 private fun MainBottomNavBarPreview() {
     AppTheme {
-        MainBottomNavBar(
-            selectedTab = MainTab.Home,
-            onTabSelected = {}
-        )
+        MainBottomNavBar(selectedTab = MainTab.Home, onTabSelected = {})
     }
 }

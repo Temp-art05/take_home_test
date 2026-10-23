@@ -10,8 +10,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.takehome.drama.core.designsystem.theme.AppTheme
+import com.takehome.drama.data.util.SystemWallClock
+import com.takehome.drama.domain.usecase.discovery.WallClock
 import com.takehome.drama.navigation.AppNavGraph
 import com.takehome.drama.navigation.DebugScreenLauncher
+import org.koin.android.ext.android.get
 
 /**
  * Dùng AppCompatActivity (không phải ComponentActivity) vì in-app language picker gọi
@@ -32,6 +35,9 @@ class MainActivity : AppCompatActivity() {
             DebugScreenLauncher.startDestination(intent)
         } else {
             null
+        }
+        if (BuildConfig.IS_DEV_FLAVOR) {
+            DebugScreenLauncher.forcedHour(intent)?.let { (get<WallClock>() as? SystemWallClock)?.overrideHour = it }
         }
 
         setContent {
