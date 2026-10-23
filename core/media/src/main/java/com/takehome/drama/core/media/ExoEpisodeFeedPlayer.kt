@@ -43,6 +43,9 @@ import timber.log.Timber
  * - Player lân cận câm, không giữ audio focus, tải tối đa vài giây ([RoleLoadControl]); chỉ prepare +
  *   tải sau khi tập hiện tại lên hình và trang đứng yên một lúc (lướt nhanh không tốn decoder).
  * - Mọi player đọc qua cùng cache đĩa (`CacheDataSource`) và chung bandwidth meter.
+ * - ExoPlayer của một slot chỉ được dựng khi slot nhận tập đầu tiên: feed một mục (preview Browse)
+ *   không tốn thread/RAM cho hai player không bao giờ dùng.
+ * - [setActive] `false` nhả hết decoder của pool khi feed bị che (tab ẩn, mở Player).
  *
  * Tạo và gọi trên main thread.
  */
@@ -71,6 +74,8 @@ class ExoEpisodeFeedPlayer(
     private var current = 0
     private var currentSlot: Slot? = null
     private var preloadActive = true
+    private var active = true
+    private var muted = false
     private var speed = 1f
     private var firstFrameRequestedAt = 0L
 
@@ -87,7 +92,13 @@ class ExoEpisodeFeedPlayer(
     /** Một player của pool. [position]/[url] = tập đang giữ; null = rảnh. */
     internal inner class Slot(val id: Int) : VideoSlot {
         private val loadControl = RoleLoadControl(profile)
-        val exoPlayer: ExoPlayer = ExoPlayer.Builder(appContext)
+        private var built: ExoPlayer? = null
+
+        /** Dựng lười ở lần dùng đầu (thường là [load]). */
+        val exoPlayer: ExoPlayer
+            get() = built ?: buildPlayer().also { built = it }
+
+        private fun buildPlayer(): ExoPlayer = ExoPlayer.Builder(appContext)
             .setMediaSourceFactory(mediaSourceFactory)
             .setRenderersFactory(renderersFactory)
             .setLoadControl(loadControl)
@@ -101,6 +112,10 @@ class ExoEpisodeFeedPlayer(
             )
             .setAudioAttributes(audioAttributes, /* handleAudioFocus = */ false)
             .build()
+            .also { player ->
+                player.addListener(listener)
+                player.addAnalyticsListener(diagnostics)
+            }
 
         var position: Int? = null
         var url: String? = null
@@ -157,11 +172,6 @@ class ExoEpisodeFeedPlayer(
             }
         }
 
-        init {
-            exoPlayer.addListener(listener)
-            exoPlayer.addAnalyticsListener(diagnostics)
-        }
-
         fun load(position: Int, item: FeedItem, url: String, startPositionMs: Long, prepareNow: Boolean) {
             Timber.d("Slot %d load position %d at %d ms (prepare now=%b)", id, position, startPositionMs, prepareNow)
             this.position = position
@@ -179,12 +189,12 @@ class ExoEpisodeFeedPlayer(
             exoPlayer.prepare()
         }
 
-        /** Vai hiện tại: có tiếng, giữ audio focus, tải như thường. */
+        /** Vai hiện tại: có tiếng (trừ khi [muted]), giữ audio focus, tải như thường. */
         fun becomeCurrent() {
             loadControl.neighborCapMs = null
-            exoPlayer.volume = 1f
-            exoPlayer.setAudioAttributes(audioAttributes, /* handleAudioFocus = */ true)
-            exoPlayer.setHandleAudioBecomingNoisy(true)
+            exoPlayer.volume = if (muted) 0f else 1f
+            exoPlayer.setAudioAttributes(audioAttributes, /* handleAudioFocus = */ !muted)
+            exoPlayer.setHandleAudioBecomingNoisy(!muted)
         }
 
         /** Vai lân cận: pause, câm; chưa tải gì tới khi [warmUp]. */
@@ -209,14 +219,16 @@ class ExoEpisodeFeedPlayer(
             url = null
             _firstFrameRendered.value = false
             prepared = false
-            exoPlayer.stop()
-            exoPlayer.clearMediaItems()
+            // stop() đưa player về IDLE: renderer nhả decoder và buffer RAM.
+            built?.stop()
+            built?.clearMediaItems()
             publishSlots()
         }
 
         fun release() {
-            exoPlayer.removeListener(listener)
-            exoPlayer.release()
+            built?.removeListener(listener)
+            built?.release()
+            built = null
         }
     }
 
@@ -232,6 +244,11 @@ class ExoEpisodeFeedPlayer(
 
     override fun setCurrent(position: Int, startPositionMs: Long, playWhenReady: Boolean) {
         val item = items.getOrNull(position) ?: return
+        if (!active) {
+            // Feed đang bị che: chỉ nhớ vị trí, setActive(true) dựng lại đúng tập này.
+            current = position
+            return
+        }
         val previous = currentSlot
         previous?.exoPlayer?.playWhenReady = false
         warmUpJob?.cancel()
@@ -270,6 +287,28 @@ class ExoEpisodeFeedPlayer(
         reassign()
     }
 
+    override fun setActive(active: Boolean) {
+        if (this.active == active) return
+        this.active = active
+        if (active) {
+            Timber.d("Pool active again at position %d", current)
+            setCurrent(current, startPositionMs = 0, playWhenReady = false)
+            return
+        }
+        Timber.d("Pool inactive: freeing every player")
+        warmUpJob?.cancel()
+        stopTicker()
+        currentSlot = null
+        pool.filter { it.position != null }.forEach(Slot::free)
+        _state.update { it.copy(isPlaying = false, playWhenReady = false, isBuffering = false) }
+    }
+
+    override fun setMuted(muted: Boolean) {
+        if (this.muted == muted) return
+        this.muted = muted
+        currentSlot?.becomeCurrent()
+    }
+
     override fun play() {
         val player = currentSlot?.exoPlayer ?: return
         // Hết tập rồi bấm play = xem lại từ đầu, như mọi player.
@@ -305,6 +344,7 @@ class ExoEpisodeFeedPlayer(
      * rảnh, nhả player rời cửa sổ. Ở nền ([preloadActive] false) chỉ giữ tập hiện tại.
      */
     private fun reassign(currentStartMs: Long? = null) {
+        if (!active) return
         val playable: (Int) -> Boolean = { items[it].url != null }
         val wanted = if (preloadActive) {
             poolPositions(current, items.size, profile, playable)
@@ -337,12 +377,12 @@ class ExoEpisodeFeedPlayer(
      * trượt khuất rồi mới tua: tua ngay thì trang đang trượt đi nhảy sang cảnh đầu tập (flash), nhất là
      * khi tự sang tập / chọn tập mà pager còn đang cuộn.
      */
+    /**
+     * Tập vừa rời tua về 0 **ngay**: caller chỉ đổi tập khi trang cũ đã khuất (`PageSettled`), nên vuốt ngược lại
+     * thấy đúng khung giây 0 + track 0% — không còn cảnh khung hình cũ (giây 5) rồi nhảy về đầu trước mắt.
+     */
     private fun resetWhenOffscreen(slot: Slot) {
-        val position = slot.position
-        scope.launch {
-            delay(RESET_PREVIOUS_DELAY_MS)
-            if (slot !== currentSlot && slot.position == position) slot.exoPlayer.seekTo(0)
-        }
+        slot.exoPlayer.seekTo(0)
     }
 
     /**
@@ -367,6 +407,7 @@ class ExoEpisodeFeedPlayer(
         val duration = player.duration.takeIf { it != C.TIME_UNSET && it > 0 } ?: 0
         _state.update { state ->
             state.copy(
+                itemId = items.getOrNull(current)?.id,
                 isPlaying = player.isPlaying,
                 playWhenReady = player.playWhenReady,
                 isBuffering = player.playbackState == Player.STATE_BUFFERING,
@@ -403,8 +444,6 @@ class ExoEpisodeFeedPlayer(
         /** Trang phải đứng yên chừng này mới chuẩn bị trang lân cận. */
         const val NEIGHBOR_WARMUP_DELAY_MS = 300L
 
-        /** Dài hơn animation trượt trang (~650 ms). */
-        const val RESET_PREVIOUS_DELAY_MS = 800L
 
         /**
          * Decoder `c2.goldfish.*` của Android Emulator lỗi giữa chừng với H.264 1080×1920 của fixtures

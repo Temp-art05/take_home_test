@@ -1,0 +1,102 @@
+<resources>
+    <string name="tab_home">الرئيسية</string>
+    <string name="tab_reels">ريلز</string>
+    <string name="tab_browse">تصفّح</string>
+    <string name="tab_library">المكتبة</string>
+    <string name="tab_settings">الإعدادات</string>
+
+    <!-- Chung -->
+    <string name="common_retry">حاول مجددًا</string>
+    <string name="common_back">رجوع</string>
+    <string name="common_episode_number">حلقة %1$d</string>
+    <plurals name="common_episode_count">
+        <item quantity="zero">%1$d حلقة</item>
+        <item quantity="one">%1$d حلقة</item>
+        <item quantity="two">%1$d حلقتان</item>
+        <item quantity="few">%1$d حلقات</item>
+        <item quantity="many">%1$d حلقة</item>
+        <item quantity="other">%1$d حلقة</item>
+    </plurals>
+    <string name="common_save_cd">حفظ في المكتبة</string>
+    <string name="common_saved_cd">محفوظ في المكتبة</string>
+    <string name="common_saved_to_library">تم الحفظ في مكتبتك</string>
+    <string name="common_removed_from_library">تمت الإزالة من مكتبتك</string>
+    <string name="status_complete">مكتمل</string>
+    <string name="status_ongoing">مستمر</string>
+
+    <!-- Day Cycle (SCR-0101) -->
+    <string name="daypart_morning">رشفة الصباح</string>
+    <string name="daypart_lunch">استراحة الغداء</string>
+    <string name="daypart_night">تدفق الليل</string>
+    <string name="daypart_morning_mood">رشفات قصيرة قبل بدء اليوم</string>
+    <string name="daypart_lunch_mood">قصص سريعة لاستراحتك</string>
+    <string name="daypart_night_mood">حلقات طويلة، والأضواء مطفأة</string>
+    <string name="daypart_morning_pitch">ملخصات من 2 دقيقة لما شاهدته</string>
+    <string name="daypart_lunch_pitch">قصة قصيرة · تكفيها 20 دقيقة</string>
+    <string name="daypart_night_pitch">حلقات طويلة، والأضواء مطفأة</string>
+    <string name="home_daypart_line">%1$s · %2$s</string>
+    <string name="home_daypart_card">%1$s · %2$s</string>
+    <string name="home_pick_morning">اختيار الصباح</string>
+    <string name="home_pick_lunch">اختيار الغداء</string>
+    <string name="home_pick_night">اختيار الليلة</string>
+    <string name="home_binge_ready">جاهز للمشاهدة المتواصلة</string>
+    <string name="home_eps_complete">%1$s مكتملة</string>
+    <string name="home_pick_up">تابع تدفقك</string>
+    <string name="home_also_flowing_morning">يتدفق أيضًا هذا الصباح</string>
+    <string name="home_also_flowing_lunch">يتدفق أيضًا وقت الغداء</string>
+    <string name="home_also_flowing_night">يتدفق أيضًا الليلة</string>
+    <string name="home_see_all">عرض الكل</string>
+    <string name="home_notifications_cd">الإشعارات</string>
+
+    <!-- SCR-0201 Search -->
+    <string name="search_title">بحث</string>
+    <string name="search_hint">مسلسلات، أنواع…</string>
+    <string name="search_clear_cd">مسح البحث</string>
+    <string name="search_matches">نتائج مطابقة</string>
+    <string name="search_genres">الأنواع</string>
+    <string name="search_popular">الرائج الآن</string>
+    <string name="search_no_results">لا شيء في التدفق لـ«%1$s»</string>
+
+    <!-- SCR-0202 Browse -->
+    <string name="browse_chip_all">الكل</string>
+    <string name="browse_hint">اضغط على ملصق · تتغير المعاينة بالأعلى</string>
+    <string name="browse_preview_auto">معاينة · تلقائي</string>
+    <string name="browse_preview_tap">معاينة · بالضغط</string>
+    <string name="browse_play_preview_cd">تشغيل المعاينة</string>
+    <string name="browse_play_ep_1">شغّل الحلقة 1</string>
+
+    <!-- SCR-0203 Reels -->
+    <string name="reels_title_episode">%1$s · حلقة %2$d</string>
+    <plurals name="reels_watch_all">
+        <item quantity="zero">شاهد %1$d حلقة</item>
+        <item quantity="one">شاهد %1$d حلقة</item>
+        <item quantity="two">شاهد الحلقتين (%1$d)</item>
+        <item quantity="few">شاهد الحلقات الـ%1$d كلها</item>
+        <item quantity="many">شاهد الحلقات الـ%1$d كلها</item>
+        <item quantity="other">شاهد الحلقات الـ%1$d كلها</item>
+    </plurals>
+    <string name="reels_more">المزيد</string>
+    <string name="reels_less">أقل</string>
+    <string name="reels_like_cd">إعجاب</string>
+    <string name="reels_speed">السرعة</string>
+    <string name="reels_speed_value">%1$s×</string>
+    <string name="reels_speed_cd">سرعة التشغيل %1$s×</string>
+    <string name="reels_save">حفظ</string>
+    <string name="reels_play_cd">تشغيل</string>
+    <string name="reels_pause_cd">إيقاف مؤقت</string>
+    <string name="reels_error_clip">تعذّر تحميل هذا المقطع.</string>
+    <string name="reels_error_playback">تعذّر التشغيل — تحقّق من اتصالك.</string>
+    <string name="reels_unavailable">لا توجد حلقة مجانية لمعاينة هذا المسلسل.</string>
+
+    <string name="library_history">سجل المشاهدة</string>
+    <string name="library_saved">المحفوظات</string>
+
+    <string name="skeleton_open_show">فتح المسلسل %1$s</string>
+    <string name="skeleton_play_show">تشغيل المسلسل %1$s</string>
+    <string name="skeleton_open_history">سجل المشاهدة</string>
+    <string name="skeleton_open_saved">المحفوظات</string>
+    <string name="skeleton_open_language">لغة التطبيق</string>
+
+    <string name="language_title">اللغة</string>
+    <string name="language_system">مطابقة لغة الجهاز</string>
+</resources>

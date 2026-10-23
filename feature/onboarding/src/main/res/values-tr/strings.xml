@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_step">ADIM %1$d / %2$d</string>
+    <string name="onboarding_continue">Devam</string>
+    <string name="onboarding_skip">Geç</string>
+    <string name="onboarding_splash_tag">Kısa Drama Dizileri</string>
+    <string name="onboarding_language_title">Dilin</string>
+    <string name="onboarding_language_body">Telefonuna göre ayarladık. İstediğin zaman Ayarlar\'dan değiştir.</string>
+    <string name="onboarding_value_prop_title">Her bölüm açık.\nHikâye akıp gidiyor.</string>
+    <string name="onboarding_value_prop_body">Binlerce kısa drama, 1. bölümden finale kadar ücretsiz. Jeton yok, abonelik yok, gecenin ortasında engel yok.</string>
+    <string name="onboarding_pill_full_seasons">Tam sezonlar</string>
+    <string name="onboarding_pill_no_signup">Kayıt yok</string>
+    <string name="onboarding_pill_short">2 dk\'lık bölümler</string>
+    <string name="onboarding_step_into_flow">Akışa adım at</string>
+    <string name="onboarding_taste_title">Bu gece nasıl hissettirsin?</string>
+    <string name="onboarding_taste_body">Önce bir duygu seç – akışını doğru hikâyelerle dolduralım.</string>
+    <string name="onboarding_mood_rage">Öfke</string>
+    <string name="onboarding_mood_swoon">Aşk</string>
+    <string name="onboarding_mood_cry">Gözyaşı</string>
+    <string name="onboarding_mood_thrill">Heyecan</string>
+    <string name="onboarding_fine_tune">İnce ayar (isteğe bağlı)</string>
+    <string name="onboarding_more_chips">+ %1$d tane daha</string>
+    <string name="onboarding_notification_title">Akışın günde üç kez başlıyor</string>
+    <string name="onboarding_notification_body">Her pencere açıldığında tek bir sessiz bildirim. Asla spam yok – Ayarlar\'dan istediğin zaman kapat.</string>
+    <string name="onboarding_ping_title">%1$s · %2$s</string>
+    <string name="onboarding_ping_morning">Sabah yudumu</string>
+    <string name="onboarding_ping_morning_body">Dün geceki bölümlerin 2 dk\'lık özetleri</string>
+    <string name="onboarding_ping_lunch">Öğle dalgası</string>
+    <string name="onboarding_ping_lunch_body">20 dakikaya sığan kısa bir hikâye</string>
+    <string name="onboarding_ping_night">Gece akışı</string>
+    <string name="onboarding_ping_night_body">Dizilerinin yeni bölümleri, izlemeye hazır</string>
+    <string name="onboarding_turn_on_notifications">Bildirimleri aç</string>
+    <string name="onboarding_not_now">Şimdi değil</string>
+</resources>

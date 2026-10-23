@@ -1,9 +1,5 @@
 package com.takehome.drama.feature.watch.fake
 
-import com.takehome.drama.core.media.EpisodeFeedPlayer
-import com.takehome.drama.core.media.FeedItem
-import com.takehome.drama.core.media.VideoSlot
-import com.takehome.drama.core.media.PlaybackState
 import com.takehome.drama.domain.model.Catalog
 import com.takehome.drama.domain.model.Episode
 import com.takehome.drama.domain.model.LocalizedText
@@ -11,17 +7,13 @@ import com.takehome.drama.domain.model.SavedShow
 import com.takehome.drama.domain.model.Show
 import com.takehome.drama.domain.model.ShowEpisodes
 import com.takehome.drama.domain.model.ShowStatus
-import com.takehome.drama.domain.model.ThemeMode
-import com.takehome.drama.domain.model.UserPreferences
 import com.takehome.drama.domain.model.WatchProgress
 import com.takehome.drama.domain.repository.CatalogRepository
 import com.takehome.drama.domain.repository.SavedShowRepository
-import com.takehome.drama.domain.repository.UserPreferencesRepository
 import com.takehome.drama.domain.repository.WatchProgressRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
@@ -89,103 +81,6 @@ class FakeSavedShowRepository : SavedShowRepository {
     override fun observeIsSaved(showId: String): Flow<Boolean> = saved.map { showId in it }
 
     override fun observeAll(): Flow<List<SavedShow>> = saved.map { ids -> ids.map { SavedShow(it, 0) } }
-}
-
-class FakeUserPreferencesRepository(initial: UserPreferences = UserPreferences(contentLanguage = "en")) :
-    UserPreferencesRepository {
-    val state = MutableStateFlow(initial)
-    override val preferences: Flow<UserPreferences> = state
-
-    override suspend fun setContentLanguage(language: String) = set { copy(contentLanguage = language) }
-
-    override suspend fun setTasteTagIds(tagIds: Set<String>) = set { copy(tasteTagIds = tagIds) }
-
-    override suspend fun setTheme(theme: ThemeMode) = set { copy(theme = theme) }
-
-    override suspend fun setOnboardingDone(done: Boolean) = set { copy(onboardingDone = done) }
-
-    override suspend fun setAutoplayPreviewWifiOnly(wifiOnly: Boolean) = set { copy(autoplayPreviewWifiOnly = wifiOnly) }
-
-    override suspend fun setAutoplayNextEpisode(enabled: Boolean) = set { copy(autoplayNextEpisode = enabled) }
-
-    private fun set(block: UserPreferences.() -> UserPreferences): Result<Unit> {
-        state.update(block)
-        return Result.success(Unit)
-    }
-}
-
-/**
- * Player giả: ghi lại lệnh, test tự đẩy [PlaybackState] qua [emit]. Mỗi `setCurrent` vào mục có URL
- * được ghi thành một [Load] (URL lấy từ playlist) — giống "nạp nguồn" ở player thật.
- */
-class FakeFeedPlayer : EpisodeFeedPlayer {
-    data class Load(val url: String, val startPositionMs: Long, val playWhenReady: Boolean)
-
-    private val _state = MutableStateFlow(PlaybackState())
-    override val state: StateFlow<PlaybackState> = _state
-    override val slots: StateFlow<Map<Int, VideoSlot>> = MutableStateFlow(emptyMap())
-
-    var items: List<FeedItem> = emptyList()
-        private set
-    val loads = mutableListOf<Load>()
-
-    /** Vị trí playlist của mọi lần `setCurrent`, kể cả mục khoá. */
-    val currents = mutableListOf<Int>()
-    var isPreloadActive = true
-        private set
-    var lastSpeed = 1f
-    var released = false
-    var position = 0L
-
-    override fun setPlaylist(items: List<FeedItem>) {
-        this.items = items
-    }
-
-    override fun setCurrent(position: Int, startPositionMs: Long, playWhenReady: Boolean) {
-        currents += position
-        val url = items[position].url
-        if (url == null) {
-            _state.value = PlaybackState()
-            return
-        }
-        loads += Load(url, startPositionMs, playWhenReady)
-        this.position = startPositionMs
-        _state.value = PlaybackState(positionMs = startPositionMs, playWhenReady = playWhenReady, isBuffering = true)
-    }
-
-    override fun setPreloadActive(active: Boolean) {
-        isPreloadActive = active
-    }
-
-    override fun play() = _state.update { it.copy(playWhenReady = true, isPlaying = true, ended = false) }
-
-    override fun pause() = _state.update { it.copy(playWhenReady = false, isPlaying = false) }
-
-    override fun seekTo(positionMs: Long) {
-        position = positionMs
-        _state.update { it.copy(positionMs = positionMs) }
-    }
-
-    override fun setSpeed(speed: Float) {
-        lastSpeed = speed
-    }
-
-    override fun currentPositionMs(): Long = position
-
-    override fun release() {
-        released = true
-    }
-
-    /** Giả lập player đang phát ở [positionMs] / [durationMs]. */
-    fun playing(positionMs: Long, durationMs: Long = 100_000) {
-        position = positionMs
-        _state.value = PlaybackState(isPlaying = true, playWhenReady = true, positionMs = positionMs, durationMs = durationMs)
-    }
-
-    fun emit(state: PlaybackState) {
-        position = state.positionMs
-        _state.value = state
-    }
 }
 
 const val SHOW_ID = "12692"

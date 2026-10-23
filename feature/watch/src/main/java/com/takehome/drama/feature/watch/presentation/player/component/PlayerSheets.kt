@@ -33,12 +33,12 @@ import com.takehome.drama.core.designsystem.component.ChoiceChip
 import com.takehome.drama.core.designsystem.icon.AppIcons
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
+import com.takehome.drama.core.media.PlaybackSpeed
 import com.takehome.drama.domain.model.Quality
 import com.takehome.drama.domain.usecase.watch.EpisodeCell
 import com.takehome.drama.domain.usecase.watch.EpisodeRange
 import com.takehome.drama.feature.watch.R
 import com.takehome.drama.feature.watch.presentation.common.EpisodeGridCell
-import com.takehome.drama.feature.watch.presentation.player.model.PlaybackSpeed
 import java.util.Locale
 
 private const val GRID_COLUMNS = 5

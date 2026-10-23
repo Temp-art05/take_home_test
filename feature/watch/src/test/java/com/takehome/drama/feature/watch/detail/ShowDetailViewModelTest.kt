@@ -2,30 +2,35 @@ package com.takehome.drama.feature.watch.detail
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
-import com.takehome.drama.domain.model.ShowEpisodes
-import com.takehome.drama.domain.usecase.catalog.CatalogUseCase
-import com.takehome.drama.domain.usecase.history.WatchProgressUseCase
-import com.takehome.drama.domain.usecase.library.SavedShowsUseCase
-import com.takehome.drama.domain.usecase.watch.EpisodeCellState
-import com.takehome.drama.domain.usecase.watch.EpisodesUseCase
 import com.takehome.drama.domain.error.DomainException
+import com.takehome.drama.domain.fake.FakeUserPreferencesRepository
+import com.takehome.drama.domain.fake.MainDispatcherRule
+import com.takehome.drama.domain.model.LocalizedText
+import com.takehome.drama.domain.model.ShowEpisodes
+import com.takehome.drama.domain.model.Tag
+import com.takehome.drama.domain.usecase.catalog.GetCatalogUseCase
+import com.takehome.drama.domain.usecase.catalog.ResolveContentLanguageUseCase
+import com.takehome.drama.domain.usecase.history.GetContinueTargetUseCase
+import com.takehome.drama.domain.usecase.history.ObserveShowProgressUseCase
+import com.takehome.drama.domain.usecase.library.ObserveIsShowSavedUseCase
+import com.takehome.drama.domain.usecase.library.SetShowSavedUseCase
+import com.takehome.drama.domain.usecase.watch.EpisodeCellState
+import com.takehome.drama.domain.usecase.watch.GetEpisodeGridUseCase
+import com.takehome.drama.domain.usecase.watch.GetEpisodeRangesUseCase
+import com.takehome.drama.domain.usecase.watch.GetShowEpisodesUseCase
 import com.takehome.drama.feature.watch.R
 import com.takehome.drama.feature.watch.fake.FakeCatalogRepository
 import com.takehome.drama.feature.watch.fake.FakeSavedShowRepository
-import com.takehome.drama.feature.watch.fake.FakeUserPreferencesRepository
 import com.takehome.drama.feature.watch.fake.FakeWatchProgressRepository
-import com.takehome.drama.feature.watch.fake.MainDispatcherRule
 import com.takehome.drama.feature.watch.fake.SHOW_ID
 import com.takehome.drama.feature.watch.fake.progress
 import com.takehome.drama.feature.watch.fake.testCatalog
 import com.takehome.drama.feature.watch.fake.testEpisodes
+import com.takehome.drama.feature.watch.fake.testShow
 import com.takehome.drama.feature.watch.presentation.detail.ContinueCta
 import com.takehome.drama.feature.watch.presentation.detail.ShowDetailIntent
 import com.takehome.drama.feature.watch.presentation.detail.ShowDetailSingleEvent
 import com.takehome.drama.feature.watch.presentation.detail.ShowDetailViewModel
-import com.takehome.drama.domain.model.LocalizedText
-import com.takehome.drama.domain.model.Tag
-import com.takehome.drama.feature.watch.fake.testShow
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -56,10 +61,15 @@ class ShowDetailViewModelTest {
 
     private fun viewModel(showId: String = SHOW_ID) = ShowDetailViewModel(
         savedStateHandle = SavedStateHandle(mapOf("showId" to showId)),
-        catalogUseCase = CatalogUseCase(catalogRepository),
-        episodesUseCase = EpisodesUseCase(catalogRepository),
-        watchProgressUseCase = WatchProgressUseCase(progressRepository),
-        savedShowsUseCase = SavedShowsUseCase(savedRepository),
+        getCatalog = GetCatalogUseCase(catalogRepository),
+        getShowEpisodes = GetShowEpisodesUseCase(catalogRepository),
+        resolveContentLanguage = ResolveContentLanguageUseCase(),
+        getEpisodeGrid = GetEpisodeGridUseCase(),
+        getEpisodeRanges = GetEpisodeRangesUseCase(),
+        observeShowProgress = ObserveShowProgressUseCase(progressRepository),
+        getContinueTarget = GetContinueTargetUseCase(progressRepository),
+        observeIsShowSaved = ObserveIsShowSavedUseCase(savedRepository),
+        setShowSaved = SetShowSavedUseCase(savedRepository),
         userPreferencesRepository = preferences,
     )
 

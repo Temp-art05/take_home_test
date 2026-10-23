@@ -1,0 +1,43 @@
+<resources>
+    <string name="onboarding_step">الخطوة %1$d / %2$d</string>
+    <string name="onboarding_continue">متابعة</string>
+    <string name="onboarding_skip">تخطي</string>
+
+    <!-- SCR-0001 Splash -->
+    <string name="onboarding_splash_tag">مسلسلات درامية قصيرة</string>
+
+    <!-- SCR-0002 Language -->
+    <string name="onboarding_language_title">لغتك</string>
+    <string name="onboarding_language_body">اخترناها لتطابق هاتفك. غيّرها متى شئت من الإعدادات.</string>
+
+    <!-- SCR-0003 Value prop -->
+    <string name="onboarding_value_prop_title">كل الحلقات مفتوحة.\nوالقصة تتدفق.</string>
+    <string name="onboarding_value_prop_body">آلاف المسلسلات القصيرة، مجانًا من الحلقة 1 حتى الختام. بلا عملات، بلا اشتراكات، بلا سدٍّ في منتصف ليلتك.</string>
+    <string name="onboarding_pill_full_seasons">مواسم كاملة</string>
+    <string name="onboarding_pill_no_signup">بلا تسجيل</string>
+    <string name="onboarding_pill_short">حلقات من 2 دقيقة</string>
+    <string name="onboarding_step_into_flow">انطلق مع التدفق</string>
+
+    <!-- SCR-0004 Taste picker -->
+    <string name="onboarding_taste_title">بأي شعور تريد ليلتك؟</string>
+    <string name="onboarding_taste_body">اختر شعورًا أولًا – وسنملأ تدفقك بالقصص المناسبة.</string>
+    <string name="onboarding_mood_rage">غضب</string>
+    <string name="onboarding_mood_swoon">هيام</string>
+    <string name="onboarding_mood_cry">بكاء</string>
+    <string name="onboarding_mood_thrill">إثارة</string>
+    <string name="onboarding_fine_tune">تخصيص أدق (اختياري)</string>
+    <string name="onboarding_more_chips">+ %1$d أخرى</string>
+
+    <!-- SCR-0005 Notification pre-prompt -->
+    <string name="onboarding_notification_title">تدفقك يعمل ثلاث مرات يوميًا</string>
+    <string name="onboarding_notification_body">تنبيه هادئ واحد عند بدء كل فترة. بلا إزعاج – أوقفه متى شئت من الإعدادات.</string>
+    <string name="onboarding_ping_title">%1$s · %2$s</string>
+    <string name="onboarding_ping_morning">رشفة الصباح</string>
+    <string name="onboarding_ping_morning_body">ملخصات من 2 دقيقة لحلقات الليلة الماضية</string>
+    <string name="onboarding_ping_lunch">استراحة الغداء</string>
+    <string name="onboarding_ping_lunch_body">قصة قصيرة تكفيها 20 دقيقة</string>
+    <string name="onboarding_ping_night">تدفق الليل</string>
+    <string name="onboarding_ping_night_body">حلقات جديدة من مسلسلاتك، جاهزة للعرض</string>
+    <string name="onboarding_turn_on_notifications">تفعيل الإشعارات</string>
+    <string name="onboarding_not_now">ليس الآن</string>
+</resources>

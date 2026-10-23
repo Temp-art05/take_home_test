@@ -9,7 +9,7 @@ Android app template: Clean Architecture, 100% Compose, 9 module (tổ chức th
 | File | Nội dung |
 |---|---|
 | [`docs/rules/architecture.md`](docs/rules/architecture.md) | module, chiều phụ thuộc, **khi nào được tạo module mới** |
-| [`docs/rules/usecase.md`](docs/rules/usecase.md) | use case **gộp theo nghiệp vụ**, rule nằm ở đâu, khi nào VM inject thẳng |
+| [`docs/rules/usecase.md`](docs/rules/usecase.md) | use case **một hành động một class + `invoke`** (Notica), rule nằm ở đâu, khi nào VM inject thẳng |
 | [`docs/rules/data-layer.md`](docs/rules/data-layer.md) | repository + datasource **có interface/Impl**, mapper, DTO, network, Room |
 | [`docs/rules/presentation.md`](docs/rules/presentation.md) | ViewModel/Screen, **MVI: mọi hành động qua `processIntent`**, navigation, Main 5 tab |
 | [`docs/rules/error-handling.md`](docs/rules/error-handling.md) | `Result`, chuỗi `ApiException → DomainException → @StringRes` |
@@ -106,6 +106,9 @@ từ DataStore lúc khởi tạo; debug build fetch interval = 0.
 ## Theme, i18n, ảnh
 
 - `AppTheme` mặc định **dark** (design Sunset Flow), light là bộ token tạm. Chủ ý **không** bật dynamic color.
-- Ngôn ngữ UI: `en` (Phase 6 thêm `ar` RTL). Thêm locale sửa **cả 3 chỗ**: `res/xml/locales_config.xml`, `localeFilters`
-  trong `app/build.gradle.kts`, enum `AppLocale` (`:core:ui-foundation`).
+- Ngôn ngữ UI: 10 locale ra mắt `en, hi, ta, id, ar, fr, es, pt-BR, tr, de` (`LaunchLanguages` ở `:domain`; `ar` là RTL).
+  Thư mục: `values-hi/ta/in/ar/fr/es/pt-rBR/tr/de` (Indonesia dùng mã cũ `in`). Thêm locale sửa **cả 3 chỗ**:
+  `res/xml/locales_config.xml`, `localeFilters` trong `app/build.gradle.kts`, enum `AppLocale` (`:core:ui-foundation`).
+- **Thêm/sửa string là phải dịch luôn đủ 9 ngôn ngữ còn lại** trong cùng thay đổi — không để `en` một mình. Chuỗi không dịch
+  (tên thương hiệu, mã) đánh `translatable="false"`. Lint `MissingTranslation` (error) chặn nếu sót.
 - Ảnh qua `AppAsyncImage`; `appImageLoader`: memory cache theo % RAM, disk cache 100 MB TTL 7 ngày.

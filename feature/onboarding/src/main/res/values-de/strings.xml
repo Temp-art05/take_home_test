@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_step">SCHRITT %1$d / %2$d</string>
+    <string name="onboarding_continue">Weiter</string>
+    <string name="onboarding_skip">Überspringen</string>
+    <string name="onboarding_splash_tag">Kurze Drama-Serien</string>
+    <string name="onboarding_language_title">Deine Sprache</string>
+    <string name="onboarding_language_body">Passend zu deinem Handy gewählt. Jederzeit in den Einstellungen änderbar.</string>
+    <string name="onboarding_value_prop_title">Jede Folge frei.\nDie Story fließt einfach.</string>
+    <string name="onboarding_value_prop_body">Tausende Kurzdramen, gratis von Folge 1 bis zum Finale. Keine Coins, keine Abos, kein Stopp mitten in deiner Nacht.</string>
+    <string name="onboarding_pill_full_seasons">Ganze Staffeln</string>
+    <string name="onboarding_pill_no_signup">Ohne Anmeldung</string>
+    <string name="onboarding_pill_short">2-Min.-Folgen</string>
+    <string name="onboarding_step_into_flow">Rein in den Flow</string>
+    <string name="onboarding_taste_title">Wie soll sich der Abend anfühlen?</string>
+    <string name="onboarding_taste_body">Wähl zuerst ein Gefühl – wir füllen deinen Flow mit den passenden Storys.</string>
+    <string name="onboarding_mood_rage">Wut</string>
+    <string name="onboarding_mood_swoon">Herzklopfen</string>
+    <string name="onboarding_mood_cry">Tränen</string>
+    <string name="onboarding_mood_thrill">Spannung</string>
+    <string name="onboarding_fine_tune">Verfeinern (optional)</string>
+    <string name="onboarding_more_chips">+ %1$d weitere</string>
+    <string name="onboarding_notification_title">Dein Flow läuft dreimal am Tag</string>
+    <string name="onboarding_notification_body">Ein leiser Hinweis, wenn sich ein Zeitfenster öffnet. Nie Spam – jederzeit in den Einstellungen abschaltbar.</string>
+    <string name="onboarding_ping_title">%1$s · %2$s</string>
+    <string name="onboarding_ping_morning">Morgenschluck</string>
+    <string name="onboarding_ping_morning_body">2-Min.-Recaps der Folgen von gestern Abend</string>
+    <string name="onboarding_ping_lunch">Mittagsspritzer</string>
+    <string name="onboarding_ping_lunch_body">Eine kurze Story, die in 20 Minuten passt</string>
+    <string name="onboarding_ping_night">Nacht-Flow</string>
+    <string name="onboarding_ping_night_body">Neue Folgen deiner Serien, startklar</string>
+    <string name="onboarding_turn_on_notifications">Benachrichtigungen aktivieren</string>
+    <string name="onboarding_not_now">Nicht jetzt</string>
+</resources>

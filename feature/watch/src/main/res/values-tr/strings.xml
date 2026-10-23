@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_back">Geri</string>
+    <string name="watch_retry">Tekrar dene</string>
+    <string name="watch_episodes">Bölümler</string>
+    <string name="watch_episode_number">Bölüm %1$d</string>
+    <string name="watch_episode_locked">Bölüm %1$d kilitli</string>
+    <string name="watch_locked_cd">Kilitli</string>
+    <string name="watch_show_not_found">Bu dizi artık mevcut değil.</string>
+    <string name="watch_stat_episodes">Bölüm</string>
+    <string name="watch_stat_views">İzlenme</string>
+    <string name="watch_more">Daha fazla</string>
+    <string name="watch_less">Daha az</string>
+    <string name="watch_play_episode">Oynat: Bölüm %1$d</string>
+    <string name="watch_continue_episode">Devam et: Bölüm %1$d</string>
+    <string name="watch_save_cd">Kitaplığa kaydet</string>
+    <string name="watch_saved_cd">Kitaplığa kaydedildi</string>
+    <string name="watch_saved_to_library">Kitaplığına kaydedildi</string>
+    <string name="watch_removed_from_library">Kitaplığından kaldırıldı</string>
+    <string name="watch_range">%1$d–%2$d</string>
+    <string name="watch_episodes_error">Bölümler yüklenemedi.</string>
+    <string name="watch_player_episode_of">Bölüm %1$d / %2$d</string>
+    <string name="watch_like_cd">Beğen</string>
+    <string name="watch_speed">Hız</string>
+    <string name="watch_speed_value">%1$s×</string>
+    <string name="watch_eps">Bölümler</string>
+    <string name="watch_more_lower">daha fazla</string>
+    <string name="watch_less_lower">daha az</string>
+    <string name="watch_play_cd">Oynat</string>
+    <string name="watch_pause_cd">Duraklat</string>
+    <string name="watch_seek_cd">Oynatma konumu</string>
+    <string name="watch_locked_title">Bölüm %1$d kilitli</string>
+    <string name="watch_locked_body">İzlemeye devam etmek için ücretsiz bir bölüm seç.</string>
+    <string name="watch_next_up">Sıradaki: Bölüm %1$d</string>
+    <string name="watch_play_next">Oynat: Bölüm %1$d</string>
+    <string name="watch_show_finished">Sona ulaştın</string>
+    <string name="watch_error_no_source">Bu bölüm şu anda oynatılamıyor.</string>
+    <string name="watch_error_playback">Oynatılamıyor — bağlantını kontrol et.</string>
+    <string name="watch_loading">Yükleniyor…</string>
+    <string name="watch_quality_dropped">Yavaş ağ — oynatma sürsün diye %1$s kalitesine düşürüldü</string>
+    <string name="watch_switch_back_hd">HD\'ye geri dön</string>
+    <plurals name="watch_episode_count">
+        <item quantity="one">%1$d bölüm</item>
+        <item quantity="other">%1$d bölüm</item>
+    </plurals>
+    <string name="watch_episodes_summary">%1$s · %2$d izlendi</string>
+    <string name="watch_playback_options">Oynatma seçenekleri</string>
+    <string name="watch_quality">Kalite</string>
+    <string name="watch_quality_auto">Otomatik</string>
+    <string name="watch_quality_auto_hint">Ağ hızına göre</string>
+    <string name="watch_quality_more_data">Daha fazla veri kullanır</string>
+    <string name="watch_language">Dil</string>
+    <string name="watch_autoplay_next">Sonraki bölümü otomatik oynat</string>
+</resources>

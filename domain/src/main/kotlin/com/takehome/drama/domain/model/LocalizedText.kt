@@ -18,6 +18,10 @@ value class LocalizedText(val values: Map<String, String>) {
             ?: values.values.firstOrNull { it.isNotBlank() }
             ?: ""
 
+    /** [resolve] cho tên tag: server gửi `SweetRomance` / `Pernikahan_Kontrak` — tách từ để đọc được. */
+    fun resolveTagLabel(preferred: String, fallback: String): String =
+        resolve(preferred, fallback).replace('_', ' ').replace(CAMEL_BOUNDARY, " ")
+
     val isEmpty: Boolean get() = values.values.all { it.isBlank() }
 
     /** Khớp chính xác trước, rồi theo language subtag: `en-US` dùng được bản `en`. */
@@ -36,3 +40,5 @@ value class LocalizedText(val values: Map<String, String>) {
 
 /** `en-US` / `en_US` → `en`. */
 fun String.languageSubtag(): String = substringBefore('-').substringBefore('_').lowercase()
+
+private val CAMEL_BOUNDARY = Regex("(?<=[a-z])(?=[A-Z])")

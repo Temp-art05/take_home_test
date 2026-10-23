@@ -1,0 +1,64 @@
+<resources>
+    <!-- Chung -->
+    <string name="watch_back">பின்செல்</string>
+    <string name="watch_retry">மீண்டும் முயல்</string>
+    <string name="watch_episodes">எபிசோடுகள்</string>
+    <string name="watch_episode_number">எபி. %1$d</string>
+    <string name="watch_episode_locked">எபிசோடு %1$d பூட்டப்பட்டுள்ளது</string>
+    <string name="watch_locked_cd">பூட்டப்பட்டது</string>
+    <string name="watch_show_not_found">இந்த ஷோ இனி கிடைக்காது.</string>
+
+    <!-- SCR-0301 Show detail -->
+    <string name="watch_stat_episodes">எபிசோடுகள்</string>
+    <string name="watch_stat_views">பார்வைகள்</string>
+    <string name="watch_more">மேலும்</string>
+    <string name="watch_less">குறைவாக</string>
+    <string name="watch_play_episode">எபி. %1$d இயக்கு</string>
+    <string name="watch_continue_episode">எபி. %1$d தொடர்</string>
+    <string name="watch_save_cd">நூலகத்தில் சேமி</string>
+    <string name="watch_saved_cd">நூலகத்தில் சேமிக்கப்பட்டது</string>
+    <string name="watch_saved_to_library">உங்கள் நூலகத்தில் சேமிக்கப்பட்டது</string>
+    <string name="watch_removed_from_library">உங்கள் நூலகத்திலிருந்து நீக்கப்பட்டது</string>
+    <string name="watch_range">%1$d–%2$d</string>
+    <string name="watch_episodes_error">எபிசோடுகளை ஏற்ற முடியவில்லை.</string>
+
+    <!-- SCR-0302 Player -->
+    <string name="watch_player_episode_of">எபி. %1$d / %2$d</string>
+    <string name="watch_like_cd">விருப்பம்</string>
+    <string name="watch_speed">வேகம்</string>
+    <string name="watch_speed_value">%1$s×</string>
+    <string name="watch_eps">எபி.</string>
+    <string name="watch_more_lower">மேலும்</string>
+    <string name="watch_less_lower">குறைவாக</string>
+    <string name="watch_play_cd">இயக்கு</string>
+    <string name="watch_pause_cd">இடைநிறுத்து</string>
+    <string name="watch_seek_cd">இயக்க நிலை</string>
+    <string name="watch_locked_title">எபி. %1$d பூட்டப்பட்டுள்ளது</string>
+    <string name="watch_locked_body">தொடர்ந்து பார்க்க இலவச எபிசோடைத் தேர்ந்தெடுங்கள்.</string>
+    <string name="watch_next_up">அடுத்து: எபி. %1$d</string>
+    <string name="watch_play_next">எபி. %1$d இயக்கு</string>
+    <string name="watch_show_finished">நீங்கள் முடிவை அடைந்துவிட்டீர்கள்</string>
+    <string name="watch_error_no_source">இந்த எபிசோடை இப்போது இயக்க முடியாது.</string>
+    <string name="watch_error_playback">இயக்க முடியவில்லை — இணைப்பைச் சரிபார்க்கவும்.</string>
+
+    <!-- SCR-0604 Buffering -->
+    <string name="watch_loading">ஏற்றுகிறது…</string>
+    <string name="watch_quality_dropped">மெதுவான நெட்வொர்க் — தொடர்ந்து இயங்க %1$s க்குக் குறைக்கப்பட்டது</string>
+    <string name="watch_switch_back_hd">மீண்டும் HD க்கு மாறு</string>
+
+    <!-- SCR-0303 Episode picker -->
+    <plurals name="watch_episode_count">
+        <item quantity="one">%1$d எபிசோடு</item>
+        <item quantity="other">%1$d எபிசோடுகள்</item>
+    </plurals>
+    <string name="watch_episodes_summary">%1$s · %2$d பார்த்தவை</string>
+
+    <!-- SCR-0304 Playback options -->
+    <string name="watch_playback_options">இயக்க விருப்பங்கள்</string>
+    <string name="watch_quality">தரம்</string>
+    <string name="watch_quality_auto">தானியங்கி</string>
+    <string name="watch_quality_auto_hint">நெட்வொர்க் வேகத்தின் அடிப்படையில்</string>
+    <string name="watch_quality_more_data">அதிக டேட்டா செலவாகும்</string>
+    <string name="watch_language">மொழி</string>
+    <string name="watch_autoplay_next">அடுத்த எபிசோடைத் தானாக இயக்கு</string>
+</resources>

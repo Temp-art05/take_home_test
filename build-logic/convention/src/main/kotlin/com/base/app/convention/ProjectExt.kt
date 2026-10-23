@@ -37,6 +37,12 @@ internal fun Project.configureAndroidCommon(extension: CommonExtension) {
             sourceCompatibility = AndroidConfig.JAVA_VERSION
             targetCompatibility = AndroidConfig.JAVA_VERSION
         }
+
+        // Rule CLAUDE.md: thêm string là dịch đủ 10 locale — thiếu bản dịch làm đỏ lint.
+        lint.apply {
+            error += "MissingTranslation"
+            checkDependencies = true
+        }
     }
 
     configureKotlinToolchain()

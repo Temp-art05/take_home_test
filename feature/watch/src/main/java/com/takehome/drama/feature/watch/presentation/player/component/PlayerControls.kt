@@ -2,10 +2,6 @@ package com.takehome.drama.feature.watch.presentation.player.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import com.takehome.drama.core.designsystem.ext.applyIf
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -17,13 +13,16 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
@@ -54,11 +53,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.takehome.drama.core.designsystem.ext.applyIf
 import com.takehome.drama.core.designsystem.icon.AppIcons
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
+import com.takehome.drama.core.media.PlaybackSpeed
 import com.takehome.drama.feature.watch.R
-import com.takehome.drama.feature.watch.presentation.player.model.PlaybackSpeed
 import java.util.Locale
 
 private val TextShadowBlur = 6f

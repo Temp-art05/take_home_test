@@ -1,46 +1,30 @@
 package com.takehome.drama.feature.onboarding.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavType
-import com.takehome.drama.core.designsystem.component.ScreenSkeleton
-import com.takehome.drama.core.designsystem.component.SkeletonAction
 import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.navigation.core.ScreenProvider
-import com.takehome.drama.core.navigation.core.SkeletonViewModel
 import com.takehome.drama.core.navigation.destination.Destination
-import com.takehome.drama.feature.onboarding.R
+import com.takehome.drama.feature.onboarding.presentation.splash.SplashScreen
+import com.takehome.drama.feature.onboarding.presentation.splash.SplashViewModel
 import kotlin.reflect.KType
 import kotlinx.serialization.Serializable
 
-/** SCR-0001 — khung, UI thật ở Phase 4. */
+/** SCR-0001 — chờ catalogue + Remote Config rồi vào onboarding hoặc Home. */
 class SplashScreenProvider(
     private val home: Destination,
-) : ScreenProvider<SplashScreenProvider.Splash, SkeletonViewModel>() {
+) : ScreenProvider<SplashScreenProvider.Splash, SplashViewModel>() {
 
+    /** [holdForDebug] chỉ DebugScreenLauncher bật: đứng yên ở splash để chụp so mockup. */
     @Serializable
-    data object Splash : Destination
+    data class Splash(val holdForDebug: Boolean = false) : Destination
 
     override val typeMap: Map<KType, NavType<*>> = emptyMap()
 
     override fun invoke(
-        viewModel: SkeletonViewModel,
+        viewModel: SplashViewModel,
         onNavigationRequest: (NavigationRequest) -> Unit
     ): @Composable () -> Unit = {
-        ScreenSkeleton(
-            code = "SCR-0001",
-            title = stringResource(R.string.onboarding_splash_title),
-            onBack = null,
-            actions = listOf(
-                SkeletonAction(stringResource(R.string.onboarding_continue)) {
-                    onNavigationRequest(
-                        NavigationRequest.NavigateToAndClearBackStack(OnboardingLanguageScreenProvider.OnboardingLanguage)
-                    )
-                },
-                SkeletonAction(stringResource(R.string.onboarding_skip_to_home)) {
-                    onNavigationRequest(NavigationRequest.NavigateToAndClearBackStack(home))
-                },
-            ),
-        )
+        SplashScreen(viewModel = viewModel, home = home, onNavigate = onNavigationRequest)
     }
 }

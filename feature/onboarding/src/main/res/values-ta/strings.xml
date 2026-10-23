@@ -1,0 +1,43 @@
+<resources>
+    <string name="onboarding_step">படி %1$d / %2$d</string>
+    <string name="onboarding_continue">தொடரவும்</string>
+    <string name="onboarding_skip">தவிர்</string>
+
+    <!-- SCR-0001 Splash -->
+    <string name="onboarding_splash_tag">குறு நாடகத் தொடர்கள்</string>
+
+    <!-- SCR-0002 Language -->
+    <string name="onboarding_language_title">உங்கள் மொழி</string>
+    <string name="onboarding_language_body">உங்கள் போனுக்கு ஏற்ப இதைத் தேர்ந்தோம். அமைப்புகளில் எப்போது வேண்டுமானாலும் மாற்றலாம்.</string>
+
+    <!-- SCR-0003 Value prop -->
+    <string name="onboarding_value_prop_title">ஒவ்வொரு எபிசோடும் திறந்தே.\nகதை தடையின்றி ஓடும்.</string>
+    <string name="onboarding_value_prop_body">ஆயிரக்கணக்கான குறு நாடகங்கள், எபி. 1 முதல் இறுதி வரை இலவசம். நாணயங்கள் இல்லை, திட்டங்கள் இல்லை, இரவின் நடுவே தடை இல்லை.</string>
+    <string name="onboarding_pill_full_seasons">முழு சீசன்கள்</string>
+    <string name="onboarding_pill_no_signup">பதிவு தேவையில்லை</string>
+    <string name="onboarding_pill_short">2-நிமிட எபிசோடுகள்</string>
+    <string name="onboarding_step_into_flow">ஃப்ளோவில் இறங்குங்கள்</string>
+
+    <!-- SCR-0004 Taste picker -->
+    <string name="onboarding_taste_title">இன்றிரவு எப்படி இருக்க வேண்டும்?</string>
+    <string name="onboarding_taste_body">முதலில் ஒரு உணர்வைத் தேர்ந்தெடுங்கள் – சரியான கதைகளை உங்கள் ஃப்ளோவில் ஊற்றுவோம்.</string>
+    <string name="onboarding_mood_rage">கோபம்</string>
+    <string name="onboarding_mood_swoon">மயக்கம்</string>
+    <string name="onboarding_mood_cry">கண்ணீர்</string>
+    <string name="onboarding_mood_thrill">த்ரில்</string>
+    <string name="onboarding_fine_tune">நுணுக்கமாகத் தேர்வு (விருப்பம்)</string>
+    <string name="onboarding_more_chips">+ %1$d மேலும்</string>
+
+    <!-- SCR-0005 Notification pre-prompt -->
+    <string name="onboarding_notification_title">உங்கள் ஃப்ளோ தினமும் மூன்று முறை</string>
+    <string name="onboarding_notification_body">ஒவ்வொரு நேரமும் தொடங்கும்போது ஒரு அமைதியான அறிவிப்பு. ஸ்பேம் இல்லை – அமைப்புகளில் எப்போதும் அணைக்கலாம்.</string>
+    <string name="onboarding_ping_title">%1$s · %2$s</string>
+    <string name="onboarding_ping_morning">காலை சிப்</string>
+    <string name="onboarding_ping_morning_body">நேற்றிரவு எபிசோடுகளின் 2-நிமிட சுருக்கம்</string>
+    <string name="onboarding_ping_lunch">மதிய ஸ்பிளாஷ்</string>
+    <string name="onboarding_ping_lunch_body">20 நிமிடத்தில் முடியும் ஒரு குறுங்கதை</string>
+    <string name="onboarding_ping_night">இரவு ஃப்ளோ</string>
+    <string name="onboarding_ping_night_body">உங்கள் ஷோக்களின் புதிய எபிசோடுகள், தயாராக</string>
+    <string name="onboarding_turn_on_notifications">அறிவிப்புகளை இயக்கு</string>
+    <string name="onboarding_not_now">இப்போது வேண்டாம்</string>
+</resources>

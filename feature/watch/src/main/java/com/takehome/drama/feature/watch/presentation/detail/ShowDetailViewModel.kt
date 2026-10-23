@@ -9,12 +9,20 @@ import com.takehome.drama.domain.model.Catalog
 import com.takehome.drama.domain.model.Episode
 import com.takehome.drama.domain.model.Show
 import com.takehome.drama.domain.model.ShowEpisodes
+import com.takehome.drama.domain.model.episodeTotal
+import com.takehome.drama.domain.model.findShow
+import com.takehome.drama.domain.model.tagsOf
 import com.takehome.drama.domain.repository.UserPreferencesRepository
-import com.takehome.drama.domain.usecase.catalog.CatalogUseCase
-import com.takehome.drama.domain.usecase.history.WatchProgressUseCase
-import com.takehome.drama.domain.usecase.library.SavedShowsUseCase
+import com.takehome.drama.domain.usecase.catalog.GetCatalogUseCase
+import com.takehome.drama.domain.usecase.catalog.ResolveContentLanguageUseCase
+import com.takehome.drama.domain.usecase.history.GetContinueTargetUseCase
+import com.takehome.drama.domain.usecase.history.ObserveShowProgressUseCase
+import com.takehome.drama.domain.usecase.library.ObserveIsShowSavedUseCase
+import com.takehome.drama.domain.usecase.library.SetShowSavedUseCase
 import com.takehome.drama.domain.usecase.watch.EpisodeRange
-import com.takehome.drama.domain.usecase.watch.EpisodesUseCase
+import com.takehome.drama.domain.usecase.watch.GetEpisodeGridUseCase
+import com.takehome.drama.domain.usecase.watch.GetEpisodeRangesUseCase
+import com.takehome.drama.domain.usecase.watch.GetShowEpisodesUseCase
 import com.takehome.drama.feature.watch.R
 import com.takehome.drama.feature.watch.navigation.ShowDetailScreenProvider.ShowDetail
 import java.util.Locale
@@ -26,10 +34,15 @@ import kotlinx.coroutines.launch
 
 class ShowDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    private val catalogUseCase: CatalogUseCase,
-    private val episodesUseCase: EpisodesUseCase,
-    private val watchProgressUseCase: WatchProgressUseCase,
-    private val savedShowsUseCase: SavedShowsUseCase,
+    private val getCatalog: GetCatalogUseCase,
+    private val getShowEpisodes: GetShowEpisodesUseCase,
+    private val resolveContentLanguage: ResolveContentLanguageUseCase,
+    private val getEpisodeGrid: GetEpisodeGridUseCase,
+    private val getEpisodeRanges: GetEpisodeRangesUseCase,
+    private val observeShowProgress: ObserveShowProgressUseCase,
+    private val getContinueTarget: GetContinueTargetUseCase,
+    private val observeIsShowSaved: ObserveIsShowSavedUseCase,
+    private val setShowSaved: SetShowSavedUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : BaseViewModel<ShowDetailIntent, ShowDetailViewState, ShowDetailSingleEvent>() {
 
@@ -47,7 +60,7 @@ class ShowDetailViewModel(
     init {
         load()
         viewModelScope.launch {
-            savedShowsUseCase.observeIsSaved(showId).collect { updateState { copy(isSaved = it) } }
+            observeIsShowSaved(showId).collect { updateState { copy(isSaved = it) } }
         }
     }
 
@@ -68,12 +81,12 @@ class ShowDetailViewModel(
     private fun load() {
         updateState { copy(isLoading = true, errorRes = null, isEpisodesLoading = true, episodesErrorRes = null) }
         viewModelScope.launch {
-            val episodesResult = async { episodesUseCase.load(showId) }
-            val catalog = catalogUseCase.load().getOrElse { error ->
+            val episodesResult = async { getShowEpisodes(showId) }
+            val catalog = getCatalog().getOrElse { error ->
                 updateState { copy(isLoading = false, errorRes = error.toErrorRes()) }
                 return@launch
             }
-            val show = catalogUseCase.findShow(catalog, showId) ?: run {
+            val show = catalog.findShow(showId) ?: run {
                 updateState { copy(isLoading = false, errorRes = R.string.watch_show_not_found) }
                 return@launch
             }
@@ -83,7 +96,7 @@ class ShowDetailViewModel(
                 copy(
                     isLoading = false,
                     posterUrl = show.posterUrl,
-                    episodeTotal = episodesUseCase.episodeTotal(show, episodes = null),
+                    episodeTotal = show.episodeTotal(episodes = null),
                     viewCount = show.viewCount,
                 )
             }
@@ -96,7 +109,7 @@ class ShowDetailViewModel(
     private fun retryEpisodes() {
         val show = show ?: return load()
         updateState { copy(isEpisodesLoading = true, episodesErrorRes = null) }
-        viewModelScope.launch { applyEpisodes(show, episodesUseCase.load(showId)) }
+        viewModelScope.launch { applyEpisodes(show, getShowEpisodes(showId)) }
     }
 
     private fun applyEpisodes(show: Show, result: Result<ShowEpisodes>) {
@@ -106,8 +119,8 @@ class ShowDetailViewModel(
                 updateState {
                     copy(
                         isEpisodesLoading = false,
-                        episodeTotal = episodesUseCase.episodeTotal(show, loaded),
-                        ranges = episodesUseCase.ranges(episodes),
+                        episodeTotal = show.episodeTotal(loaded),
+                        ranges = getEpisodeRanges(episodes),
                     )
                 }
                 observeProgress()
@@ -128,11 +141,11 @@ class ShowDetailViewModel(
                 .map { it.contentLanguage }
                 .distinctUntilChanged()
                 .collect { saved ->
-                    val language = catalogUseCase.resolveContentLanguage(saved, Locale.getDefault().language, catalog)
+                    val language = resolveContentLanguage(saved, Locale.getDefault().language, catalog)
                     updateState {
                         copy(
                             title = show.title.resolve(language, catalog.defaultLanguage),
-                            tags = catalogUseCase.tagsOf(show, catalog)
+                            tags = catalog.tagsOf(show)
                                 .filter { it.isCategory }
                                 .map { it.name.resolve(language, catalog.defaultLanguage) },
                             synopsis = show.synopsis.resolve(language, catalog.defaultLanguage),
@@ -146,16 +159,16 @@ class ShowDetailViewModel(
     private fun observeProgress() {
         progressJob?.cancel()
         progressJob = viewModelScope.launch {
-            watchProgressUseCase.observeForShow(showId).collect { progress ->
-                val target = episodes.takeIf { it.isNotEmpty() }?.let { watchProgressUseCase.continueTarget(showId, it) }
+            observeShowProgress(showId).collect { progress ->
+                val target = episodes.takeIf { it.isNotEmpty() }?.let { getContinueTarget(showId, it) }
                 val targetEpisode = target?.let { t -> episodes.firstOrNull { it.index == t.episodeIndex } }
                 updateState {
                     copy(
                         // User đã tự chọn tab thì giữ; không thì tab chứa tập Continue.
-                        selectedRange = if (rangePickedByUser) selectedRange else episodesUseCase.rangeOf(ranges, episodes, target?.episodeIndex ?: -1),
-                        watchedCount = episodesUseCase.watchedCount(episodes, progress),
+                        selectedRange = if (rangePickedByUser) selectedRange else getEpisodeRanges.rangeOf(ranges, episodes, target?.episodeIndex ?: -1),
+                        watchedCount = getEpisodeGrid.watchedCount(episodes, progress),
                         // Tập kế bị khoá không được tô "đang phát": ô phải lõm + khoá để user biết.
-                        cells = episodesUseCase.grid(
+                        cells = getEpisodeGrid(
                             episodes,
                             progress,
                             currentIndex = target?.takeIf { it.hasProgress && targetEpisode?.isFree == true }?.episodeIndex,
@@ -191,7 +204,7 @@ class ShowDetailViewModel(
     private fun toggleSaved() {
         val save = !currentState.isSaved
         viewModelScope.launch {
-            savedShowsUseCase.setSaved(showId, save).onSuccess {
+            setShowSaved(showId, save).onSuccess {
                 val message = if (save) R.string.watch_saved_to_library else R.string.watch_removed_from_library
                 sendEvent(ShowDetailSingleEvent.ShowToast(message, formatArg = null, success = true))
             }.onFailure { error ->

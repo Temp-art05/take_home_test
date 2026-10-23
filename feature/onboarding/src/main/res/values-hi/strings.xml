@@ -1,0 +1,43 @@
+<resources>
+    <string name="onboarding_step">चरण %1$d / %2$d</string>
+    <string name="onboarding_continue">जारी रखें</string>
+    <string name="onboarding_skip">छोड़ें</string>
+
+    <!-- SCR-0001 Splash -->
+    <string name="onboarding_splash_tag">शॉर्ट ड्रामा सीरीज़</string>
+
+    <!-- SCR-0002 Language -->
+    <string name="onboarding_language_title">आपकी भाषा</string>
+    <string name="onboarding_language_body">हमने इसे आपके फ़ोन से मिलाया है। सेटिंग्स में कभी भी बदलें।</string>
+
+    <!-- SCR-0003 Value prop -->
+    <string name="onboarding_value_prop_title">हर एपिसोड खुला।\nकहानी बस बहती है।</string>
+    <string name="onboarding_value_prop_body">हज़ारों शॉर्ट ड्रामा, एपि. 1 से फ़िनाले तक मुफ़्त। न कॉइन, न प्लान, न आधी रात में कोई रुकावट।</string>
+    <string name="onboarding_pill_full_seasons">पूरे सीज़न</string>
+    <string name="onboarding_pill_no_signup">साइन-अप नहीं</string>
+    <string name="onboarding_pill_short">2-मिनट के एपिसोड</string>
+    <string name="onboarding_step_into_flow">फ़्लो में कदम रखें</string>
+
+    <!-- SCR-0004 Taste picker -->
+    <string name="onboarding_taste_title">आज की रात कैसी हो?</string>
+    <string name="onboarding_taste_body">पहले एक एहसास चुनें – हम आपके फ़्लो में सही कहानियाँ भर देंगे।</string>
+    <string name="onboarding_mood_rage">गुस्सा</string>
+    <string name="onboarding_mood_swoon">दीवानगी</string>
+    <string name="onboarding_mood_cry">आँसू</string>
+    <string name="onboarding_mood_thrill">रोमांच</string>
+    <string name="onboarding_fine_tune">और बारीकी से (वैकल्पिक)</string>
+    <string name="onboarding_more_chips">+ %1$d और</string>
+
+    <!-- SCR-0005 Notification pre-prompt -->
+    <string name="onboarding_notification_title">आपका फ़्लो दिन में तीन बार चलता है</string>
+    <string name="onboarding_notification_body">हर विंडो खुलने पर एक शांत पिंग। कभी स्पैम नहीं – सेटिंग्स में कभी भी बंद करें।</string>
+    <string name="onboarding_ping_title">%1$s · %2$s</string>
+    <string name="onboarding_ping_morning">सुबह की चुस्की</string>
+    <string name="onboarding_ping_morning_body">पिछली रात के एपिसोड के 2-मिनट रीकैप</string>
+    <string name="onboarding_ping_lunch">लंच की बौछार</string>
+    <string name="onboarding_ping_lunch_body">एक छोटी कहानी जो 20 मिनट में पूरी हो</string>
+    <string name="onboarding_ping_night">रात का फ़्लो</string>
+    <string name="onboarding_ping_night_body">आपके शो के नए एपिसोड, चलने को तैयार</string>
+    <string name="onboarding_turn_on_notifications">सूचनाएँ चालू करें</string>
+    <string name="onboarding_not_now">अभी नहीं</string>
+</resources>

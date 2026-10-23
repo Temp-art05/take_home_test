@@ -80,6 +80,10 @@ log/analytics hành động gắn được ở một chỗ, và luồng dữ li�
   (`AppBottomSheet`, `AppToastHost`…).
 - Lifecycle là intent: `LifecycleEventEffect(ON_START/ON_STOP)` → `ScreenStarted` / `ScreenStopped`; VM quyết
   định pause + lưu vị trí, và chỉ phát lại nếu trước khi vào nền đang phát.
+- Feed bị che hẳn (tab ẩn, mở Player từ tab, màn STOP) → `player.setActive(false)`: nhả **mọi** player của pool
+  (decoder + buffer RAM, giữ cache đĩa); hiện lại → `setActive(true)` dựng lại trang hiện tại + lân cận rồi
+  `play()`. Không bao giờ để hai pool (Reels + Player, Reels + Browse) cùng giữ decoder. Preview câm (Browse)
+  dùng `setMuted(true)` — không giành audio focus; pool chỉ dựng ExoPlayer cho slot thật sự được dùng.
 - Thứ cần sống qua process death (tập đang xem, tốc độ, quality) ghi vào `SavedStateHandle`; vị trí phát lấy
   lại từ Room. Test VM bằng player giả, không cần ExoPlayer.
 
@@ -97,6 +101,9 @@ log/analytics hành động gắn được ở một chỗ, và luồng dữ li�
 `scrollToPage` (không trượt qua tab giữa), `beyondViewportPageCount = tabs.lastIndex` (tab đã mở không
 bị dispose → giữ scroll/state, không load lại), tab chưa mở chưa compose (`visitedTabs`). ViewModel tab
 lấy bằng `koinViewModel()` → scope theo back stack entry của Main.
+
+Tab bar (`MainBottomNavBar`) **đè** lên pager như mockup (`.tb` absolute, nền 93% đục): mỗi tab nhận
+`bottomPadding` = `mainTabBarHeight()` để phần cuối danh sách cuộn ra khỏi bar; Reels vẽ video tràn dưới bar.
 
 Bẫy: tab ẩn **vẫn RESUMED** — việc chỉ nên chạy khi tab hiện (polling, video) thì gate theo `selectedTab`.
 

@@ -17,11 +17,8 @@ import com.takehome.drama.feature.main.navigation.LanguageScreenProvider
 import com.takehome.drama.feature.main.navigation.MainScreenProvider
 import com.takehome.drama.feature.main.navigation.SavedScreenProvider
 import com.takehome.drama.feature.main.navigation.SearchScreenProvider
-import com.takehome.drama.feature.onboarding.navigation.NotificationPromptScreenProvider
-import com.takehome.drama.feature.onboarding.navigation.OnboardingLanguageScreenProvider
+import com.takehome.drama.feature.onboarding.navigation.OnboardingScreenProvider
 import com.takehome.drama.feature.onboarding.navigation.SplashScreenProvider
-import com.takehome.drama.feature.onboarding.navigation.TastePickerScreenProvider
-import com.takehome.drama.feature.onboarding.navigation.ValuePropScreenProvider
 import com.takehome.drama.feature.watch.navigation.PlayerScreenProvider
 import com.takehome.drama.feature.watch.navigation.ShowDetailScreenProvider
 
@@ -35,7 +32,7 @@ private const val NAV_ANIM_OFFSET_FRACTION = 0.1f
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
-    startDestination: Destination = SplashScreenProvider.Splash,
+    startDestination: Destination = SplashScreenProvider.Splash(),
 ) {
     CompositionLocalProvider(LocalNavController provides navController) {
         NavHost(
@@ -70,10 +67,8 @@ fun AppNavGraph(
 
             // Onboarding — SCR-0001…0005
             applyDestination(SplashScreenProvider(home = home))
-            applyDestination(OnboardingLanguageScreenProvider())
-            applyDestination(ValuePropScreenProvider())
-            applyDestination(TastePickerScreenProvider())
-            applyDestination(NotificationPromptScreenProvider(home = home))
+            // 0002…0005 là một destination, các bước trượt trong pager.
+            applyDestination(OnboardingScreenProvider(home = home))
 
             // Main 5 tab + màn mở từ tab
             applyDestination(MainScreenProvider(watchRoutes = AppWatchRoutes))

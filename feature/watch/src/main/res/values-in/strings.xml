@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_back">Kembali</string>
+    <string name="watch_retry">Coba lagi</string>
+    <string name="watch_episodes">Episode</string>
+    <string name="watch_episode_number">Ep. %1$d</string>
+    <string name="watch_episode_locked">Episode %1$d terkunci</string>
+    <string name="watch_locked_cd">Terkunci</string>
+    <string name="watch_show_not_found">Serial ini sudah tidak tersedia.</string>
+    <string name="watch_stat_episodes">Episode</string>
+    <string name="watch_stat_views">Ditonton</string>
+    <string name="watch_more">Selengkapnya</string>
+    <string name="watch_less">Sembunyikan</string>
+    <string name="watch_play_episode">Putar Ep. %1$d</string>
+    <string name="watch_continue_episode">Lanjutkan Ep. %1$d</string>
+    <string name="watch_save_cd">Simpan ke Koleksi</string>
+    <string name="watch_saved_cd">Tersimpan di Koleksi</string>
+    <string name="watch_saved_to_library">Tersimpan di Koleksimu</string>
+    <string name="watch_removed_from_library">Dihapus dari Koleksimu</string>
+    <string name="watch_range">%1$d–%2$d</string>
+    <string name="watch_episodes_error">Gagal memuat episode.</string>
+    <string name="watch_player_episode_of">Ep. %1$d / %2$d</string>
+    <string name="watch_like_cd">Suka</string>
+    <string name="watch_speed">Kecepatan</string>
+    <string name="watch_speed_value">%1$s×</string>
+    <string name="watch_eps">Ep</string>
+    <string name="watch_more_lower">selengkapnya</string>
+    <string name="watch_less_lower">sembunyikan</string>
+    <string name="watch_play_cd">Putar</string>
+    <string name="watch_pause_cd">Jeda</string>
+    <string name="watch_seek_cd">Posisi pemutaran</string>
+    <string name="watch_locked_title">Ep. %1$d terkunci</string>
+    <string name="watch_locked_body">Pilih episode gratis untuk lanjut menonton.</string>
+    <string name="watch_next_up">Berikutnya: Ep. %1$d</string>
+    <string name="watch_play_next">Putar Ep. %1$d</string>
+    <string name="watch_show_finished">Kamu sudah sampai akhir</string>
+    <string name="watch_error_no_source">Episode ini belum bisa diputar sekarang.</string>
+    <string name="watch_error_playback">Tak bisa diputar — cek koneksimu.</string>
+    <string name="watch_loading">Memuat…</string>
+    <string name="watch_quality_dropped">Jaringan lambat — turun ke %1$s agar tetap berjalan</string>
+    <string name="watch_switch_back_hd">Kembali ke HD</string>
+    <plurals name="watch_episode_count">
+        <item quantity="other">%1$d ep</item>
+    </plurals>
+    <string name="watch_episodes_summary">%1$s · %2$d ditonton</string>
+    <string name="watch_playback_options">Opsi pemutaran</string>
+    <string name="watch_quality">Kualitas</string>
+    <string name="watch_quality_auto">Otomatis</string>
+    <string name="watch_quality_auto_hint">Sesuai kecepatan jaringan</string>
+    <string name="watch_quality_more_data">Pakai lebih banyak data</string>
+    <string name="watch_language">Bahasa</string>
+    <string name="watch_autoplay_next">Putar otomatis episode berikutnya</string>
+</resources>

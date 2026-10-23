@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -57,10 +58,24 @@ fun MainScreen(
         tabContent = { tab ->
             // ViewModel của tab lấy bằng koinViewModel() mặc định → scope theo back stack entry
             // của Main, nên sống qua mọi lần đổi tab và chỉ bị huỷ khi Main bị pop.
+            val isSelected = viewState.selectedTab == tab
+            val switchTab: (MainTab) -> Unit = { viewModel.processIntent(MainIntent.SelectTab(it)) }
             when (tab) {
-                MainTab.Home -> HomeScreen(watchRoutes = watchRoutes, onNavigate = onNavigate)
-                MainTab.Reels -> ReelsScreen(watchRoutes = watchRoutes, onNavigate = onNavigate)
-                MainTab.Browse -> BrowseScreen(watchRoutes = watchRoutes, onNavigate = onNavigate)
+                MainTab.Home -> HomeScreen(
+                    watchRoutes = watchRoutes,
+                    onNavigate = onNavigate,
+                    onSwitchTab = switchTab,
+                )
+                MainTab.Reels -> ReelsScreen(
+                    watchRoutes = watchRoutes,
+                    onNavigate = onNavigate,
+                    isSelected = isSelected,
+                )
+                MainTab.Browse -> BrowseScreen(
+                    watchRoutes = watchRoutes,
+                    onNavigate = onNavigate,
+                    isSelected = isSelected,
+                )
                 MainTab.Library -> LibraryScreen(watchRoutes = watchRoutes, onNavigate = onNavigate)
                 MainTab.Settings -> SettingsScreen(onNavigate = onNavigate)
             }
@@ -77,13 +92,16 @@ fun MainScreen(
  *
  * Tab đang ẩn vẫn ở lifecycle RESUMED: việc chỉ nên chạy khi tab hiện (polling, video...) thì
  * gate bằng tab đang chọn, đừng dựa vào lifecycle.
+ *
+ * Tab bar nằm **dưới** pager (Column), không đè: nội dung (video Reels, cuối danh sách) dừng ở mép trên bar,
+ * không nhìn xuyên qua bar — user bác kiểu đè + nền 93% của mockup. Bar tự cao theo nội dung + inset.
  */
 @Composable
 private fun MainContent(
     viewState: MainViewState,
     pagerState: PagerState,
     onIntent: (MainIntent) -> Unit,
-    tabContent: @Composable (MainTab) -> Unit,
+    tabContent: @Composable (tab: MainTab) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -93,8 +111,8 @@ private fun MainContent(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
+                .weight(1f)
+                .fillMaxWidth(),
             userScrollEnabled = false,
             beyondViewportPageCount = tabs.lastIndex,
             key = { page -> tabs[page].name },

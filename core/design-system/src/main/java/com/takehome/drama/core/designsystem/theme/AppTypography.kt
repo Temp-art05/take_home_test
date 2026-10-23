@@ -31,6 +31,50 @@ object AppTypography {
         letterSpacing = 0.16.em,
     )
 
+    /** Wordmark ở Splash — 30sp, giãn .2em. */
+    val wordmarkSplash = wordmark.copy(fontSize = 30.sp, letterSpacing = 0.2.em)
+
+    /** Tiêu đề onboarding `.ob h1` — 28sp/800. */
+    val headline = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 28.sp,
+        lineHeight = 34.sp,
+        letterSpacing = (-0.01).em,
+    )
+
+    /** Tiêu đề khung giờ ở Home ("Night flow") — 23sp/800. */
+    val daypart = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 23.sp,
+        lineHeight = 28.sp,
+    )
+
+    /** Tên show trên key art (hero Home 19sp, preview Browse 21sp) — đậm 800. */
+    val artTitle = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 19.sp,
+        lineHeight = 24.sp,
+    )
+
+    /** Eyebrow viết hoa (`STEP 1 / 4`, `TAP A POSTER…`, `FINE-TUNE`) — 11.5sp/700, giãn .1em. */
+    val eyebrow = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.Bold,
+        fontSize = 11.5.sp,
+        letterSpacing = 0.1.em,
+    )
+
+    /** Badge gradient / pill trên art (`TONIGHT'S PICK`, `PREVIEW · auto`) — 10.5sp/800, .08em. */
+    val badge = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 10.5.sp,
+        letterSpacing = 0.08.em,
+    )
+
     /** Tiêu đề màn / sheet — 19sp. */
     val title = TextStyle(
         fontFamily = family,
@@ -106,10 +150,10 @@ object AppTypography {
         fontSize = 10.5.sp,
     )
 
-    /** Nhãn tab bar — 10.5sp. */
+    /** Nhãn tab bar — mockup 10.5px/600; ảnh chụp thiết bị nhỏ hơn ~16% nên nâng lên 12sp/700. */
     val tab = TextStyle(
         fontFamily = family,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 10.5.sp,
+        fontWeight = FontWeight.Bold,
+        fontSize = 12.sp,
     )
 }

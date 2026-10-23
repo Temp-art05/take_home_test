@@ -1,0 +1,94 @@
+<resources>
+    <string name="tab_home">होम</string>
+    <string name="tab_reels">रील्स</string>
+    <string name="tab_browse">ब्राउज़</string>
+    <string name="tab_library">लाइब्रेरी</string>
+    <string name="tab_settings">सेटिंग्स</string>
+
+    <!-- Chung -->
+    <string name="common_retry">फिर कोशिश करें</string>
+    <string name="common_back">वापस</string>
+    <string name="common_episode_number">एपि. %1$d</string>
+    <plurals name="common_episode_count">
+        <item quantity="one">%1$d एपिसोड</item>
+        <item quantity="other">%1$d एपिसोड</item>
+    </plurals>
+    <string name="common_save_cd">लाइब्रेरी में सेव करें</string>
+    <string name="common_saved_cd">लाइब्रेरी में सेव है</string>
+    <string name="common_saved_to_library">आपकी लाइब्रेरी में सेव हुआ</string>
+    <string name="common_removed_from_library">आपकी लाइब्रेरी से हटाया गया</string>
+    <string name="status_complete">पूरा</string>
+    <string name="status_ongoing">जारी</string>
+
+    <!-- Day Cycle (SCR-0101) -->
+    <string name="daypart_morning">सुबह की चुस्की</string>
+    <string name="daypart_lunch">लंच की बौछार</string>
+    <string name="daypart_night">रात का फ़्लो</string>
+    <string name="daypart_morning_mood">दिन शुरू होने से पहले छोटी चुस्कियाँ</string>
+    <string name="daypart_lunch_mood">ब्रेक के लिए झटपट कहानियाँ</string>
+    <string name="daypart_night_mood">लंबे एपिसोड, लाइट बंद</string>
+    <string name="daypart_morning_pitch">आपने जो देखा, उसके 2-मिनट रीकैप</string>
+    <string name="daypart_lunch_pitch">एक छोटी कहानी · 20 मिनट में</string>
+    <string name="daypart_night_pitch">लंबे एपिसोड, लाइट बंद</string>
+    <string name="home_daypart_line">%1$s · %2$s</string>
+    <string name="home_daypart_card">%1$s · %2$s</string>
+    <string name="home_pick_morning">सुबह की पसंद</string>
+    <string name="home_pick_lunch">लंच की पसंद</string>
+    <string name="home_pick_night">आज रात की पसंद</string>
+    <string name="home_binge_ready">बिंज के लिए तैयार</string>
+    <string name="home_eps_complete">%1$s पूरे</string>
+    <string name="home_pick_up">अपना फ़्लो फिर शुरू करें</string>
+    <string name="home_also_flowing_morning">आज सुबह और भी</string>
+    <string name="home_also_flowing_lunch">लंच में और भी</string>
+    <string name="home_also_flowing_night">आज रात और भी</string>
+    <string name="home_see_all">सभी देखें</string>
+    <string name="home_notifications_cd">सूचनाएँ</string>
+
+    <!-- SCR-0201 Search -->
+    <string name="search_title">खोजें</string>
+    <string name="search_hint">शो, शैलियाँ…</string>
+    <string name="search_clear_cd">खोज साफ़ करें</string>
+    <string name="search_matches">मिलते-जुलते</string>
+    <string name="search_genres">शैलियाँ</string>
+    <string name="search_popular">अभी लोकप्रिय</string>
+    <string name="search_no_results">“%1$s” के लिए फ़्लो में कुछ नहीं</string>
+
+    <!-- SCR-0202 Browse -->
+    <string name="browse_chip_all">सभी</string>
+    <string name="browse_hint">पोस्टर टैप करें · ऊपर प्रीव्यू बदलेगा</string>
+    <string name="browse_preview_auto">प्रीव्यू · ऑटो</string>
+    <string name="browse_preview_tap">प्रीव्यू · टैप</string>
+    <string name="browse_play_preview_cd">प्रीव्यू चलाएँ</string>
+    <string name="browse_play_ep_1">एपि. 1 चलाएँ</string>
+
+    <!-- SCR-0203 Reels -->
+    <string name="reels_title_episode">%1$s · एपि. %2$d</string>
+    <plurals name="reels_watch_all">
+        <item quantity="one">%1$d एपिसोड देखें</item>
+        <item quantity="other">सभी %1$d एपिसोड देखें</item>
+    </plurals>
+    <string name="reels_more">और</string>
+    <string name="reels_less">कम</string>
+    <string name="reels_like_cd">पसंद</string>
+    <string name="reels_speed">स्पीड</string>
+    <string name="reels_speed_value">%1$s×</string>
+    <string name="reels_speed_cd">प्लेबैक स्पीड %1$s×</string>
+    <string name="reels_save">सेव</string>
+    <string name="reels_play_cd">चलाएँ</string>
+    <string name="reels_pause_cd">रोकें</string>
+    <string name="reels_error_clip">यह रील लोड नहीं हो सकी।</string>
+    <string name="reels_error_playback">चल नहीं सका — कनेक्शन जाँचें।</string>
+    <string name="reels_unavailable">इस शो में प्रीव्यू के लिए कोई मुफ़्त एपिसोड नहीं है।</string>
+
+    <string name="library_history">देखने का इतिहास</string>
+    <string name="library_saved">सेव किए गए</string>
+
+    <string name="skeleton_open_show">शो %1$s खोलें</string>
+    <string name="skeleton_play_show">शो %1$s चलाएँ</string>
+    <string name="skeleton_open_history">देखने का इतिहास</string>
+    <string name="skeleton_open_saved">सेव किए गए</string>
+    <string name="skeleton_open_language">ऐप की भाषा</string>
+
+    <string name="language_title">भाषा</string>
+    <string name="language_system">डिवाइस की भाषा अपनाएँ</string>
+</resources>

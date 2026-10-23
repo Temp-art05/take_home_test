@@ -1,0 +1,64 @@
+<resources>
+    <!-- Chung -->
+    <string name="watch_back">वापस</string>
+    <string name="watch_retry">फिर कोशिश करें</string>
+    <string name="watch_episodes">एपिसोड</string>
+    <string name="watch_episode_number">एपि. %1$d</string>
+    <string name="watch_episode_locked">एपिसोड %1$d लॉक है</string>
+    <string name="watch_locked_cd">लॉक</string>
+    <string name="watch_show_not_found">यह शो अब उपलब्ध नहीं है।</string>
+
+    <!-- SCR-0301 Show detail -->
+    <string name="watch_stat_episodes">एपिसोड</string>
+    <string name="watch_stat_views">व्यूज़</string>
+    <string name="watch_more">और</string>
+    <string name="watch_less">कम</string>
+    <string name="watch_play_episode">एपि. %1$d चलाएँ</string>
+    <string name="watch_continue_episode">एपि. %1$d जारी रखें</string>
+    <string name="watch_save_cd">लाइब्रेरी में सेव करें</string>
+    <string name="watch_saved_cd">लाइब्रेरी में सेव है</string>
+    <string name="watch_saved_to_library">आपकी लाइब्रेरी में सेव हुआ</string>
+    <string name="watch_removed_from_library">आपकी लाइब्रेरी से हटाया गया</string>
+    <string name="watch_range">%1$d–%2$d</string>
+    <string name="watch_episodes_error">एपिसोड लोड नहीं हो सके।</string>
+
+    <!-- SCR-0302 Player -->
+    <string name="watch_player_episode_of">एपि. %1$d / %2$d</string>
+    <string name="watch_like_cd">पसंद</string>
+    <string name="watch_speed">स्पीड</string>
+    <string name="watch_speed_value">%1$s×</string>
+    <string name="watch_eps">एपि.</string>
+    <string name="watch_more_lower">और</string>
+    <string name="watch_less_lower">कम</string>
+    <string name="watch_play_cd">चलाएँ</string>
+    <string name="watch_pause_cd">रोकें</string>
+    <string name="watch_seek_cd">प्लेबैक स्थिति</string>
+    <string name="watch_locked_title">एपि. %1$d लॉक है</string>
+    <string name="watch_locked_body">देखते रहने के लिए कोई मुफ़्त एपिसोड चुनें।</string>
+    <string name="watch_next_up">अगला: एपि. %1$d</string>
+    <string name="watch_play_next">एपि. %1$d चलाएँ</string>
+    <string name="watch_show_finished">आप अंत तक पहुँच गए</string>
+    <string name="watch_error_no_source">यह एपिसोड अभी नहीं चल सकता।</string>
+    <string name="watch_error_playback">चल नहीं सका — कनेक्शन जाँचें।</string>
+
+    <!-- SCR-0604 Buffering -->
+    <string name="watch_loading">लोड हो रहा है…</string>
+    <string name="watch_quality_dropped">धीमा नेटवर्क — चलते रहने के लिए %1$s पर किया गया</string>
+    <string name="watch_switch_back_hd">वापस HD पर जाएँ</string>
+
+    <!-- SCR-0303 Episode picker -->
+    <plurals name="watch_episode_count">
+        <item quantity="one">%1$d एपिसोड</item>
+        <item quantity="other">%1$d एपिसोड</item>
+    </plurals>
+    <string name="watch_episodes_summary">%1$s · %2$d देखे</string>
+
+    <!-- SCR-0304 Playback options -->
+    <string name="watch_playback_options">प्लेबैक विकल्प</string>
+    <string name="watch_quality">क्वालिटी</string>
+    <string name="watch_quality_auto">ऑटो</string>
+    <string name="watch_quality_auto_hint">नेटवर्क स्पीड के अनुसार</string>
+    <string name="watch_quality_more_data">ज़्यादा डेटा लगता है</string>
+    <string name="watch_language">भाषा</string>
+    <string name="watch_autoplay_next">अगला एपिसोड अपने-आप चलाएँ</string>
+</resources>

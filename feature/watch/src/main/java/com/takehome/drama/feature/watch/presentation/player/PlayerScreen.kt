@@ -3,23 +3,6 @@ package com.takehome.drama.feature.watch.presentation.player
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.VerticalPager
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import com.takehome.drama.core.designsystem.component.AppAsyncImage
-import com.takehome.drama.feature.watch.presentation.player.model.PlayerPage
-import com.takehome.drama.core.media.VideoSlot
-import com.takehome.drama.core.media.KeepScreenOnWhilePlaying
-import androidx.compose.ui.graphics.graphicsLayer
-import com.takehome.drama.core.utils.extension.findActivity
-import kotlin.math.abs
-import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,19 +17,30 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
@@ -56,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.takehome.drama.core.designsystem.component.AppAsyncImage
 import com.takehome.drama.core.designsystem.component.AppBottomSheet
 import com.takehome.drama.core.designsystem.component.AppToastHost
 import com.takehome.drama.core.designsystem.component.GhostPillButton
@@ -65,11 +60,15 @@ import com.takehome.drama.core.designsystem.ext.clickableNoRipple
 import com.takehome.drama.core.designsystem.icon.AppIcons
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
+import com.takehome.drama.core.media.KeepScreenOnWhilePlaying
+import com.takehome.drama.core.media.PlaybackProgress
 import com.takehome.drama.core.media.PlaybackState
+import com.takehome.drama.core.media.VideoSlot
 import com.takehome.drama.core.media.VideoSurface
 import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.core.ui.foundation.format.formatCompactCount
+import com.takehome.drama.core.utils.extension.findActivity
 import com.takehome.drama.domain.usecase.watch.EndAction
 import com.takehome.drama.feature.watch.R
 import com.takehome.drama.feature.watch.presentation.player.component.CenterPlayIcon
@@ -80,7 +79,10 @@ import com.takehome.drama.feature.watch.presentation.player.component.PlayerInfo
 import com.takehome.drama.feature.watch.presentation.player.component.PlayerRail
 import com.takehome.drama.feature.watch.presentation.player.component.PlayerTopBar
 import com.takehome.drama.feature.watch.presentation.player.component.PlayerTrack
+import com.takehome.drama.feature.watch.presentation.player.model.PlayerPage
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerSheet
+import kotlin.math.abs
+import kotlinx.coroutines.launch
 
 /** Overlay mờ hết khi trang lệch ~60% chiều cao. */
 private const val OVERLAY_FADE = 1.6f
@@ -95,18 +97,19 @@ fun PlayerScreen(
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     // Không `by`: chỉ thanh track đọc `.value` → tick 500ms không recompose cả màn.
-    val positionMs = viewModel.positionMs.collectAsStateWithLifecycle()
+    val progress = viewModel.playbackProgress.collectAsStateWithLifecycle()
     val slots by viewModel.player.slots.collectAsStateWithLifecycle()
     val toastState = rememberToastState()
     val pagerState = rememberPagerState { viewState.pages.size }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val resources = LocalResources.current
 
     viewModel.singleEvent.CollectAsEffect { event ->
         when (event) {
             PlayerSingleEvent.NavigateBack -> onNavigate(NavigationRequest.PopBackStack)
             is PlayerSingleEvent.ShowToast -> toastState.show(
-                text = event.formatArg?.let { context.getString(event.messageRes, it) } ?: context.getString(event.messageRes),
+                text = event.formatArg?.let { resources.getString(event.messageRes, it) } ?: resources.getString(event.messageRes),
                 success = false,
             )
             is PlayerSingleEvent.ScrollToEpisode -> {
@@ -147,7 +150,7 @@ fun PlayerScreen(
         PlayerContent(
             viewState = viewState,
             pagerState = pagerState,
-            positionMs = { positionMs.value },
+            progress = { progress.value },
             slots = slots,
             onIntent = viewModel::processIntent,
         )
@@ -201,7 +204,7 @@ private fun PlayerSheets(viewState: PlayerViewState, onIntent: (PlayerIntent) ->
 private fun PlayerContent(
     viewState: PlayerViewState,
     pagerState: PagerState,
-    positionMs: () -> Long,
+    progress: () -> PlaybackProgress,
     slots: Map<Int, VideoSlot>,
     onIntent: (PlayerIntent) -> Unit,
 ) {
@@ -220,7 +223,7 @@ private fun PlayerContent(
                     slot = slots[page],
                     isCurrent = item.episodeIndex == viewState.episodeIndex,
                     viewState = viewState,
-                    positionMs = positionMs,
+                    progress = progress,
                     // Overlay mờ dần theo độ lệch trang; đọc trong lambda của graphicsLayer → không recompose mỗi frame.
                     overlayAlpha = { (1f - abs(pagerState.getOffsetDistanceInPages(page)) * OVERLAY_FADE).coerceIn(0f, 1f) },
                     onIntent = onIntent,
@@ -263,12 +266,13 @@ private fun EpisodePage(
     slot: VideoSlot?,
     isCurrent: Boolean,
     viewState: PlayerViewState,
-    positionMs: () -> Long,
+    progress: () -> PlaybackProgress,
     overlayAlpha: () -> Float,
     onIntent: (PlayerIntent) -> Unit,
 ) {
     val media = AppTheme.colors.media
     val playback = viewState.playback
+    val itemId = page.episodeIndex.toString()
     val active = isCurrent && !viewState.isLoading && viewState.errorRes == null
     val buffering = active && !page.isLocked && playback.isBuffering && playback.playWhenReady
     val poster: @Composable () -> Unit = {
@@ -334,8 +338,9 @@ private fun EpisodePage(
                     isCurrent = isCurrent,
                     viewState = viewState,
                     expanded = expanded,
-                    positionMs = if (isCurrent) positionMs else ({ 0L }),
-                    durationMs = if (isCurrent) playback.durationMs else page.durationMs,
+                    // Theo id tập, không theo `isCurrent`: khung đầu sau khi lật, player còn báo số đo của tập trước.
+                    positionMs = { progress().positionFor(itemId) },
+                    durationMs = if (playback.itemId == itemId && playback.durationMs > 0) playback.durationMs else page.durationMs,
                     buffering = buffering,
                     onIntent = onIntent,
                 )
@@ -534,12 +539,12 @@ private fun PlayerContentPreview() {
                     episodeNumber = 13,
                     episodeTotal = 68,
                     likeCount = 24_100,
-                    playback = PlaybackState(isPlaying = true, playWhenReady = true, durationMs = 91_000),
+                    playback = PlaybackState(itemId = "12", isPlaying = true, playWhenReady = true, durationMs = 91_000),
                     pages = listOf(PlayerPage(episodeIndex = 12, isLocked = false, episodeNumber = 13, likeCount = 24_100)),
                     episodeIndex = 12,
                 ),
                 pagerState = rememberPagerState { 1 },
-                positionMs = { 42_000 },
+                progress = { PlaybackProgress(itemId = "12", positionMs = 42_000, durationMs = 91_000) },
                 slots = emptyMap(),
                 onIntent = {},
             )

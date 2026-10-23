@@ -18,16 +18,41 @@ import com.takehome.drama.data.repository.CatalogRepositoryImpl
 import com.takehome.drama.data.repository.SavedShowRepositoryImpl
 import com.takehome.drama.data.repository.UserPreferencesRepositoryImpl
 import com.takehome.drama.data.repository.WatchProgressRepositoryImpl
+import com.takehome.drama.data.util.SystemWallClock
 import com.takehome.drama.domain.config.AppConfig
 import com.takehome.drama.domain.repository.CatalogRepository
 import com.takehome.drama.domain.repository.SavedShowRepository
 import com.takehome.drama.domain.repository.UserPreferencesRepository
 import com.takehome.drama.domain.repository.WatchProgressRepository
-import com.takehome.drama.domain.usecase.catalog.CatalogUseCase
-import com.takehome.drama.domain.usecase.history.WatchProgressUseCase
-import com.takehome.drama.domain.usecase.library.SavedShowsUseCase
-import com.takehome.drama.domain.usecase.watch.EpisodesUseCase
+import com.takehome.drama.domain.usecase.catalog.GetCatalogUseCase
+import com.takehome.drama.domain.usecase.catalog.ResolveContentLanguageUseCase
+import com.takehome.drama.domain.usecase.discovery.GetHomeFeedUseCase
+import com.takehome.drama.domain.usecase.discovery.WallClock
+import com.takehome.drama.domain.usecase.history.GetContinueTargetUseCase
+import com.takehome.drama.domain.usecase.history.GetResumePositionUseCase
+import com.takehome.drama.domain.usecase.history.ObserveShowProgressUseCase
+import com.takehome.drama.domain.usecase.history.ObserveWatchHistoryUseCase
+import com.takehome.drama.domain.usecase.history.SaveWatchProgressUseCase
+import com.takehome.drama.domain.usecase.library.ObserveIsShowSavedUseCase
+import com.takehome.drama.domain.usecase.library.ObserveSavedShowsUseCase
+import com.takehome.drama.domain.usecase.library.SetShowSavedUseCase
+import com.takehome.drama.domain.usecase.onboarding.CompleteOnboardingUseCase
+import com.takehome.drama.domain.usecase.onboarding.GetLanguageChoiceUseCase
+import com.takehome.drama.domain.usecase.onboarding.GetMoodOptionsUseCase
+import com.takehome.drama.domain.usecase.onboarding.IsOnboardingDoneUseCase
+import com.takehome.drama.domain.usecase.onboarding.SaveTasteUseCase
+import com.takehome.drama.domain.usecase.onboarding.SetContentLanguageUseCase
+import com.takehome.drama.domain.usecase.reels.GetReelClipUseCase
+import com.takehome.drama.domain.usecase.reels.GetReelsFeedUseCase
+import com.takehome.drama.domain.usecase.search.GetPopularShowsUseCase
+import com.takehome.drama.domain.usecase.search.SearchShowsUseCase
+import com.takehome.drama.domain.usecase.watch.GetEndActionUseCase
+import com.takehome.drama.domain.usecase.watch.GetEpisodeGridUseCase
+import com.takehome.drama.domain.usecase.watch.GetEpisodeRangesUseCase
+import com.takehome.drama.domain.usecase.watch.GetShowEpisodesUseCase
+import com.takehome.drama.domain.usecase.watch.PickVideoSourceUseCase
 import org.koin.android.ext.koin.androidContext
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 /**
@@ -60,9 +85,34 @@ val dataModule = module {
     single<SavedShowRepository> { SavedShowRepositoryImpl(get()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(get()) }
 
-    // Use case
-    factory { CatalogUseCase(get()) }
-    factory { EpisodesUseCase(get()) }
-    factory { WatchProgressUseCase(get()) }
-    factory { SavedShowsUseCase(get()) }
+    // Use case — mỗi hành động một class (`operator fun invoke`), không giữ state → factory.
+    factory { GetCatalogUseCase(get()) }
+    factory { ResolveContentLanguageUseCase() }
+    factory { GetShowEpisodesUseCase(get()) }
+    factory { PickVideoSourceUseCase() }
+    factory { GetEpisodeGridUseCase() }
+    factory { GetEpisodeRangesUseCase() }
+    factory { GetEndActionUseCase() }
+    factory { SaveWatchProgressUseCase(get()) }
+    factory { GetResumePositionUseCase(get()) }
+    factory { GetContinueTargetUseCase(get()) }
+    factory { ObserveWatchHistoryUseCase(get()) }
+    factory { ObserveShowProgressUseCase(get()) }
+    factory { SetShowSavedUseCase(get()) }
+    factory { ObserveIsShowSavedUseCase(get()) }
+    factory { ObserveSavedShowsUseCase(get()) }
+    factory { GetHomeFeedUseCase() }
+    factory { GetMoodOptionsUseCase() }
+    factory { SaveTasteUseCase(get()) }
+    factory { GetLanguageChoiceUseCase(get(), get()) }
+    factory { SetContentLanguageUseCase(get()) }
+    factory { IsOnboardingDoneUseCase(get()) }
+    factory { CompleteOnboardingUseCase(get()) }
+    factory { SearchShowsUseCase() }
+    factory { GetPopularShowsUseCase() }
+    factory { GetReelsFeedUseCase() }
+    factory { GetReelClipUseCase(get(), get()) }
+
+    // Đồng hồ máy cho Day Cycle — single để flavor dev ép giờ một lần cho cả phiên.
+    single { SystemWallClock() } bind WallClock::class
 }
