@@ -57,7 +57,7 @@ fun AppAsyncImage(
     )
 }
 
-/** ImageLoader cho cả app — `BaseApp.newImageLoader` trả hàm này. */
+/** ImageLoader cho cả app — `FlowDramaApp.newImageLoader` trả hàm này. */
 @OptIn(ExperimentalCoilApi::class)
 fun appImageLoader(context: Context): ImageLoader = ImageLoader.Builder(context)
     .components {

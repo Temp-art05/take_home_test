@@ -6,40 +6,48 @@
 
 | File | Nội dung |
 |---|---|
-| `FooContract.kt` | `data class FooViewState : ViewState`, `sealed interface FooSingleEvent : SingleEvent` |
-| `FooViewModel.kt` | `BaseViewModel<FooViewState, FooSingleEvent>` |
+| `FooContract.kt` | `data class FooViewState : ViewState`, `sealed interface FooIntent : ViewIntent`, `sealed interface FooSingleEvent : SingleEvent` |
+| `FooViewModel.kt` | `BaseViewModel<FooIntent, FooViewState, FooSingleEvent>` |
 | `FooScreen.kt` | `FooScreen` (nối ViewModel) + `FooContent` (stateless, có preview) |
 | `navigation/FooScreenProvider.kt` | chỉ màn là một destination: `@Serializable` destination + factory composable |
 
-## Không dispatch intent
+## MVI — mọi hành động đi qua `processIntent`
 
-**Cấm** kiểu `processIntent(intent)` / `onIntent = viewModel::processIntent` / `sealed interface FooIntent`.
-Hành động của user là **hàm public tên rõ** trên ViewModel; `FooContent` nhận **callback tên rõ**;
-`FooScreen` truyền **lambda**, không dùng method reference `::`.
+Theo pattern của Notica. Mỗi màn có `sealed interface FooIntent : ViewIntent`; ViewModel override
+`processIntent(intent)` → `when (intent)` → gọi hàm **private** xử lý. Không có hàm public nào khác
+cho hành động của user.
 
 ```kotlin
+// Contract
+sealed interface FooIntent : ViewIntent {
+    data object RetryClick : FooIntent
+    data class SelectTab(val tab: MainTab) : FooIntent
+}
+
 // ViewModel
-fun onRetryClick() = load()
-fun selectTab(tab: MainTab) { ... }
+override fun processIntent(intent: FooIntent) {
+    when (intent) {
+        FooIntent.RetryClick -> load()
+        is FooIntent.SelectTab -> selectTab(intent.tab)
+    }
+}
 
 // Screen
 FooContent(
     viewState = viewState,
-    onRetryClick = { viewModel.onRetryClick() },
-    onTabSelected = { tab -> viewModel.selectTab(tab) },
+    onIntent = { intent -> viewModel.processIntent(intent) },
 )
 
-// Content
+// Content — stateless, chỉ biết gửi intent
 @Composable
 private fun FooContent(
     viewState: FooViewState,
-    onRetryClick: () -> Unit,
-    onTabSelected: (MainTab) -> Unit,
+    onIntent: (FooIntent) -> Unit,
 )
 ```
 
-Lý do: Find Usages của từng hành động trỏ đúng một chỗ gọi; đọc signature của Content là biết màn
-có những hành động gì.
+Lý do: một cửa vào duy nhất cho mọi hành động — đọc `FooIntent` là biết màn có những hành động gì,
+log/analytics hành động gắn được ở một chỗ, và luồng dữ liệu một chiều (Intent → State/Event).
 
 ## ViewModel
 
@@ -67,7 +75,7 @@ có những hành động gì.
   `PopBackStack`, `NavigateUp`, `PopTo`). Có throttle chống double-tap; điều hướng không do user bấm
   (deeplink, hết phiên) gọi `NavigationThrottle.awaitWindow()` trước.
 
-## Main 3 tab
+## Main 5 tab (Home, Reels, Browse, Library, Settings)
 
 `HorizontalPager` làm container giữ tab, không phải carousel: `userScrollEnabled = false`, đổi tab bằng
 `scrollToPage` (không trượt qua tab giữa), `beyondViewportPageCount = tabs.lastIndex` (tab đã mở không

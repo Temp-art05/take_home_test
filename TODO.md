@@ -4,10 +4,10 @@ Xem `README.md` cho cấu trúc, `docs/rules/` cho quy ước code.
 
 ## 1. Đổi định danh
 
-- [ ] `settings.gradle.kts` → `rootProject.name` (hiện: `BaseApp`)
+- [x] `settings.gradle.kts` → `rootProject.name` = `FlowDrama`
 - [x] `app/build.gradle.kts` → `applicationId` = `com.takehome.drama`
 - [x] Package + `namespace` mọi module → `com.takehome.drama.*` (`build-logic` giữ `com.base.app.convention`)
-- [ ] `app/src/main/res/values/strings.xml` → `app_name`
+- [x] `app/src/main/res/values/strings.xml` → `app_name` = `FlowDrama`
 - [ ] Launcher icon: `app/src/main/res/mipmap-*` + `ic_launcher_background/foreground.xml`
 
 ## 2. Brand

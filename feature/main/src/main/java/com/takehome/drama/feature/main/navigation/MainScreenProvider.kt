@@ -5,12 +5,15 @@ import androidx.navigation.NavType
 import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.navigation.core.ScreenProvider
 import com.takehome.drama.core.navigation.destination.Destination
+import com.takehome.drama.core.navigation.destination.WatchRoutes
 import com.takehome.drama.feature.main.presentation.main.MainScreen
 import com.takehome.drama.feature.main.presentation.main.MainViewModel
 import kotlin.reflect.KType
 import kotlinx.serialization.Serializable
 
-class MainScreenProvider : ScreenProvider<MainScreenProvider.Main, MainViewModel>() {
+class MainScreenProvider(
+    private val watchRoutes: WatchRoutes,
+) : ScreenProvider<MainScreenProvider.Main, MainViewModel>() {
 
     @Serializable
     data object Main : Destination
@@ -23,6 +26,7 @@ class MainScreenProvider : ScreenProvider<MainScreenProvider.Main, MainViewModel
     ): @Composable () -> Unit = {
         MainScreen(
             viewModel = viewModel,
+            watchRoutes = watchRoutes,
             onNavigate = onNavigationRequest
         )
     }

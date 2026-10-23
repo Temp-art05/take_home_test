@@ -25,7 +25,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "BaseApp"
+rootProject.name = "FlowDrama"
 include(":app")
 include(":domain")
 include(":data")
@@ -34,4 +34,6 @@ include(":core:navigation")
 include(":core:analytics")
 include(":core:ui-foundation")
 include(":core:design-system")
+include(":feature:onboarding")
 include(":feature:main")
+include(":feature:watch")

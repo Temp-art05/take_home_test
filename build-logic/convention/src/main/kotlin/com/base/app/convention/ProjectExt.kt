@@ -14,7 +14,7 @@ import org.gradle.kotlin.dsl.getByType
 object AndroidConfig {
     const val COMPILE_SDK = 37
     const val TARGET_SDK = 37
-    const val MIN_SDK = 26
+    const val MIN_SDK = 24
     val JAVA_VERSION = JavaVersion.VERSION_17
     const val JVM_TOOLCHAIN = 17
 }

@@ -1,0 +1,10 @@
+<resources>
+    <string name="watch_show_detail_title">Show %1$s</string>
+    <string name="watch_player_title">Show %1$s · Ep. %2$d</string>
+    <string name="watch_play_episode">Play Ep. %1$d</string>
+    <string name="watch_episodes">Episodes</string>
+    <string name="watch_playback_options">Playback options</string>
+    <string name="watch_next_episode">Next episode</string>
+    <string name="watch_episode_picker_sheet">SCR-0303 · Episode picker</string>
+    <string name="watch_playback_options_sheet">SCR-0304 · Playback options</string>
+</resources>

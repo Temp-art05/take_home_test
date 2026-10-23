@@ -1,6 +1,7 @@
 package com.takehome.drama.feature.main.presentation.main
 
 import com.takehome.drama.core.ui.foundation.vm.SingleEvent
+import com.takehome.drama.core.ui.foundation.vm.ViewIntent
 import com.takehome.drama.core.ui.foundation.vm.ViewState
 import com.takehome.drama.feature.main.presentation.main.model.MainTab
 
@@ -12,5 +13,9 @@ data class MainViewState(
     val selectedTab: MainTab = MainTab.Home,
     val visitedTabs: Set<MainTab> = setOf(MainTab.Home),
 ) : ViewState
+
+sealed interface MainIntent : ViewIntent {
+    data class SelectTab(val tab: MainTab) : MainIntent
+}
 
 sealed interface MainSingleEvent : SingleEvent

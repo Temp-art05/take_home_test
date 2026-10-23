@@ -3,7 +3,6 @@ package com.takehome.drama.core.designsystem.theme
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -15,49 +14,67 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = AppColors.Primary.p500,
-    onPrimary = AppColors.Base.base0,
-    primaryContainer = AppColors.Primary.p700,
-    onPrimaryContainer = AppColors.Primary.p100,
-    secondary = AppColors.Neutral.n600,
-    onSecondary = AppColors.Base.base0,
-    background = AppColors.Base.base950,
-    onBackground = AppColors.Base.base0,
-    surface = AppColors.Base.base950,
-    onSurface = AppColors.Base.base0,
-    surfaceVariant = AppColors.Neutral.n950,
-    onSurfaceVariant = AppColors.Neutral.n300,
-    outline = AppColors.Neutral.n700,
-    outlineVariant = AppColors.Neutral.n950,
+    primary = AppColors.Brand.accent,
+    onPrimary = AppColors.Brand.onAccent,
+    primaryContainer = AppColors.Dark.surface3,
+    onPrimaryContainer = AppColors.Dark.text1,
+    secondary = AppColors.Brand.gradientEnd,
+    onSecondary = AppColors.Dark.text1,
+    background = AppColors.Dark.bg,
+    onBackground = AppColors.Dark.text1,
+    surface = AppColors.Dark.surface,
+    onSurface = AppColors.Dark.text1,
+    surfaceVariant = AppColors.Dark.surface2,
+    onSurfaceVariant = AppColors.Dark.text2,
+    // Sheet/dialog/menu của Material đọc các surfaceContainer* — map hết để không rơi về màu mặc định.
+    surfaceContainerLowest = AppColors.Dark.bg,
+    surfaceContainerLow = AppColors.Dark.surface,
+    surfaceContainer = AppColors.Dark.surface,
+    surfaceContainerHigh = AppColors.Dark.surface2,
+    surfaceContainerHighest = AppColors.Dark.surface3,
+    outline = AppColors.Dark.border,
+    outlineVariant = AppColors.Dark.border,
+    error = AppColors.Status.error,
+    onError = AppColors.Dark.text1,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = AppColors.Primary.p600,
-    onPrimary = AppColors.Base.base0,
-    primaryContainer = AppColors.Primary.p100,
-    onPrimaryContainer = AppColors.Primary.p900,
-    secondary = AppColors.Neutral.n700,
-    onSecondary = AppColors.Base.base0,
-    background = AppColors.Base.base0,
-    onBackground = AppColors.Base.base950,
-    surface = AppColors.Base.base0,
-    onSurface = AppColors.Base.base950,
-    surfaceVariant = AppColors.Neutral.n100,
-    onSurfaceVariant = AppColors.Neutral.n800,
-    outline = AppColors.Neutral.n400,
-    outlineVariant = AppColors.Neutral.n200,
+    primary = AppColors.Brand.accentPress,
+    onPrimary = AppColors.Brand.onAccent,
+    primaryContainer = AppColors.Light.surface3,
+    onPrimaryContainer = AppColors.Light.text1,
+    secondary = AppColors.Brand.gradientEnd,
+    onSecondary = AppColors.Light.surface,
+    background = AppColors.Light.bg,
+    onBackground = AppColors.Light.text1,
+    surface = AppColors.Light.surface,
+    onSurface = AppColors.Light.text1,
+    surfaceVariant = AppColors.Light.surface2,
+    onSurfaceVariant = AppColors.Light.text2,
+    // Sheet/dialog/menu của Material đọc các surfaceContainer* — map hết để không rơi về màu mặc định.
+    surfaceContainerLowest = AppColors.Light.bg,
+    surfaceContainerLow = AppColors.Light.surface,
+    surfaceContainer = AppColors.Light.surface,
+    surfaceContainerHigh = AppColors.Light.surface2,
+    surfaceContainerHighest = AppColors.Light.surface3,
+    outline = AppColors.Light.border,
+    outlineVariant = AppColors.Light.border,
+    error = AppColors.Status.error,
+    onError = AppColors.Light.surface,
 )
 
 /**
- * Chủ ý KHÔNG bật dynamic color (Material You): base này dùng cho app có brand riêng,
- * màu hệ thống sẽ ghi đè brand. Project nào cần thì thêm dynamicDarkColorScheme ở đây.
+ * Chủ ý KHÔNG bật dynamic color (Material You): màu hệ thống sẽ ghi đè brand Sunset Flow.
+ * Mặc định dark, không theo hệ thống: design chọn sẵn Dark ở Settings và không có "Match system".
+ * Light dùng bộ token tạm (xem [AppColors.Light]); lựa chọn Dark/Light của user nối vào ở Phase 6.
  */
 @Composable
 fun AppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val extendedColors = if (darkTheme) DarkExtendedColors else LightExtendedColors
     val view = LocalView.current
 
     if (!view.isInEditMode) {
@@ -73,9 +90,9 @@ fun AppTheme(
     }
 
     CompositionLocalProvider(
-        LocalAppShape provides DefaultAppShape,
-        LocalAppDimension provides DefaultAppDimension,
-        LocalAppComponentTokens provides defaultComponentTokens
+        LocalAppShape provides AppShape(),
+        LocalAppDimension provides AppDimension(),
+        LocalAppExtendedColors provides extendedColors,
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
@@ -91,6 +108,11 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
 }
 
 object AppTheme {
+    val colors: AppExtendedColors
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalAppExtendedColors.current
+
     val shapes: AppShape
         @Composable
         @ReadOnlyComposable
@@ -100,9 +122,4 @@ object AppTheme {
         @Composable
         @ReadOnlyComposable
         get() = LocalAppDimension.current
-
-    val tokens: AppComponentTokens
-        @Composable
-        @ReadOnlyComposable
-        get() = LocalAppComponentTokens.current
 }

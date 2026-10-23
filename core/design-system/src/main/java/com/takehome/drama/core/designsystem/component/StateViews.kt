@@ -66,7 +66,7 @@ private fun MessageState(
     ) {
         Text(
             text = message,
-            style = AppTypography.bodyRegular,
+            style = AppTypography.body,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
         )
