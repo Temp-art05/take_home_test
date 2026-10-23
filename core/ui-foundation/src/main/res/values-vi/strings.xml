@@ -1,0 +1,7 @@
+<resources>
+    <string name="error_network">Không có kết nối mạng. Kiểm tra lại đường truyền rồi thử lại.</string>
+    <string name="error_timeout">Yêu cầu quá thời gian chờ. Vui lòng thử lại.</string>
+    <string name="error_server">Có lỗi phía máy chủ. Vui lòng thử lại sau.</string>
+    <string name="error_unauthorized">Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</string>
+    <string name="error_unexpected">Đã có lỗi xảy ra. Vui lòng thử lại.</string>
+</resources>

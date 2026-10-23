@@ -1,0 +1,18 @@
+<resources>
+    <string name="tab_home">Trang chủ</string>
+    <string name="tab_feature">Tính năng</string>
+    <string name="tab_profile">Cá nhân</string>
+    <string name="main_feature_loaded">Đã tải %1$d lần</string>
+    <string name="main_feature_refresh">Làm mới</string>
+    <string name="main_profile_guest">Khách</string>
+    <string name="main_profile_open_settings">Mở Cài đặt</string>
+    <string name="title_settings">Cài đặt</string>
+    <string name="settings_language">Ngôn ngữ</string>
+    <string name="language_system">Theo hệ thống</string>
+    <string name="home_retry">Thử lại</string>
+    <string name="home_load_more">Tải thêm</string>
+    <string name="home_add_bookmark">Lưu bài</string>
+    <string name="home_remove_bookmark">Bỏ lưu bài</string>
+    <string name="home_bookmarked">Đã lưu bài</string>
+    <string name="home_unbookmarked">Đã bỏ lưu bài</string>
+</resources>

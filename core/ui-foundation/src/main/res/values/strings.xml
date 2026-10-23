@@ -1,0 +1,7 @@
+<resources>
+    <string name="error_network">No internet connection. Please check your network and try again.</string>
+    <string name="error_timeout">The request took too long. Please try again.</string>
+    <string name="error_server">Something went wrong on our side. Please try again later.</string>
+    <string name="error_unauthorized">Your session has expired. Please sign in again.</string>
+    <string name="error_unexpected">Something went wrong. Please try again.</string>
+</resources>

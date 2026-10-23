@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Danh sách ngôn ngữ app hỗ trợ. Từ API 33 hệ thống đọc file này để hiện app trong
+  Settings > System > Languages (per-app language). Thêm locale mới phải khai báo ở đây,
+  nếu không picker sẽ không thấy.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="vi" />
+</locale-config>

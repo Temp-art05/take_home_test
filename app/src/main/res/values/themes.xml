@@ -1,0 +1,8 @@
+<resources>
+    <!--
+      XML theme for the Activity window only. All in-app styling lives in Compose
+      (:designsystem AppTheme). DayNight so the window background follows the system
+      theme before the first Compose frame.
+    -->
+    <style name="Theme.BaseApp" parent="Theme.AppCompat.DayNight.NoActionBar" />
+</resources>
