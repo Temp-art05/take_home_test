@@ -25,9 +25,17 @@ data class ShowDetailViewState(
     @StringRes val episodesErrorRes: Int? = null,
     val cells: List<EpisodeCell> = emptyList(),
     val ranges: List<EpisodeRange> = emptyList(),
+    /** Tab khoảng 20 tập đang xem; lưới chỉ hiện các tập của tab này. Mặc định tab chứa tập Continue. */
+    val selectedRange: EpisodeRange? = null,
+    /** Số tập đã xem (cho "44 eps · 7 watched"). */
+    val watchedCount: Int = 0,
     val continueCta: ContinueCta? = null,
     val isSaved: Boolean = false,
-) : ViewState
+) : ViewState {
+    /** Ô của tab đang chọn; chưa có tab (≤ 20 tập) thì cả lưới. */
+    val visibleCells: List<EpisodeCell>
+        get() = selectedRange?.let { cells.subList(it.start.coerceAtMost(cells.size), it.endExclusive.coerceAtMost(cells.size)) } ?: cells
+}
 
 /** Nút "Continue Ep. N" / "Play Ep. N". */
 data class ContinueCta(
@@ -59,5 +67,4 @@ sealed interface ShowDetailSingleEvent : SingleEvent {
     data class ShowToast(@StringRes val messageRes: Int, val formatArg: Int?, val success: Boolean) : ShowDetailSingleEvent
 
     /** [position] là vị trí ô trong lưới. */
-    data class ScrollToEpisode(val position: Int) : ShowDetailSingleEvent
 }

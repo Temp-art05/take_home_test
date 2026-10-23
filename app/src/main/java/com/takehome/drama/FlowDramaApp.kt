@@ -10,7 +10,9 @@ import com.takehome.drama.core.analytics.analyticsModule
 import com.takehome.drama.core.analytics.remoteconfig.RemoteConfigSource
 import com.takehome.drama.core.analytics.remoteconfig.remoteConfigModule
 import com.takehome.drama.core.designsystem.component.appImageLoader
+import com.takehome.drama.core.media.DeviceTier
 import com.takehome.drama.core.media.mediaModule
+import com.takehome.drama.core.media.prepareMediaCache
 import com.takehome.drama.core.navigation.core.skeletonModule
 import com.takehome.drama.core.utils.notification.NotificationHelper
 import com.takehome.drama.data.di.dataModule
@@ -21,8 +23,10 @@ import com.takehome.drama.feature.main.di.mainModule
 import com.takehome.drama.feature.watch.di.watchModule
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
+import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -52,8 +56,8 @@ class FlowDramaApp : Application(), SingletonImageLoader.Factory {
                 analyticsModule(isDebug = BuildConfig.IS_DEBUG),
                 remoteConfigModule,
                 dataModule,
-                // Dev: `adb shell run-as com.takehome.drama touch files/force_low_tier` để ép chính sách máy yếu.
-                mediaModule(forceLowTier = { BuildConfig.IS_DEV_FLAVOR && File(filesDir, "force_low_tier").exists() }),
+                // Dev: `adb shell run-as com.takehome.drama touch files/force_low_tier` (hoặc force_normal_tier) để ép mức máy.
+                mediaModule(tierOverride = ::devTierOverride),
                 skeletonModule,
                 mainModule,
                 watchModule,
@@ -67,5 +71,14 @@ class FlowDramaApp : Application(), SingletonImageLoader.Factory {
 
         // Không có bước này thì remote config không bao giờ được fetch.
         get<CoroutineScope>(AppScope).launch { get<RemoteConfigSource>().fetchAndSync() }
+        // Cache video theo phiên: xoá bản của lần mở trước ngay khi app lên.
+        get<CoroutineScope>(AppScope).launch(Dispatchers.IO) { getKoin().prepareMediaCache() }
+    }
+
+    private fun devTierOverride(): DeviceTier? = when {
+        !BuildConfig.IS_DEV_FLAVOR -> null
+        File(filesDir, "force_low_tier").exists() -> DeviceTier.LOW
+        File(filesDir, "force_normal_tier").exists() -> DeviceTier.NORMAL
+        else -> null
     }
 }

@@ -10,15 +10,14 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
-import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
-import androidx.media3.exoplayer.source.preload.DefaultPreloadManager
-import androidx.media3.exoplayer.source.preload.DefaultPreloadManager.PreloadStatus
-import androidx.media3.exoplayer.source.preload.TargetPreloadStatusControl
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter
+import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,12 +33,18 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 /**
- * [EpisodeFeedPlayer] trên **một** ExoPlayer + `DefaultPreloadManager` dựng từ cùng một builder
- * (chung load control, bandwidth meter, renderer, nguồn qua cache đĩa). Một decoder duy nhất → hợp
- * máy yếu; preload chỉ tốn RAM buffer. Tạo và gọi trên main thread.
+ * [EpisodeFeedPlayer] trên một **pool** ExoPlayer (`MediaProfile.poolSize`: 3 máy thường, 2 máy yếu)
+ * — kiểu TikTok. Tập hiện tại phát; mỗi tập lân cận có player riêng đã `prepare` và đứng **pause** ở
+ * giây 0, nên trang lân cận đã có khung hình thật và vài giây đầu trong buffer: vuốt tới chỉ cần `play()`.
+ * Tập vừa rời được tua về 0 (sau khi trang trượt khuất), nên vuốt ngược cũng tức thì.
  *
- * Kiểu TikTok: tập hiện tại được ưu tiên băng thông — preload chỉ chạy (`invalidate`) sau khi tập
- * hiện tại lên khung đầu và không đang buffer.
+ * - Player giữ một tập còn trong cửa sổ thì không bị động tới khi vuốt ([assignSlots]); player rời
+ *   cửa sổ được tái dùng cho tập mới.
+ * - Player lân cận câm, không giữ audio focus, tải tối đa vài giây ([RoleLoadControl]); chỉ prepare +
+ *   tải sau khi tập hiện tại lên hình và trang đứng yên một lúc (lướt nhanh không tốn decoder).
+ * - Mọi player đọc qua cùng cache đĩa (`CacheDataSource`) và chung bandwidth meter.
+ *
+ * Tạo và gọi trên main thread.
  */
 @OptIn(UnstableApi::class)
 class ExoEpisodeFeedPlayer(
@@ -48,224 +53,329 @@ class ExoEpisodeFeedPlayer(
     dataSourceFactory: DataSource.Factory,
 ) : EpisodeFeedPlayer {
 
+    private val appContext = context.applicationContext
+    private val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
+    private val renderersFactory = DefaultRenderersFactory(appContext)
+        // Decoder đầu tiên khởi tạo lỗi (vd. hết decoder phần cứng) thì thử decoder kế thay vì dừng phát.
+        .setEnableDecoderFallback(true)
+        .setMediaCodecSelector(EmulatorLastCodecSelector)
+    private val bandwidthMeter = DefaultBandwidthMeter.getSingletonInstance(appContext)
+    private val audioAttributes = AudioAttributes.Builder()
+        .setUsage(C.USAGE_MEDIA)
+        .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+        .build()
+
+    private val pool: List<Slot> = List(profile.poolSize) { Slot(it) }
+
     private var items: List<FeedItem> = emptyList()
     private var current = 0
+    private var currentSlot: Slot? = null
     private var preloadActive = true
-
-    /** Vị trí → MediaItem đang nằm trong preload manager. */
-    private val managed = mutableMapOf<Int, MediaItem>()
-
-    /** Mục đã ra khỏi manager nhưng player còn đang dùng nguồn của nó — gỡ sau khi player đổi nguồn. */
-    private val retired = mutableListOf<MediaItem>()
-    private var playerItem: MediaItem? = null
+    private var speed = 1f
     private var firstFrameRequestedAt = 0L
-    private var lastSetFromPreload = false
-
-    private val statusControl = TargetPreloadStatusControl<Int, PreloadStatus> { position ->
-        val item = items.getOrNull(position)
-        when (val target = preloadTarget(position - current, isLocked = item?.url == null, profile = profile)) {
-            is PreloadTarget.Range -> PreloadStatus.specifiedRangeLoaded(target.durationMs)
-            PreloadTarget.TracksSelected -> PreloadStatus.PRELOAD_STATUS_TRACKS_SELECTED
-            null -> PreloadStatus.PRELOAD_STATUS_NOT_PRELOADED
-        }
-    }
-
-    private val preloadBuilder = DefaultPreloadManager.Builder(context.applicationContext, statusControl)
-        .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory))
-        .setLoadControl(
-            DefaultLoadControl.Builder()
-                .setBufferDurationsMs(
-                    profile.minBufferMs,
-                    profile.maxBufferMs,
-                    profile.bufferForPlaybackMs,
-                    minOf(REBUFFER_MS, profile.minBufferMs),
-                )
-                .apply { profile.targetBufferBytes?.let(::setTargetBufferBytes) }
-                .build(),
-        )
-        .setRenderersFactory(
-            DefaultRenderersFactory(context.applicationContext)
-                // Decoder đầu tiên khởi tạo lỗi thì thử decoder kế thay vì dừng phát.
-                .setEnableDecoderFallback(true)
-                .setMediaCodecSelector(EmulatorLastCodecSelector),
-        )
-        .setTrackSelectorFactory { trackContext ->
-            DefaultTrackSelector(trackContext).apply {
-                profile.maxVideoSize?.let { (width, height) ->
-                    setParameters(buildUponParameters().setMaxVideoSize(width, height))
-                }
-            }
-        }
-
-    internal val exoPlayer: ExoPlayer = preloadBuilder.buildExoPlayer(
-        ExoPlayer.Builder(context.applicationContext)
-            .setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(C.USAGE_MEDIA)
-                    .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
-                    .build(),
-                /* handleAudioFocus = */ true,
-            )
-            .setHandleAudioBecomingNoisy(true),
-    )
-    private val preloadManager: DefaultPreloadManager = preloadBuilder.build()
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var ticker: Job? = null
+    private var warmUpJob: Job? = null
 
     private val _state = MutableStateFlow(PlaybackState())
     override val state: StateFlow<PlaybackState> = _state.asStateFlow()
 
-    private val _firstFrameRendered = MutableStateFlow(false)
-    override val firstFrameRendered: StateFlow<Boolean> = _firstFrameRendered.asStateFlow()
+    private val _slots = MutableStateFlow<Map<Int, VideoSlot>>(emptyMap())
+    override val slots: StateFlow<Map<Int, VideoSlot>> = _slots.asStateFlow()
 
-    private val listener = object : Player.Listener {
-        override fun onEvents(player: Player, events: Player.Events) {
-            publish()
-            if (player.isPlaying) startTicker() else stopTicker()
-            if (events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED)) maybeInvalidate()
+    /** Một player của pool. [position]/[url] = tập đang giữ; null = rảnh. */
+    internal inner class Slot(val id: Int) : VideoSlot {
+        private val loadControl = RoleLoadControl(profile)
+        val exoPlayer: ExoPlayer = ExoPlayer.Builder(appContext)
+            .setMediaSourceFactory(mediaSourceFactory)
+            .setRenderersFactory(renderersFactory)
+            .setLoadControl(loadControl)
+            .setBandwidthMeter(bandwidthMeter)
+            .setTrackSelector(
+                DefaultTrackSelector(appContext).apply {
+                    profile.maxVideoSize?.let { (width, height) ->
+                        setParameters(buildUponParameters().setMaxVideoSize(width, height))
+                    }
+                },
+            )
+            .setAudioAttributes(audioAttributes, /* handleAudioFocus = */ false)
+            .build()
+
+        var position: Int? = null
+        var url: String? = null
+
+        /** Đã `prepare` (decoder + khung đầu). Lân cận chỉ prepare khi trang hiện tại đã đứng yên. */
+        private var prepared = false
+
+        private val _firstFrameRendered = MutableStateFlow(false)
+        override val firstFrameRendered: StateFlow<Boolean> = _firstFrameRendered.asStateFlow()
+
+        private val listener = object : Player.Listener {
+            override fun onEvents(player: Player, events: Player.Events) {
+                if (this@Slot !== currentSlot) return
+                publish()
+                if (player.isPlaying) startTicker() else stopTicker()
+            }
+
+            override fun onRenderedFirstFrame() {
+                _firstFrameRendered.value = true
+                if (this@Slot === currentSlot) {
+                    // Chỉ đo lần đầu sau mỗi lần đổi tập; tua / gắn lại surface cũng bắn lại callback này.
+                    if (firstFrameRequestedAt > 0) {
+                        Timber.d("FirstFrame %d ms (slot %d, from pool=false)", SystemClock.elapsedRealtime() - firstFrameRequestedAt, id)
+                        firstFrameRequestedAt = 0
+                    }
+                    allowNeighborLoading()
+                }
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                Timber.w(error, "Playback error %s (slot %d, position %s)", error.errorCodeName, id, position)
+                if (this@Slot === currentSlot) {
+                    _state.update { it.copy(error = PlaybackError(error.errorCodeName)) }
+                } else {
+                    // Lân cận lỗi (vd. hết decoder): bỏ, trang đó hiện poster; tập đang phát không sao.
+                    free()
+                }
+            }
         }
 
-        override fun onRenderedFirstFrame() {
-            Timber.d("FirstFrame %d ms (preloaded=%b)", SystemClock.elapsedRealtime() - firstFrameRequestedAt, lastSetFromPreload)
-            _firstFrameRendered.value = true
-            maybeInvalidate()
+        /** Chẩn đoán tiếng rè / giật: underrun = audio track hết dữ liệu (CPU/decoder không theo kịp). */
+        private val diagnostics = object : AnalyticsListener {
+            override fun onAudioUnderrun(
+                eventTime: AnalyticsListener.EventTime,
+                bufferSize: Int,
+                bufferSizeMs: Long,
+                elapsedSinceLastFeedMs: Long,
+            ) {
+                Timber.w("AudioUnderrun slot %d: buffer %d ms, %d ms since last feed", id, bufferSizeMs, elapsedSinceLastFeedMs)
+            }
+
+            override fun onDroppedVideoFrames(eventTime: AnalyticsListener.EventTime, droppedFrames: Int, elapsedMs: Long) {
+                Timber.d("DroppedFrames slot %d: %d in %d ms", id, droppedFrames, elapsedMs)
+            }
         }
 
-        override fun onPlayerError(error: PlaybackException) {
-            Timber.w(error, "Playback error %s", error.errorCodeName)
-            _state.update { it.copy(error = PlaybackError(error.errorCodeName)) }
+        init {
+            exoPlayer.addListener(listener)
+            exoPlayer.addAnalyticsListener(diagnostics)
         }
-    }
 
-    init {
-        exoPlayer.addListener(listener)
+        fun load(position: Int, item: FeedItem, url: String, startPositionMs: Long, prepareNow: Boolean) {
+            Timber.d("Slot %d load position %d at %d ms (prepare now=%b)", id, position, startPositionMs, prepareNow)
+            this.position = position
+            this.url = url
+            _firstFrameRendered.value = false
+            prepared = false
+            exoPlayer.setMediaItem(MediaItem.Builder().setMediaId(item.id).setUri(url).build(), startPositionMs)
+            exoPlayer.playWhenReady = false
+            if (prepareNow) ensurePrepared()
+        }
+
+        fun ensurePrepared() {
+            if (prepared || position == null) return
+            prepared = true
+            exoPlayer.prepare()
+        }
+
+        /** Vai hiện tại: có tiếng, giữ audio focus, tải như thường. */
+        fun becomeCurrent() {
+            loadControl.neighborCapMs = null
+            exoPlayer.volume = 1f
+            exoPlayer.setAudioAttributes(audioAttributes, /* handleAudioFocus = */ true)
+            exoPlayer.setHandleAudioBecomingNoisy(true)
+        }
+
+        /** Vai lân cận: pause, câm; chưa tải gì tới khi [warmUp]. */
+        fun becomeNeighbor(capMs: Long) {
+            exoPlayer.playWhenReady = false
+            exoPlayer.volume = 0f
+            exoPlayer.setAudioAttributes(audioAttributes, /* handleAudioFocus = */ false)
+            exoPlayer.setHandleAudioBecomingNoisy(false)
+            loadControl.neighborCapMs = capMs
+            loadControl.neighborLoadingAllowed = false
+        }
+
+        /** Lân cận bắt đầu: prepare (khung đầu) + tải vài giây đầu. */
+        fun warmUp() {
+            loadControl.neighborLoadingAllowed = true
+            ensurePrepared()
+        }
+
+        fun free() {
+            Timber.d("Slot %d free position %s", id, position)
+            position = null
+            url = null
+            _firstFrameRendered.value = false
+            prepared = false
+            exoPlayer.stop()
+            exoPlayer.clearMediaItems()
+            publishSlots()
+        }
+
+        fun release() {
+            exoPlayer.removeListener(listener)
+            exoPlayer.release()
+        }
     }
 
     override fun setPlaylist(items: List<FeedItem>) {
         this.items = items
-        // URL đổi (quality/ngôn ngữ) → bản preload cũ vô dụng.
-        managed.entries.removeAll { (position, mediaItem) ->
-            val changed = items.getOrNull(position)?.url != mediaItem.localConfiguration?.uri?.toString()
-            if (changed) retire(mediaItem)
-            changed
+        // URL đổi (quality/ngôn ngữ) → bản đã nạp vô dụng. Tập hiện tại nạp lại ở setCurrent kế tiếp.
+        pool.forEach { slot ->
+            val position = slot.position ?: return@forEach
+            if (items.getOrNull(position)?.url != slot.url) slot.free()
         }
-        syncWindow()
+        if (currentSlot?.position == current) reassign()
     }
 
     override fun setCurrent(position: Int, startPositionMs: Long, playWhenReady: Boolean) {
         val item = items.getOrNull(position) ?: return
+        val previous = currentSlot
+        previous?.exoPlayer?.playWhenReady = false
+        warmUpJob?.cancel()
         current = position
-        _firstFrameRendered.value = false
-        preloadManager.setCurrentPlayingIndex(position)
-        val url = item.url
-        if (url == null) {
-            exoPlayer.stop()
-            exoPlayer.clearMediaItems()
-            playerItem = null
+        firstFrameRequestedAt = SystemClock.elapsedRealtime()
+        stopTicker()
+        if (item.url == null) {
+            currentSlot = null
+            reassign()
             _state.value = PlaybackState()
-        } else {
-            val mediaItem = managed[position] ?: mediaItemOf(item, url)
-            val preloaded = preloadManager.getMediaSource(mediaItem)
-            lastSetFromPreload = preloaded != null
-            _state.value = PlaybackState(positionMs = startPositionMs, playWhenReady = playWhenReady, isBuffering = true)
-            if (preloaded != null) {
-                exoPlayer.setMediaSource(preloaded, startPositionMs)
-            } else {
-                exoPlayer.setMediaItem(mediaItem, startPositionMs)
-            }
-            exoPlayer.playWhenReady = playWhenReady
-            exoPlayer.prepare()
-            firstFrameRequestedAt = SystemClock.elapsedRealtime()
-            playerItem = mediaItem
+            return
         }
-        val stale = retired.filter { it != playerItem }
-        stale.forEach(preloadManager::remove)
-        retired.removeAll(stale)
-        syncWindow()
+        reassign(currentStartMs = startPositionMs)
+        val slot = pool.first { it.position == position }
+        currentSlot = slot
+        if (previous != null && previous !== slot && previous.position != null) resetWhenOffscreen(previous)
+        // Player lân cận đứng ở vị trí resume cũ; vị trí mới lệch nhiều (vd. đổi quality) thì tua.
+        if (abs(slot.exoPlayer.currentPosition - startPositionMs) > SEEK_TOLERANCE_MS) slot.exoPlayer.seekTo(startPositionMs)
+        slot.exoPlayer.setPlaybackSpeed(speed)
+        slot.becomeCurrent()
+        // Lướt nhanh tới trang lân cận chưa kịp warm-up: prepare ngay.
+        slot.ensurePrepared()
+        slot.exoPlayer.playWhenReady = playWhenReady
+        val fromPool = slot.firstFrameRendered.value
+        if (fromPool) {
+            Timber.d("FirstFrame 0 ms (slot %d, from pool=true)", slot.id)
+            firstFrameRequestedAt = 0
+            allowNeighborLoading()
+        }
+        publish()
     }
 
     override fun setPreloadActive(active: Boolean) {
         if (preloadActive == active) return
         preloadActive = active
-        syncWindow()
-        maybeInvalidate()
+        reassign()
     }
 
     override fun play() {
+        val player = currentSlot?.exoPlayer ?: return
         // Hết tập rồi bấm play = xem lại từ đầu, như mọi player.
-        if (exoPlayer.playbackState == Player.STATE_ENDED) exoPlayer.seekTo(0)
-        exoPlayer.play()
+        if (player.playbackState == Player.STATE_ENDED) player.seekTo(0)
+        player.play()
     }
 
-    override fun pause() = exoPlayer.pause()
+    override fun pause() {
+        currentSlot?.exoPlayer?.pause()
+    }
 
     override fun seekTo(positionMs: Long) {
-        exoPlayer.seekTo(positionMs)
+        currentSlot?.exoPlayer?.seekTo(positionMs)
         publish()
     }
 
-    override fun setSpeed(speed: Float) = exoPlayer.setPlaybackSpeed(speed)
+    override fun setSpeed(speed: Float) {
+        this.speed = speed
+        currentSlot?.exoPlayer?.setPlaybackSpeed(speed)
+    }
 
-    override fun currentPositionMs(): Long = exoPlayer.currentPosition
+    override fun currentPositionMs(): Long = currentSlot?.exoPlayer?.currentPosition ?: 0
 
     override fun release() {
         scope.cancel()
-        exoPlayer.removeListener(listener)
-        // Manager trước: nó giữ nguồn mà player có thể đang dùng.
-        preloadManager.release()
-        exoPlayer.release()
+        pool.forEach(Slot::release)
+        currentSlot = null
+        _slots.value = emptyMap()
     }
 
     /**
-     * Đưa preload manager về đúng cửa sổ quanh [current]. Tập hiện tại luôn nằm trong manager khi
-     * player đang dùng nguồn của nó (gỡ ra = nhả nguồn player đang phát).
+     * Đưa pool về đúng cửa sổ quanh [current]: giữ player đang giữ tập vẫn cần, nạp tập mới vào player
+     * rảnh, nhả player rời cửa sổ. Ở nền ([preloadActive] false) chỉ giữ tập hiện tại.
      */
-    private fun syncWindow() {
-        val window = if (preloadActive) {
-            preloadWindow(current, items.size, profile) { items[it].url != null }
+    private fun reassign(currentStartMs: Long? = null) {
+        val playable: (Int) -> Boolean = { items[it].url != null }
+        val wanted = if (preloadActive) {
+            poolPositions(current, items.size, profile, playable)
         } else {
-            emptySet()
+            listOf(current).filter { it in items.indices && playable(it) }
         }
-        val wanted = window + listOfNotNull(current.takeIf { items.getOrNull(it)?.url != null })
-        val diff = PreloadWindowDiff.between(managed.keys.toSet(), wanted)
-        diff.toRemove.forEach { position -> managed.remove(position)?.let(::retire) }
-        diff.toAdd.forEach { position ->
-            val item = items[position]
-            val mediaItem = mediaItemOf(item, item.url ?: return@forEach)
-            managed[position] = mediaItem
-            preloadManager.add(mediaItem, position)
+        val assignment = assignSlots(pool.map { it.position }, wanted)
+        // Tập hiện tại khoá thì không có gì để nhường băng thông.
+        val currentReady = items.getOrNull(current)?.url == null ||
+            pool.firstOrNull { it.position == current }?.firstFrameRendered?.value == true
+        pool.forEachIndexed { index, slot ->
+            val target = assignment[index]
+            if (target == null) {
+                if (slot.position != null) slot.free()
+                return@forEachIndexed
+            }
+            if (slot.position != target) {
+                val item = items[target]
+                val start = if (target == current) currentStartMs ?: 0 else 0
+                slot.load(target, item, item.url ?: return@forEachIndexed, start, prepareNow = target == current)
+            }
+            if (target != current) slot.becomeNeighbor(profile.neighborBufferMs[target - current] ?: 0)
+        }
+        publishSlots()
+        if (currentReady) allowNeighborLoading()
+    }
+
+    /**
+     * Tập vừa rời (giờ là lân cận) về giây 0 — khung đầu + buffer đầu sẵn cho lần vuốt ngược. Đợi trang
+     * trượt khuất rồi mới tua: tua ngay thì trang đang trượt đi nhảy sang cảnh đầu tập (flash), nhất là
+     * khi tự sang tập / chọn tập mà pager còn đang cuộn.
+     */
+    private fun resetWhenOffscreen(slot: Slot) {
+        val position = slot.position
+        scope.launch {
+            delay(RESET_PREVIOUS_DELAY_MS)
+            if (slot !== currentSlot && slot.position == position) slot.exoPlayer.seekTo(0)
         }
     }
 
-    private fun retire(mediaItem: MediaItem) {
-        if (mediaItem == playerItem) retired += mediaItem else preloadManager.remove(mediaItem)
+    /**
+     * Tập hiện tại đã lên hình → sau [NEIGHBOR_WARMUP_DELAY_MS] player lân cận mới prepare + tải vài giây.
+     * Lướt nhanh qua nhiều trang thì mỗi lần đổi tập huỷ lượt warm-up trước: không tốn decoder/CPU cho
+     * trang chỉ lướt qua (đo trên emulator: lướt 10 trang liên tục đẩy decoder + app lên ~150% CPU).
+     */
+    private fun allowNeighborLoading() {
+        warmUpJob?.cancel()
+        warmUpJob = scope.launch {
+            delay(NEIGHBOR_WARMUP_DELAY_MS)
+            pool.filter { it !== currentSlot && it.position != null }.forEach(Slot::warmUp)
+        }
     }
 
-    /** Preload chỉ chạy khi tập hiện tại đã lên hình và không buffer — không giành băng thông. */
-    private fun maybeInvalidate() {
-        if (!preloadActive) return
-        val currentReady = playerItem == null ||
-            (_firstFrameRendered.value && exoPlayer.playbackState != Player.STATE_BUFFERING)
-        if (currentReady) preloadManager.invalidate()
+    private fun publishSlots() {
+        _slots.value = pool.mapNotNull { slot -> slot.position?.let { it to slot } }.toMap()
     }
-
-    private fun mediaItemOf(item: FeedItem, url: String): MediaItem =
-        MediaItem.Builder().setMediaId(item.id).setUri(url).build()
 
     private fun publish() {
-        val duration = exoPlayer.duration.takeIf { it != C.TIME_UNSET && it > 0 } ?: 0
-        _state.update { current ->
-            current.copy(
-                isPlaying = exoPlayer.isPlaying,
-                playWhenReady = exoPlayer.playWhenReady,
-                isBuffering = exoPlayer.playbackState == Player.STATE_BUFFERING,
-                positionMs = exoPlayer.currentPosition,
+        val player = currentSlot?.exoPlayer ?: return
+        val duration = player.duration.takeIf { it != C.TIME_UNSET && it > 0 } ?: 0
+        _state.update { state ->
+            state.copy(
+                isPlaying = player.isPlaying,
+                playWhenReady = player.playWhenReady,
+                isBuffering = player.playbackState == Player.STATE_BUFFERING,
+                positionMs = player.currentPosition,
                 durationMs = duration,
-                bufferedMs = exoPlayer.bufferedPosition,
-                ended = exoPlayer.playbackState == Player.STATE_ENDED,
+                bufferedMs = player.bufferedPosition,
+                ended = player.playbackState == Player.STATE_ENDED,
                 // Chuẩn bị lại (đổi tập / retry) thì xoá lỗi cũ.
-                error = if (exoPlayer.playerError == null) null else current.error,
+                error = if (player.playerError == null) null else state.error,
             )
         }
     }
@@ -288,7 +398,13 @@ class ExoEpisodeFeedPlayer(
 
     private companion object {
         const val TICK_MS = 500L
-        const val REBUFFER_MS = 1_500
+        const val SEEK_TOLERANCE_MS = 1_000L
+
+        /** Trang phải đứng yên chừng này mới chuẩn bị trang lân cận. */
+        const val NEIGHBOR_WARMUP_DELAY_MS = 300L
+
+        /** Dài hơn animation trượt trang (~650 ms). */
+        const val RESET_PREVIOUS_DELAY_MS = 800L
 
         /**
          * Decoder `c2.goldfish.*` của Android Emulator lỗi giữa chừng với H.264 1080×1920 của fixtures

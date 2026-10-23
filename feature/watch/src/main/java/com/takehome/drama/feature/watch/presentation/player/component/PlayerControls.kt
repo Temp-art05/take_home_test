@@ -2,6 +2,10 @@ package com.takehome.drama.feature.watch.presentation.player.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import com.takehome.drama.core.designsystem.ext.applyIf
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -187,7 +191,10 @@ private fun RailItem(
     }
 }
 
-/** `.pbot`: "Ep. N" + mô tả 2 dòng + more. */
+/**
+ * `.pbot`: "Ep. N" + mô tả 2 dòng + more. "more" chỉ hiện khi mô tả thật sự bị cắt; mở rộng thì hiện
+ * **đủ** văn bản, cuộn trong khung cao tối đa [ExpandedDescriptionMaxHeight].
+ */
 @Composable
 internal fun PlayerInfo(
     episodeNumber: Int,
@@ -197,6 +204,7 @@ internal fun PlayerInfo(
     modifier: Modifier = Modifier,
 ) {
     val media = AppTheme.colors.media
+    var truncated by remember(description) { mutableStateOf(false) }
     Column(modifier = modifier) {
         // Tên tập rỗng ở cả 299 tập → chỉ hiện số tập.
         Text(
@@ -209,21 +217,28 @@ internal fun PlayerInfo(
                 text = description,
                 style = shadowed(AppTypography.label.copy(fontWeight = FontWeight.Normal, lineHeight = 19.5.sp)),
                 color = media.textBody,
-                maxLines = if (expanded) 6 else 2,
-                overflow = TextOverflow.Ellipsis,
+                maxLines = if (expanded) Int.MAX_VALUE else COLLAPSED_LINES,
+                overflow = if (expanded) TextOverflow.Clip else TextOverflow.Ellipsis,
+                onTextLayout = { if (!expanded) truncated = it.hasVisualOverflow },
                 modifier = Modifier
                     .padding(top = 6.dp)
+                    .applyIf(expanded) { heightIn(max = ExpandedDescriptionMaxHeight).verticalScroll(rememberScrollState()) }
                     .tapToToggle(onToggle),
             )
-            Text(
-                text = stringResource(if (expanded) R.string.watch_less_lower else R.string.watch_more_lower),
-                style = AppTypography.label,
-                color = media.textFaint,
-                modifier = Modifier.tapToToggle(onToggle),
-            )
+            if (truncated || expanded) {
+                Text(
+                    text = stringResource(if (expanded) R.string.watch_less_lower else R.string.watch_more_lower),
+                    style = AppTypography.label,
+                    color = media.textFaint,
+                    modifier = Modifier.tapToToggle(onToggle),
+                )
+            }
         }
     }
 }
+
+private const val COLLAPSED_LINES = 2
+private val ExpandedDescriptionMaxHeight = 220.dp
 
 private fun Modifier.tapToToggle(onClick: () -> Unit): Modifier =
     pointerInput(onClick) { detectTapGestures { onClick() } }
@@ -240,8 +255,11 @@ internal fun PlayerTrack(
     dimmed: Boolean,
     onSeek: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    /** false = track tĩnh của trang lân cận (chỉ hiện chỗ đã xem tới). */
+    seekable: Boolean = true,
 ) {
     val media = AppTheme.colors.media
+    val canSeek = seekable && durationMs > 0
     var dragFraction by remember { mutableStateOf<Float?>(null) }
     val positionMs = positionMs()
     val fraction = dragFraction
@@ -256,17 +274,19 @@ internal fun PlayerTrack(
                 .semantics {
                     contentDescription = seekDescription
                     progressBarRangeInfo = ProgressBarRangeInfo(fraction, 0f..1f)
-                    setProgress { target ->
-                        if (durationMs > 0) onSeek((target.coerceIn(0f, 1f) * durationMs).toLong())
-                        durationMs > 0
+                    if (canSeek) {
+                        setProgress { target ->
+                            onSeek((target.coerceIn(0f, 1f) * durationMs).toLong())
+                            true
+                        }
                     }
                 }
-                .pointerInput(durationMs) {
-                    if (durationMs <= 0) return@pointerInput
+                .pointerInput(durationMs, canSeek) {
+                    if (!canSeek) return@pointerInput
                     detectTapGestures { offset -> onSeek((offset.x / size.width * durationMs).toLong()) }
                 }
-                .pointerInput(durationMs) {
-                    if (durationMs <= 0) return@pointerInput
+                .pointerInput(durationMs, canSeek) {
+                    if (!canSeek) return@pointerInput
                     detectHorizontalDragGestures(
                         onDragStart = { offset -> dragFraction = (offset.x / size.width).coerceIn(0f, 1f) },
                         onDragEnd = {

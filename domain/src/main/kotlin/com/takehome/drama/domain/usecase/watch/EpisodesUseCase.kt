@@ -47,26 +47,26 @@ class EpisodesUseCase(
 
     /**
      * Lưới tập. Ưu tiên **Playing > Locked > Watched > Unwatched**: tập đang phát luôn phải nổi;
-     * khoá thắng "đã xem" vì khoá là thứ user cần biết trước khi chạm. "Đã xem" = xem xong
-     * ([WatchProgress.isEpisodeCompleted]) — tập dở vẫn trắng.
+     * khoá thắng "đã xem" vì khoá là thứ user cần biết trước khi chạm. "Đã xem" =
+     * [WatchProgress.isWatched] (xong hoặc đã xem ≥ 5s) — tập chỉ lướt qua vẫn trắng.
      */
     fun grid(episodes: List<Episode>, progress: List<WatchProgress>, currentIndex: Int?): List<EpisodeCell> {
-        val completed = progress.filter { it.isEpisodeCompleted }.mapTo(HashSet()) { it.episodeIndex }
+        val watched = progress.filter { it.isWatched }.mapTo(HashSet()) { it.episodeIndex }
         return episodes.map { episode ->
             val state = when {
                 episode.index == currentIndex -> EpisodeCellState.Playing
                 !episode.isFree -> EpisodeCellState.Locked
-                episode.index in completed -> EpisodeCellState.Watched
+                episode.index in watched -> EpisodeCellState.Watched
                 else -> EpisodeCellState.Unwatched
             }
             EpisodeCell(episode.index, episode.displayNumber, state)
         }
     }
 
-    /** Số tập đã xem xong — bản ghi của tập không còn trong file không tính. */
+    /** Số ô "đã xem" ([WatchProgress.isWatched]) — bản ghi của tập không còn trong file không tính. */
     fun watchedCount(episodes: List<Episode>, progress: List<WatchProgress>): Int {
         val indexes = episodes.mapTo(HashSet()) { it.index }
-        return progress.count { it.isEpisodeCompleted && it.episodeIndex in indexes }
+        return progress.count { it.isWatched && it.episodeIndex in indexes }
     }
 
     /** Chia theo vị trí trong list (index có thể thủng lỗ), nhãn theo số hiển thị (`number` có thể nhảy cóc). */

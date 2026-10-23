@@ -206,12 +206,35 @@ class ShowDetailViewModelTest {
     }
 
     @Test
-    fun `range dropdown scrolls to the first episode of the chunk`() = runTest(mainRule.dispatcher) {
+    fun `range tabs filter the grid - first tab when nothing was watched`() = runTest(mainRule.dispatcher) {
         val viewModel = viewModel()
-        viewModel.singleEvent.test {
-            viewModel.processIntent(ShowDetailIntent.RangeSelect(viewModel.viewState.value.ranges[1]))
-            assertEquals(ShowDetailSingleEvent.ScrollToEpisode(position = 20), awaitItem())
-        }
+        val ranges = viewModel.viewState.value.ranges
+        assertEquals(ranges[0], viewModel.viewState.value.selectedRange)
+
+        viewModel.processIntent(ShowDetailIntent.RangeSelect(ranges[2]))
+        val state = viewModel.viewState.value
+        assertEquals(ranges[2], state.selectedRange)
+        assertEquals((40 until 50).toList(), state.visibleCells.map { it.index })
+    }
+
+    @Test
+    fun `default tab is the one holding the continue episode, a tab the user picked is kept`() = runTest(mainRule.dispatcher) {
+        catalogRepository.episodes = mapOf(SHOW_ID to Result.success(testEpisodes(count = 50, free = 50)))
+        progressRepository.save(progress(index = 25, positionMs = 30_000))
+        val viewModel = viewModel()
+        val ranges = viewModel.viewState.value.ranges
+        assertEquals(ranges[1], viewModel.viewState.value.selectedRange)
+
+        viewModel.processIntent(ShowDetailIntent.RangeSelect(ranges[0]))
+        progressRepository.save(progress(index = 26, positionMs = 30_000, updatedAt = 99))
+        assertEquals(ranges[0], viewModel.viewState.value.selectedRange)
+    }
+
+    @Test
+    fun `header counts episodes watched`() = runTest(mainRule.dispatcher) {
+        progressRepository.save(progress(index = 0, positionMs = 99_000))
+        progressRepository.save(progress(index = 1, positionMs = 1_000))
+        assertEquals(1, viewModel().viewState.value.watchedCount)
     }
 
     @Test

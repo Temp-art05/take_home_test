@@ -26,14 +26,28 @@ class EpisodeGridTest {
     }
 
     @Test
-    fun `completed episode is watched, a half watched one is not`() {
-        val episodes = listOf(episode(0), episode(1))
+    fun `completed or partly watched episodes are watched, a skim under 5s is not`() {
+        val episodes = listOf(episode(0), episode(1), episode(2), episode(3))
         val cells = useCase.grid(
             episodes,
-            progress = listOf(progress(0, positionMs = 99_000), progress(1, positionMs = 40_000)),
+            progress = listOf(
+                progress(0, positionMs = 99_000),
+                progress(1, positionMs = 40_000),
+                progress(2, positionMs = 5_000),
+                progress(3, positionMs = 4_999),
+            ),
             currentIndex = null,
         )
-        assertEquals(listOf(EpisodeCellState.Watched, EpisodeCellState.Unwatched), cells.map { it.state })
+        assertEquals(
+            listOf(EpisodeCellState.Watched, EpisodeCellState.Watched, EpisodeCellState.Watched, EpisodeCellState.Unwatched),
+            cells.map { it.state },
+        )
+    }
+
+    @Test
+    fun `progress saved before the duration is known still counts once past 5s`() {
+        val cells = useCase.grid(listOf(episode(0)), listOf(progress(0, positionMs = 6_000, durationMs = 0)), null)
+        assertEquals(EpisodeCellState.Watched, cells[0].state)
     }
 
     @Test
@@ -64,9 +78,9 @@ class EpisodeGridTest {
     }
 
     @Test
-    fun `watched count only counts completed episodes that are still in the file`() {
+    fun `watched count matches the watched cells and ignores episodes no longer in the file`() {
         val episodes = listOf(episode(0), episode(1), episode(2))
-        val progress = listOf(progress(0, 99_000), progress(1, 10_000), progress(9, 99_000))
-        assertEquals(1, useCase.watchedCount(episodes, progress))
+        val progress = listOf(progress(0, 99_000), progress(1, 10_000), progress(2, 1_000), progress(9, 99_000))
+        assertEquals(2, useCase.watchedCount(episodes, progress))
     }
 }

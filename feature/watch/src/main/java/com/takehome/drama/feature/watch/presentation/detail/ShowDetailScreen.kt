@@ -3,6 +3,7 @@ package com.takehome.drama.feature.watch.presentation.detail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,30 +28,27 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.SpanStyle
@@ -66,12 +64,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.takehome.drama.core.designsystem.component.AppAsyncImage
 import com.takehome.drama.core.designsystem.component.AppToastHost
+import com.takehome.drama.core.designsystem.component.ChoiceChip
 import com.takehome.drama.core.designsystem.component.ErrorState
 import com.takehome.drama.core.designsystem.component.GhostIconButton
 import com.takehome.drama.core.designsystem.component.GradientButton
 import com.takehome.drama.core.designsystem.component.LoadingState
 import com.takehome.drama.core.designsystem.component.OutlinePillButton
 import com.takehome.drama.core.designsystem.component.rememberToastState
+import com.takehome.drama.core.designsystem.ext.applyIf
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
 import com.takehome.drama.core.navigation.core.NavigationRequest
@@ -83,12 +83,9 @@ import com.takehome.drama.domain.usecase.watch.EpisodeRange
 import com.takehome.drama.feature.watch.R
 import com.takehome.drama.feature.watch.navigation.PlayerScreenProvider
 import com.takehome.drama.feature.watch.presentation.common.EpisodeGridCell
-import kotlinx.coroutines.launch
 
 private const val GRID_COLUMNS = 5
 
-/** Số item đứng trước ô tập đầu tiên trong grid (hero, stats, synopsis, CTA, header Episodes). */
-private const val HEADER_ITEMS = 5
 
 private val HeroHeight = 296.dp
 private val CellGap = 9.dp
@@ -101,7 +98,6 @@ fun ShowDetailScreen(
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     val gridState = rememberLazyGridState()
     val toastState = rememberToastState()
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     viewModel.singleEvent.CollectAsEffect { event ->
@@ -114,9 +110,6 @@ fun ShowDetailScreen(
                 text = event.formatArg?.let { context.getString(event.messageRes, it) } ?: context.getString(event.messageRes),
                 success = event.success,
             )
-            is ShowDetailSingleEvent.ScrollToEpisode -> scope.launch {
-                gridState.animateScrollToItem(HEADER_ITEMS + event.position)
-            }
         }
     }
 
@@ -187,7 +180,15 @@ private fun DetailGrid(
             )
         }
         fullSpan { CtaRow(viewState, onIntent) }
-        fullSpan { EpisodesHeader(viewState.ranges, onSelect = { onIntent(ShowDetailIntent.RangeSelect(it)) }) }
+        fullSpan {
+            EpisodesHeader(
+                ranges = viewState.ranges,
+                selected = viewState.selectedRange,
+                episodeCount = viewState.cells.size,
+                watchedCount = viewState.watchedCount,
+                onSelect = { onIntent(ShowDetailIntent.RangeSelect(it)) },
+            )
+        }
         if (viewState.episodesErrorRes != null) {
             fullSpan {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
@@ -206,7 +207,7 @@ private fun DetailGrid(
         } else if (viewState.isEpisodesLoading) {
             fullSpan { LoadingState(Modifier.height(120.dp)) }
         } else {
-            items(viewState.cells, key = { it.index }) { cell ->
+            items(viewState.visibleCells, key = { it.index }) { cell ->
                 EpisodeGridCell(cell = cell, onClick = { onIntent(ShowDetailIntent.EpisodeClick(it)) })
             }
         }
@@ -330,10 +331,12 @@ private fun Synopsis(text: String, expanded: Boolean, onToggle: () -> Unit) {
     if (text.isBlank()) return
     val more = stringResource(if (expanded) R.string.watch_less else R.string.watch_more)
     val emphasis = MaterialTheme.colorScheme.onBackground
+    // "More" chỉ khi 3 dòng thật sự cắt mất chữ.
+    var truncated by remember(text) { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .padding(top = 14.dp)
-            .clickable(role = Role.Button, onClickLabel = more, onClick = onToggle),
+            .applyIf(truncated || expanded) { clickable(role = Role.Button, onClickLabel = more, onClick = onToggle) },
     ) {
         Text(
             text = text,
@@ -341,12 +344,15 @@ private fun Synopsis(text: String, expanded: Boolean, onToggle: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = if (expanded) Int.MAX_VALUE else 3,
             overflow = TextOverflow.Ellipsis,
+            onTextLayout = { if (!expanded) truncated = it.hasVisualOverflow },
         )
-        Text(
-            text = buildAnnotatedString { withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append(more) } },
-            style = AppTypography.body.copy(fontSize = 13.5.sp),
-            color = emphasis,
-        )
+        if (truncated || expanded) {
+            Text(
+                text = buildAnnotatedString { withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append(more) } },
+                style = AppTypography.body.copy(fontSize = 13.5.sp),
+                color = emphasis,
+            )
+        }
     }
 }
 
@@ -388,41 +394,55 @@ private fun CtaRow(viewState: ShowDetailViewState, onIntent: (ShowDetailIntent) 
     }
 }
 
+/**
+ * "Episodes" + "44 eps · 7 watched", dưới là tab khoảng 20 tập (cùng kiểu chip với sheet 0303). Tab lọc
+ * lưới — chọn tab là thấy ngay đúng các tập đó, không phải cuộn tìm.
+ */
 @Composable
-private fun EpisodesHeader(ranges: List<EpisodeRange>, onSelect: (EpisodeRange) -> Unit) {
-    var menuOpen by rememberSaveable { mutableStateOf(false) }
-    Row(
+private fun EpisodesHeader(
+    ranges: List<EpisodeRange>,
+    selected: EpisodeRange?,
+    episodeCount: Int,
+    watchedCount: Int,
+    onSelect: (EpisodeRange) -> Unit,
+) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = AppTheme.dimensions.s5, bottom = 1.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(top = AppTheme.dimensions.s5, bottom = AppTheme.dimensions.s1),
     ) {
-        Text(
-            text = stringResource(R.string.watch_episodes),
-            style = AppTypography.titleSmall,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.weight(1f),
-        )
-        if (ranges.isNotEmpty()) {
-            Box {
-                TextButton(onClick = { menuOpen = true }, enabled = ranges.size > 1) {
-                    Text(
-                        text = stringResource(R.string.watch_range, ranges.first().firstLabel, ranges.last().lastLabel) +
-                            if (ranges.size > 1) " ▾" else "",
-                        style = AppTypography.label,
-                        color = AppTheme.colors.text3,
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(
+                text = stringResource(R.string.watch_episodes),
+                style = AppTypography.titleSmall,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.weight(1f),
+            )
+            if (episodeCount > 0) {
+                Text(
+                    text = stringResource(
+                        R.string.watch_episodes_summary,
+                        pluralStringResource(R.plurals.watch_episode_count, episodeCount, episodeCount),
+                        watchedCount,
+                    ),
+                    style = AppTypography.label,
+                    color = AppTheme.colors.text3,
+                )
+            }
+        }
+        if (ranges.size > 1) {
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .padding(top = AppTheme.dimensions.s3),
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.s2),
+            ) {
+                ranges.forEach { range ->
+                    ChoiceChip(
+                        text = stringResource(R.string.watch_range, range.firstLabel, range.lastLabel),
+                        selected = range == selected,
+                        onClick = { onSelect(range) },
                     )
-                }
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    ranges.forEach { range ->
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.watch_range, range.firstLabel, range.lastLabel)) },
-                            onClick = {
-                                menuOpen = false
-                                onSelect(range)
-                            },
-                        )
-                    }
                 }
             }
         }

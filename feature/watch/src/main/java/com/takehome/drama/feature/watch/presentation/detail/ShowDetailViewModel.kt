@@ -38,6 +38,7 @@ class ShowDetailViewModel(
     private var catalog: Catalog? = null
     private var show: Show? = null
     private var episodes: List<Episode> = emptyList()
+    private var rangePickedByUser = false
     private var progressJob: Job? = null
     private var languageJob: Job? = null
 
@@ -58,7 +59,7 @@ class ShowDetailViewModel(
             ShowDetailIntent.ToggleSynopsis -> updateState { copy(synopsisExpanded = !synopsisExpanded) }
             ShowDetailIntent.ContinueClick -> currentState.continueCta?.let { openEpisode(it.episodeIndex) }
             is ShowDetailIntent.EpisodeClick -> openEpisode(intent.index)
-            is ShowDetailIntent.RangeSelect -> scrollTo(intent.range)
+            is ShowDetailIntent.RangeSelect -> selectRange(intent.range)
             ShowDetailIntent.SaveClick -> toggleSaved()
         }
     }
@@ -150,6 +151,9 @@ class ShowDetailViewModel(
                 val targetEpisode = target?.let { t -> episodes.firstOrNull { it.index == t.episodeIndex } }
                 updateState {
                     copy(
+                        // User đã tự chọn tab thì giữ; không thì tab chứa tập Continue.
+                        selectedRange = if (rangePickedByUser) selectedRange else episodesUseCase.rangeOf(ranges, episodes, target?.episodeIndex ?: -1),
+                        watchedCount = episodesUseCase.watchedCount(episodes, progress),
                         // Tập kế bị khoá không được tô "đang phát": ô phải lõm + khoá để user biết.
                         cells = episodesUseCase.grid(
                             episodes,
@@ -179,8 +183,9 @@ class ShowDetailViewModel(
         }
     }
 
-    private fun scrollTo(range: EpisodeRange) {
-        sendEvent(ShowDetailSingleEvent.ScrollToEpisode(range.start))
+    private fun selectRange(range: EpisodeRange) {
+        rangePickedByUser = true
+        updateState { copy(selectedRange = range) }
     }
 
     private fun toggleSaved() {

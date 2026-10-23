@@ -67,6 +67,9 @@ class PlayerViewModel(
     private var show: Show? = null
     private var episodes: List<Episode> = emptyList()
     private var progress: List<WatchProgress> = emptyList()
+
+    /** Like cục bộ theo tập (không có API) — vuốt đi rồi quay lại vẫn còn. */
+    private val likedEpisodes = mutableSetOf<Int>()
     private var contentLanguage: String = ""
 
     /** Quality của nguồn đang nạp (Auto thì là quality `pickSource` chọn). */
@@ -146,13 +149,13 @@ class PlayerViewModel(
                 copy(
                     isLoading = false,
                     posterUrl = loadedShow.posterUrl,
-                    pages = episodes.map { PlayerPage(episodeIndex = it.index, isLocked = !it.isFree) },
                     episodeTotal = episodes.size,
                     ranges = episodesUseCase.ranges(episodes),
                     autoplayNext = preferences.autoplayNextEpisode,
                 )
             }
             applyShowTexts()
+            refreshPages()
             startObservers()
             refreshPlaylist()
             openEpisode(currentState.episodeIndex)
@@ -173,13 +176,15 @@ class PlayerViewModel(
             watchProgressUseCase.observeForShow(showId).collect {
                 progress = it
                 refreshGrid()
+                refreshPages()
             }
         }
     }
 
     /**
      * Mở một tập trong player hiện có. Tập khoá (vuốt tới, hoặc vào từ route) không nạp.
-     * [positionMs] null = vị trí resume đã lưu. Mở tập mới huỷ lần mở trước còn dở — không thì lần
+     * [positionMs] null = vị trí resume đã lưu (chỉ tập vào màn — Continue từ Detail); đổi tập trong
+     * feed truyền 0. Mở tập mới huỷ lần mở trước còn dở — không thì lần
      * xong sau thắng và player phát nhầm tập.
      */
     private fun openEpisode(index: Int, positionMs: Long? = null) {
@@ -193,8 +198,8 @@ class PlayerViewModel(
                 episodeIndex = episode.index,
                 episodeNumber = episode.displayNumber,
                 isLocked = !episode.isFree,
-                likeCount = episode.likeCount,
-                isLiked = false,
+                likeCount = episode.likeCount + if (episode.index in likedEpisodes) 1 else 0,
+                isLiked = episode.index in likedEpisodes,
                 endAction = null,
                 errorRes = null,
                 selectedRange = episodesUseCase.rangeOf(ranges, episodes, episode.index),
@@ -271,7 +276,8 @@ class PlayerViewModel(
         saveProgress(playback.durationMs, playback.durationMs)
         val action = episodesUseCase.afterEnded(episodes, currentState.episodeIndex, currentState.autoplayNext)
         if (action is EndAction.PlayNext) {
-            openEpisode(action.index)
+            // Chỉ cuộn; tập kế mở khi trang dừng (PageSettled) như user tự vuốt. Đổi tập trước khi cuộn
+            // thì trang cũ (player bị tua về 0) và top bar đổi giữa lúc trượt → flash.
             sendEvent(PlayerSingleEvent.ScrollToEpisode(action.index))
         } else {
             updateState { copy(endAction = action) }
@@ -349,12 +355,15 @@ class PlayerViewModel(
         wasPlayingBeforeStop = false
     }
 
-    /** User vuốt tới tập khác: lưu chỗ tập cũ dừng rồi phát tập mới (tập khoá: chỉ dừng). */
+    /**
+     * User vuốt tới tập khác: lưu chỗ tập cũ dừng rồi phát tập mới **từ đầu** như một feed (player lân
+     * cận đã đứng sẵn ở giây 0 → lên hình tức thì). Tiến độ vẫn lưu cho Continue / ô đã xem.
+     */
     private fun onPageSettled(index: Int) {
         if (index == currentState.episodeIndex || episodes.none { it.index == index }) return
         saveCurrentProgress()
         updateState { copy(sheet = PlayerSheet.None) }
-        openEpisode(index)
+        openEpisode(index, positionMs = 0)
     }
 
     private fun togglePlay() {
@@ -374,7 +383,10 @@ class PlayerViewModel(
     }
 
     private fun toggleLike() {
+        val index = currentState.episodeIndex
+        if (!likedEpisodes.add(index)) likedEpisodes.remove(index)
         updateState { copy(isLiked = !isLiked, likeCount = likeCount + if (isLiked) -1 else 1) }
+        refreshPages()
     }
 
     private fun setSpeed(speed: Float) {
@@ -401,7 +413,7 @@ class PlayerViewModel(
         updateState { copy(sheet = PlayerSheet.None) }
         if (index == currentState.episodeIndex && !currentState.playback.ended) return
         saveCurrentProgress()
-        openEpisode(index)
+        openEpisode(index, positionMs = 0)
         sendEvent(PlayerSingleEvent.ScrollToEpisode(index))
     }
 
@@ -449,6 +461,25 @@ class PlayerViewModel(
                 showTitle = show.title.resolve(contentLanguage, defaultLanguage),
                 description = show.hook.resolve(contentLanguage, defaultLanguage)
                     .ifBlank { show.synopsis.resolve(contentLanguage, defaultLanguage) },
+            )
+        }
+    }
+
+    private fun refreshPages() {
+        updateState {
+            copy(
+                pages = episodes.map { episode ->
+                    val record = progress.firstOrNull { it.episodeIndex == episode.index }
+                    val liked = episode.index in likedEpisodes
+                    PlayerPage(
+                        episodeIndex = episode.index,
+                        isLocked = !episode.isFree,
+                        episodeNumber = episode.displayNumber,
+                        likeCount = episode.likeCount + if (liked) 1 else 0,
+                        isLiked = liked,
+                        durationMs = record?.durationMs ?: 0,
+                    )
+                },
             )
         }
     }

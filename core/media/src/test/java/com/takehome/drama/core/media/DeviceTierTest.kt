@@ -15,7 +15,7 @@ class DeviceTierTest {
     @Test
     fun `small heap is low`() {
         assertEquals(DeviceTier.LOW, classifyDeviceTier(isLowRam = false, memoryClassMb = 128, totalMemBytes = 8 * gb))
-        assertEquals(DeviceTier.LOW, classifyDeviceTier(isLowRam = false, memoryClassMb = 192, totalMemBytes = 8 * gb))
+        assertEquals(DeviceTier.NORMAL, classifyDeviceTier(isLowRam = false, memoryClassMb = 192, totalMemBytes = 8 * gb))
         assertEquals(DeviceTier.NORMAL, classifyDeviceTier(isLowRam = false, memoryClassMb = 256, totalMemBytes = 8 * gb))
     }
 

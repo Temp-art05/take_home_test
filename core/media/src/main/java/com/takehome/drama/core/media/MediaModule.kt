@@ -7,28 +7,31 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
-import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import java.io.File
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.Koin
 import org.koin.dsl.module
 
 /**
- * [forceLowTier] để flavor dev ép chính sách máy yếu khi kiểm/chụp. `SimpleCache` chỉ được **một**
- * instance mỗi thư mục → `single`, player lẫn preload đọc qua cùng cache: vuốt ngược lại hay mở lại
- * tập phát từ đĩa, không tải lại.
+ * [tierOverride] để flavor dev ép một mức máy khi kiểm/chụp. `SimpleCache` chỉ được **một**
+ * instance mỗi thư mục → `single`, mọi player của pool đọc/ghi qua cùng cache: vuốt ngược lại hay mở
+ * lại tập đã lướt qua phát từ đĩa, không tải lại.
+ *
+ * Cache **theo phiên**: giữ [MediaProfile.maxCachedVideos] video gần nhất, và xoá sạch lúc process
+ * khởi động — app bị kill thì không chạy được code dọn, nên dọn ở lần mở kế là cách chắc chắn duy nhất.
  */
 @OptIn(UnstableApi::class)
-fun mediaModule(forceLowTier: () -> Boolean = { false }) = module {
-    single { DeviceTierDetector(androidContext(), forceLowTier) }
+fun mediaModule(tierOverride: () -> DeviceTier? = { null }) = module {
+    single { DeviceTierDetector(androidContext(), tierOverride) }
     single { MediaProfile.forTier(get<DeviceTierDetector>().detect()) }
     single<Cache> {
         val context = androidContext()
-        SimpleCache(
-            File(context.cacheDir, "media"),
-            LeastRecentlyUsedCacheEvictor(get<MediaProfile>().cacheBytes),
-            StandaloneDatabaseProvider(context),
-        )
+        val profile = get<MediaProfile>()
+        val directory = File(context.cacheDir, "media")
+        val databaseProvider = StandaloneDatabaseProvider(context)
+        SimpleCache.delete(directory, databaseProvider)
+        SimpleCache(directory, RecentVideosEvictor(profile.maxCachedVideos, profile.cacheBytes), databaseProvider)
     }
     single<DataSource.Factory> {
         CacheDataSource.Factory()
@@ -42,4 +45,13 @@ fun mediaModule(forceLowTier: () -> Boolean = { false }) = module {
         val dataSourceFactory = get<DataSource.Factory>()
         EpisodeFeedPlayerFactory { ExoEpisodeFeedPlayer(context, profile, dataSourceFactory) }
     }
+}
+
+/**
+ * Gọi một lần lúc app khởi động, **trên thread nền**: dựng cache ngay để thư mục của phiên trước bị xoá
+ * liền (không đợi tới lúc mở player), và lần mở player đầu không phải chờ khởi tạo cache.
+ */
+@OptIn(UnstableApi::class)
+fun Koin.prepareMediaCache() {
+    get<Cache>()
 }

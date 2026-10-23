@@ -1,6 +1,8 @@
 package com.takehome.drama.feature.watch.presentation.player
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -11,8 +13,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.takehome.drama.core.designsystem.component.AppAsyncImage
-import com.takehome.drama.core.designsystem.component.ToastState
-import com.takehome.drama.core.media.EpisodeFeedPlayer
+import com.takehome.drama.feature.watch.presentation.player.model.PlayerPage
+import com.takehome.drama.core.media.VideoSlot
+import com.takehome.drama.core.media.KeepScreenOnWhilePlaying
+import androidx.compose.ui.graphics.graphicsLayer
 import com.takehome.drama.core.utils.extension.findActivity
 import kotlin.math.abs
 import kotlinx.coroutines.launch
@@ -36,6 +40,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -49,6 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.takehome.drama.core.designsystem.component.AppBottomSheet
 import com.takehome.drama.core.designsystem.component.AppToastHost
 import com.takehome.drama.core.designsystem.component.GhostPillButton
 import com.takehome.drama.core.designsystem.component.GradientButton
@@ -74,6 +82,12 @@ import com.takehome.drama.feature.watch.presentation.player.component.PlayerTopB
 import com.takehome.drama.feature.watch.presentation.player.component.PlayerTrack
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerSheet
 
+/** Overlay mờ hết khi trang lệch ~60% chiều cao. */
+private const val OVERLAY_FADE = 1.6f
+
+/** Trượt sang tập kế khi tự chuyển tập: đủ chậm để mắt theo kịp, không giật như spring mặc định. */
+private const val AUTO_SCROLL_MS = 650
+
 @Composable
 fun PlayerScreen(
     viewModel: PlayerViewModel,
@@ -82,7 +96,7 @@ fun PlayerScreen(
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     // Không `by`: chỉ thanh track đọc `.value` → tick 500ms không recompose cả màn.
     val positionMs = viewModel.positionMs.collectAsStateWithLifecycle()
-    val firstFrameRendered by viewModel.player.firstFrameRendered.collectAsStateWithLifecycle()
+    val slots by viewModel.player.slots.collectAsStateWithLifecycle()
     val toastState = rememberToastState()
     val pagerState = rememberPagerState { viewState.pages.size }
     val scope = rememberCoroutineScope()
@@ -99,8 +113,12 @@ fun PlayerScreen(
                 val page = viewState.pages.indexOfFirst { it.episodeIndex == event.index }
                 if (page >= 0) {
                     scope.launch {
-                        // Tập liền kề: vuốt có animation như user tự vuốt; xa hơn thì nhảy thẳng.
-                        if (abs(page - pagerState.currentPage) == 1) pagerState.animateScrollToPage(page) else pagerState.scrollToPage(page)
+                        // Tập liền kề: trượt chậm, mềm (tự sang tập / chọn tập kế); xa hơn thì nhảy thẳng.
+                        if (abs(page - pagerState.currentPage) == 1) {
+                            pagerState.animateScrollToPage(page, animationSpec = tween(AUTO_SCROLL_MS, easing = FastOutSlowInEasing))
+                        } else {
+                            pagerState.scrollToPage(page)
+                        }
                     }
                 }
             }
@@ -113,6 +131,7 @@ fun PlayerScreen(
         viewModel.processIntent(PlayerIntent.ScreenStopped(changingConfigurations))
     }
     BackHandler { viewModel.processIntent(PlayerIntent.BackClick) }
+    KeepScreenOnWhilePlaying(viewModel.player)
 
     val pagesLoaded = viewState.pages.isNotEmpty()
     LaunchedEffect(pagerState, pagesLoaded) {
@@ -129,18 +148,50 @@ fun PlayerScreen(
             viewState = viewState,
             pagerState = pagerState,
             positionMs = { positionMs.value },
-            firstFrameRendered = firstFrameRendered,
-            player = viewModel.player,
-            toastState = toastState,
+            slots = slots,
             onIntent = viewModel::processIntent,
         )
-        // Sheet nằm ở cửa sổ riêng có scrim: khi sheet mở, toast hiện trong sheet (xem PlayerSheets).
-        if (viewState.sheet == PlayerSheet.None) {
-            AppToastHost(
-                state = toastState,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(bottom = 120.dp),
+        PlayerSheets(viewState, onIntent = viewModel::processIntent)
+        // Sheet vẽ cùng cửa sổ (AppBottomSheet) → toast đặt sau nó vẫn nổi trên scrim.
+        AppToastHost(
+            state = toastState,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(bottom = 120.dp),
+        )
+    }
+}
+
+/** Sheet 0303 / 0304. Giữ sheet vừa đóng để animation thoát còn nội dung. */
+@Composable
+private fun PlayerSheets(viewState: PlayerViewState, onIntent: (PlayerIntent) -> Unit) {
+    var shownSheet by remember { mutableStateOf(viewState.sheet) }
+    if (viewState.sheet != PlayerSheet.None) shownSheet = viewState.sheet
+    AppBottomSheet(
+        visible = viewState.sheet != PlayerSheet.None,
+        onDismiss = { onIntent(PlayerIntent.DismissSheet) },
+    ) {
+        when (shownSheet) {
+            PlayerSheet.None -> Unit
+            PlayerSheet.Episodes -> EpisodePickerSheet(
+                cells = viewState.cells,
+                ranges = viewState.ranges,
+                selectedRange = viewState.selectedRange,
+                watchedCount = viewState.watchedCount,
+                onRangeSelect = { onIntent(PlayerIntent.RangeSelect(it)) },
+                onEpisodeSelect = { onIntent(PlayerIntent.EpisodeSelect(it)) },
+            )
+            PlayerSheet.Options -> PlaybackOptionsSheet(
+                speed = viewState.speed,
+                qualities = viewState.qualities,
+                quality = viewState.quality,
+                languages = viewState.languages,
+                language = viewState.language,
+                autoplayNext = viewState.autoplayNext,
+                onSpeedSelect = { onIntent(PlayerIntent.SpeedSelect(it)) },
+                onQualitySelect = { onIntent(PlayerIntent.QualitySelect(it)) },
+                onLanguageSelect = { onIntent(PlayerIntent.LanguageSelect(it)) },
+                onAutoplayToggle = { onIntent(PlayerIntent.AutoplayToggle) },
             )
         }
     }
@@ -151,47 +202,34 @@ private fun PlayerContent(
     viewState: PlayerViewState,
     pagerState: PagerState,
     positionMs: () -> Long,
-    firstFrameRendered: Boolean,
-    player: EpisodeFeedPlayer?,
-    toastState: ToastState,
+    slots: Map<Int, VideoSlot>,
     onIntent: (PlayerIntent) -> Unit,
 ) {
-    val media = AppTheme.colors.media
-    val playback = viewState.playback
-    val buffering = playback.isBuffering && playback.playWhenReady && !viewState.isLocked
-    val showsVideo = !viewState.isLoading && viewState.errorRes == null && !viewState.isLocked
-
     Box(Modifier.fillMaxSize()) {
         if (viewState.pages.isNotEmpty()) {
             VerticalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
-                // Một player duy nhất: trang lân cận chỉ là poster, không dựng sẵn.
-                beyondViewportPageCount = 0,
+                // Trang ±1 dựng sẵn để surface của player lân cận đã có khung hình khi vuốt nhẹ.
+                beyondViewportPageCount = 1,
                 key = { viewState.pages[it].episodeIndex },
             ) { page ->
                 val item = viewState.pages[page]
-                val isCurrent = item.episodeIndex == viewState.episodeIndex
                 EpisodePage(
-                    posterUrl = viewState.posterUrl,
-                    player = player.takeIf { isCurrent && showsVideo },
-                    showPoster = !(isCurrent && showsVideo && firstFrameRendered),
-                    isPlaying = playback.playWhenReady,
-                    onTogglePlay = { onIntent(PlayerIntent.TogglePlay) },
+                    page = item,
+                    slot = slots[page],
+                    isCurrent = item.episodeIndex == viewState.episodeIndex,
+                    viewState = viewState,
+                    positionMs = positionMs,
+                    // Overlay mờ dần theo độ lệch trang; đọc trong lambda của graphicsLayer → không recompose mỗi frame.
+                    overlayAlpha = { (1f - abs(pagerState.getOffsetDistanceInPages(page)) * OVERLAY_FADE).coerceIn(0f, 1f) },
+                    onIntent = onIntent,
                 )
             }
         }
-        if (buffering) Box(Modifier.fillMaxSize().background(media.bufferingDim))
 
+        // Top bar cố định như TikTok: không trượt theo trang, đổi số tập khi trang dừng.
         Box(Modifier.fillMaxWidth().height(150.dp).background(AppTheme.colors.scrimTop))
-        Box(
-            Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .fillMaxHeight(0.46f)
-                .background(AppTheme.colors.scrimBottom),
-        )
-
         PlayerTopBar(
             title = viewState.showTitle,
             episodeNumber = viewState.episodeNumber,
@@ -209,90 +247,111 @@ private fun PlayerContent(
                 actionLabel = stringResource(R.string.watch_retry),
                 onAction = { onIntent(PlayerIntent.RetryClick) },
             )
-            viewState.isLocked -> CenterMessage(
-                title = stringResource(R.string.watch_locked_title, viewState.episodeNumber),
-                body = stringResource(R.string.watch_locked_body),
-                actionLabel = stringResource(R.string.watch_episodes),
-                onAction = { onIntent(PlayerIntent.EpisodesClick) },
-            )
-            viewState.hasPlaybackError -> CenterMessage(
-                title = stringResource(R.string.watch_error_playback),
-                actionLabel = stringResource(R.string.watch_retry),
-                onAction = { onIntent(PlayerIntent.RetryClick) },
-            )
-            viewState.endAction != null -> EndCard(viewState.endAction, onIntent)
-            buffering -> BufferingOverlay(viewState.qualityDropped, onSwitchBack = { onIntent(PlayerIntent.SwitchBackToHd) })
-            !playback.playWhenReady -> CenterPlayIcon(AppIcons.Play, Modifier.align(Alignment.Center))
         }
-
-        if (!viewState.isLoading && viewState.errorRes == null) {
-            BottomControls(viewState, positionMs, buffering, onIntent)
-        }
-    }
-
-    when (viewState.sheet) {
-        PlayerSheet.None -> Unit
-        PlayerSheet.Episodes -> EpisodePickerSheet(
-            cells = viewState.cells,
-            ranges = viewState.ranges,
-            selectedRange = viewState.selectedRange,
-            watchedCount = viewState.watchedCount,
-            toastState = toastState,
-            onRangeSelect = { onIntent(PlayerIntent.RangeSelect(it)) },
-            onEpisodeSelect = { onIntent(PlayerIntent.EpisodeSelect(it)) },
-            onDismiss = { onIntent(PlayerIntent.DismissSheet) },
-        )
-        PlayerSheet.Options -> PlaybackOptionsSheet(
-            speed = viewState.speed,
-            qualities = viewState.qualities,
-            quality = viewState.quality,
-            languages = viewState.languages,
-            language = viewState.language,
-            autoplayNext = viewState.autoplayNext,
-            toastState = toastState,
-            onSpeedSelect = { onIntent(PlayerIntent.SpeedSelect(it)) },
-            onQualitySelect = { onIntent(PlayerIntent.QualitySelect(it)) },
-            onLanguageSelect = { onIntent(PlayerIntent.LanguageSelect(it)) },
-            onAutoplayToggle = { onIntent(PlayerIntent.AutoplayToggle) },
-            onDismiss = { onIntent(PlayerIntent.DismissSheet) },
-        )
     }
 }
 
 /**
- * Một trang của pager: poster của show, video của tập hiện tại vẽ dưới poster và lộ ra khi đã có
- * khung hình đầu (không chớp đen lúc vuốt). [player] null = trang lân cận / khoá / lỗi.
+ * Một trang của pager = một tập, **tự chứa** video + scrim + mô tả + rail + track + pill: vuốt là
+ * cả trang trượt theo, overlay mờ dần ([overlayAlpha]). Trang lân cận vẽ surface của player đã
+ * prepare + pause (khung hình thật); chưa có player/khung hình thì poster. Chỉ trang hiện tại nhận
+ * tap play/pause, đọc vị trí live, hiện buffering/end card.
  */
 @Composable
 private fun EpisodePage(
-    posterUrl: String,
-    player: EpisodeFeedPlayer?,
-    showPoster: Boolean,
-    isPlaying: Boolean,
-    onTogglePlay: () -> Unit,
+    page: PlayerPage,
+    slot: VideoSlot?,
+    isCurrent: Boolean,
+    viewState: PlayerViewState,
+    positionMs: () -> Long,
+    overlayAlpha: () -> Float,
+    onIntent: (PlayerIntent) -> Unit,
 ) {
+    val media = AppTheme.colors.media
+    val playback = viewState.playback
+    val active = isCurrent && !viewState.isLoading && viewState.errorRes == null
+    val buffering = active && !page.isLocked && playback.isBuffering && playback.playWhenReady
+    val poster: @Composable () -> Unit = {
+        AppAsyncImage(model = viewState.posterUrl, contentDescription = null, modifier = Modifier.fillMaxSize())
+    }
+
     Box(Modifier.fillMaxSize()) {
-        if (player != null) VideoSurface(player = player, modifier = Modifier.fillMaxSize())
-        if (showPoster) {
-            AppAsyncImage(model = posterUrl, contentDescription = null, modifier = Modifier.fillMaxSize())
+        if (slot != null && !page.isLocked) {
+            VideoSurface(slot = slot, modifier = Modifier.fillMaxSize(), shutter = poster)
+        } else {
+            poster()
         }
-        if (player != null) {
+        if (buffering) Box(Modifier.fillMaxSize().background(media.bufferingDim))
+        Box(
+            Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .fillMaxHeight(0.46f)
+                .background(AppTheme.colors.scrimBottom),
+        )
+        if (active && !page.isLocked) {
             // Chạm vào video = play/pause; TalkBack đọc được hành động.
-            val label = stringResource(if (isPlaying) R.string.watch_pause_cd else R.string.watch_play_cd)
+            val label = stringResource(if (playback.playWhenReady) R.string.watch_pause_cd else R.string.watch_play_cd)
             Box(
                 Modifier
                     .fillMaxSize()
-                    .clickableNoRipple(onClickLabel = label, role = Role.Button, onClick = onTogglePlay)
+                    .clickableNoRipple(onClickLabel = label, role = Role.Button) { onIntent(PlayerIntent.TogglePlay) }
                     .semantics { contentDescription = label },
             )
+        }
+        val expanded = active && viewState.descriptionExpanded
+        if (expanded) {
+            // Mô tả mở rộng: nền tối hơn để đọc; chạm ra ngoài thì thu lại.
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(media.bufferingDim)
+                    .clickableNoRipple { onIntent(PlayerIntent.ToggleDescription) },
+            )
+        }
+
+        Box(Modifier.fillMaxSize().graphicsLayer { alpha = overlayAlpha() }) {
+            when {
+                page.isLocked -> CenterMessage(
+                    title = stringResource(R.string.watch_locked_title, page.episodeNumber),
+                    body = stringResource(R.string.watch_locked_body),
+                    actionLabel = stringResource(R.string.watch_episodes),
+                    onAction = { onIntent(PlayerIntent.EpisodesClick) },
+                )
+                !active -> Unit
+                viewState.hasPlaybackError -> CenterMessage(
+                    title = stringResource(R.string.watch_error_playback),
+                    actionLabel = stringResource(R.string.watch_retry),
+                    onAction = { onIntent(PlayerIntent.RetryClick) },
+                )
+                viewState.endAction != null -> EndCard(viewState.endAction, onIntent)
+                buffering -> BufferingOverlay(viewState.qualityDropped, onSwitchBack = { onIntent(PlayerIntent.SwitchBackToHd) })
+                !playback.playWhenReady -> CenterPlayIcon(AppIcons.Play, Modifier.align(Alignment.Center))
+            }
+            if (!viewState.isLoading && viewState.errorRes == null) {
+                BottomControls(
+                    page = page,
+                    isCurrent = isCurrent,
+                    viewState = viewState,
+                    expanded = expanded,
+                    positionMs = if (isCurrent) positionMs else ({ 0L }),
+                    durationMs = if (isCurrent) playback.durationMs else page.durationMs,
+                    buffering = buffering,
+                    onIntent = onIntent,
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun BoxScope.BottomControls(
+    page: PlayerPage,
+    isCurrent: Boolean,
     viewState: PlayerViewState,
+    expanded: Boolean,
     positionMs: () -> Long,
+    durationMs: Long,
     buffering: Boolean,
     onIntent: (PlayerIntent) -> Unit,
 ) {
@@ -307,32 +366,33 @@ private fun BoxScope.BottomControls(
     ) {
         Row(verticalAlignment = Alignment.Bottom) {
             PlayerInfo(
-                episodeNumber = viewState.episodeNumber,
+                episodeNumber = page.episodeNumber,
                 description = viewState.description,
-                expanded = viewState.descriptionExpanded,
-                onToggle = { onIntent(PlayerIntent.ToggleDescription) },
+                expanded = expanded,
+                onToggle = { if (isCurrent) onIntent(PlayerIntent.ToggleDescription) },
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = AppTheme.dimensions.s4),
             )
-            if (!viewState.isLocked) {
+            if (!page.isLocked) {
                 PlayerRail(
-                    likeCount = formatCompactCount(viewState.likeCount, Locale.current.platformLocale),
-                    isLiked = viewState.isLiked,
+                    likeCount = formatCompactCount(page.likeCount, Locale.current.platformLocale),
+                    isLiked = page.isLiked,
                     speed = viewState.speed,
-                    onLike = { onIntent(PlayerIntent.LikeClick) },
-                    onSpeedClick = { onIntent(PlayerIntent.SpeedClick) },
-                    onSpeedLongPress = { onIntent(PlayerIntent.SpeedLongPress) },
+                    onLike = { if (isCurrent) onIntent(PlayerIntent.LikeClick) },
+                    onSpeedClick = { if (isCurrent) onIntent(PlayerIntent.SpeedClick) },
+                    onSpeedLongPress = { if (isCurrent) onIntent(PlayerIntent.SpeedLongPress) },
                     onEpisodes = { onIntent(PlayerIntent.EpisodesClick) },
                     modifier = Modifier.padding(bottom = AppTheme.dimensions.s6),
                 )
             }
         }
-        if (!viewState.isLocked) {
+        if (!page.isLocked) {
             PlayerTrack(
                 positionMs = positionMs,
-                durationMs = viewState.playback.durationMs,
+                durationMs = durationMs,
                 dimmed = buffering,
+                seekable = isCurrent,
                 onSeek = { onIntent(PlayerIntent.SeekTo(it)) },
                 modifier = Modifier.padding(top = AppTheme.dimensions.s3),
             )
@@ -475,12 +535,12 @@ private fun PlayerContentPreview() {
                     episodeTotal = 68,
                     likeCount = 24_100,
                     playback = PlaybackState(isPlaying = true, playWhenReady = true, durationMs = 91_000),
+                    pages = listOf(PlayerPage(episodeIndex = 12, isLocked = false, episodeNumber = 13, likeCount = 24_100)),
+                    episodeIndex = 12,
                 ),
-                pagerState = rememberPagerState { 0 },
+                pagerState = rememberPagerState { 1 },
                 positionMs = { 42_000 },
-                firstFrameRendered = false,
-                player = null,
-                toastState = rememberToastState(),
+                slots = emptyMap(),
                 onIntent = {},
             )
         }

@@ -2,6 +2,7 @@ package com.takehome.drama.feature.watch.fake
 
 import com.takehome.drama.core.media.EpisodeFeedPlayer
 import com.takehome.drama.core.media.FeedItem
+import com.takehome.drama.core.media.VideoSlot
 import com.takehome.drama.core.media.PlaybackState
 import com.takehome.drama.domain.model.Catalog
 import com.takehome.drama.domain.model.Episode
@@ -122,7 +123,7 @@ class FakeFeedPlayer : EpisodeFeedPlayer {
 
     private val _state = MutableStateFlow(PlaybackState())
     override val state: StateFlow<PlaybackState> = _state
-    override val firstFrameRendered = MutableStateFlow(false)
+    override val slots: StateFlow<Map<Int, VideoSlot>> = MutableStateFlow(emptyMap())
 
     var items: List<FeedItem> = emptyList()
         private set

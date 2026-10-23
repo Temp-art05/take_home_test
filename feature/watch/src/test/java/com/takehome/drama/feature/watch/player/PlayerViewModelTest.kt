@@ -134,14 +134,21 @@ class PlayerViewModelTest {
     }
 
     @Test
-    fun `episode end with autoplay - marks it watched and plays the next one from the start`() = runTest(mainRule.dispatcher) {
+    fun `episode end with autoplay - marks it watched, scrolls first, plays the next one once the page settles`() = runTest(mainRule.dispatcher) {
         val viewModel = viewModel()
-        player.emit(PlaybackState(ended = true, positionMs = 100_000, durationMs = 100_000))
-
+        viewModel.singleEvent.test {
+            player.emit(PlaybackState(ended = true, positionMs = 100_000, durationMs = 100_000))
+            assertEquals(PlayerSingleEvent.ScrollToEpisode(1), awaitItem())
+        }
         assertTrue(progressRepository.get(SHOW_ID, 0)!!.isEpisodeCompleted)
+        // Chưa đổi tập trong lúc trang đang trượt: không nạp, top bar vẫn tập cũ (không flash).
+        assertEquals(1, player.loads.size)
+        assertEquals(0, viewModel.viewState.value.episodeIndex)
+        assertNull(viewModel.viewState.value.endAction)
+
+        viewModel.processIntent(PlayerIntent.PageSettled(index = 1))
         assertEquals(Load(url(1), 0, playWhenReady = true), player.loads.last())
         assertEquals(1, viewModel.viewState.value.episodeIndex)
-        assertNull(viewModel.viewState.value.endAction)
     }
 
     @Test
@@ -253,6 +260,27 @@ class PlayerViewModelTest {
     }
 
     @Test
+    fun `like belongs to the episode - kept when swiping away and back`() = runTest(mainRule.dispatcher) {
+        val viewModel = viewModel()
+        viewModel.processIntent(PlayerIntent.LikeClick)
+        viewModel.processIntent(PlayerIntent.PageSettled(1))
+        assertFalse(viewModel.viewState.value.isLiked)
+        assertEquals(1_001L, viewModel.viewState.value.pages[0].likeCount)
+        assertTrue(viewModel.viewState.value.pages[0].isLiked)
+        viewModel.processIntent(PlayerIntent.PageSettled(0))
+        assertTrue(viewModel.viewState.value.isLiked)
+        assertEquals(1_001L, viewModel.viewState.value.likeCount)
+    }
+
+    @Test
+    fun `every page carries its own number and likes for the overlay`() = runTest(mainRule.dispatcher) {
+        val page = viewModel().viewState.value.pages[1]
+        assertEquals(2, page.episodeNumber)
+        assertEquals(1_000L, page.likeCount)
+        assertFalse(page.isLiked)
+    }
+
+    @Test
     fun `going to background while the episode is still loading - stays silent, plays when back`() = runTest(mainRule.dispatcher) {
         val gate = CompletableDeferred<Unit>()
         catalogRepository.episodesGate = gate
@@ -288,11 +316,11 @@ class PlayerViewModelTest {
 
     @Test
     fun `switching episodes quickly - the last choice wins even if an earlier load finishes later`() = runTest(mainRule.dispatcher) {
-        val viewModel = viewModel()
+        // Tập vào màn đọc vị trí resume từ Room (chậm); user chọn tập khác trước khi đọc xong.
         val slow = CompletableDeferred<Unit>()
         progressRepository.getGates[1] = slow
+        val viewModel = viewModel(episodeIndex = 1)
 
-        viewModel.processIntent(PlayerIntent.EpisodeSelect(index = 1))
         viewModel.processIntent(PlayerIntent.EpisodeSelect(index = 2))
         slow.complete(Unit)
 
@@ -335,12 +363,29 @@ class PlayerViewModelTest {
     }
 
     @Test
-    fun `swiping back resumes where that episode stopped`() = runTest(mainRule.dispatcher) {
+    fun `swiping back plays the episode again from the start - like a feed`() = runTest(mainRule.dispatcher) {
         val viewModel = viewModel()
         player.playing(positionMs = 30_000)
         viewModel.processIntent(PlayerIntent.PageSettled(index = 1))
         viewModel.processIntent(PlayerIntent.PageSettled(index = 0))
-        assertEquals(Load(url(0), 30_000, playWhenReady = true), player.loads.last())
+        assertEquals(Load(url(0), 0, playWhenReady = true), player.loads.last())
+    }
+
+    @Test
+    fun `swiping onto a half watched episode starts it from the beginning, the progress stays saved`() = runTest(mainRule.dispatcher) {
+        progressRepository.save(progress(index = 1, positionMs = 40_000))
+        val viewModel = viewModel()
+        viewModel.processIntent(PlayerIntent.PageSettled(index = 1))
+        assertEquals(Load(url(1), 0, playWhenReady = true), player.loads.last())
+        assertEquals(40_000L, progressRepository.get(SHOW_ID, 1)?.positionMs)
+    }
+
+    @Test
+    fun `picking a half watched episode in the sheet starts it from the beginning`() = runTest(mainRule.dispatcher) {
+        progressRepository.save(progress(index = 2, positionMs = 40_000))
+        val viewModel = viewModel()
+        viewModel.processIntent(PlayerIntent.EpisodeSelect(index = 2))
+        assertEquals(Load(url(2), 0, playWhenReady = true), player.loads.last())
     }
 
     @Test
@@ -369,15 +414,6 @@ class PlayerViewModelTest {
         viewModel.singleEvent.test {
             viewModel.processIntent(PlayerIntent.EpisodeSelect(index = 3))
             assertEquals(PlayerSingleEvent.ScrollToEpisode(3), awaitItem())
-        }
-    }
-
-    @Test
-    fun `autoplay to the next episode scrolls the pager to it`() = runTest(mainRule.dispatcher) {
-        val viewModel = viewModel()
-        viewModel.singleEvent.test {
-            player.emit(PlaybackState(ended = true, positionMs = 100_000, durationMs = 100_000))
-            assertEquals(PlayerSingleEvent.ScrollToEpisode(1), awaitItem())
         }
     }
 

@@ -10,7 +10,8 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Icon vẽ lại từ SVG của mockup (viewBox 24) — `material-icons-core` không có pause, heart,
- * episodes, volume. Màu thật lấy từ `tint` của `Icon`, ở đây chỉ cần màu đặc bất kỳ.
+ * episodes, volume; ký tự chữ (✓) thì hiển thị lệch theo font nên cũng vẽ ở đây.
+ * Màu thật lấy từ `tint` của `Icon`, ở đây chỉ cần màu đặc bất kỳ.
  */
 object AppIcons {
 
@@ -31,6 +32,9 @@ object AppIcons {
 
     /** Loa (dòng Autoplay ở SCR-0304). */
     val Volume: ImageVector by lazy { stroked("Volume", "M5 9v6h4l5 4V5L9 9H5z", "M17 9.5a4 4 0 0 1 0 5") }
+
+    /** Dấu chọn (dòng quality/ngôn ngữ đang chọn ở SCR-0304). */
+    val Check: ImageVector by lazy { stroked("Check", "M5 12.5l4.5 4.5L19 7.5") }
 
     val Play: ImageVector by lazy { filled("Play", "M8 5.5v13l10.5-6.5z") }
 
