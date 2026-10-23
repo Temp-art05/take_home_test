@@ -6,55 +6,17 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 
-/**
- * App shape definitions.
- * Contains all shape values used throughout the application.
- */
+/** Radius `--r-sm`…`--r-full` của mockup. */
 @Immutable
 data class AppShape(
-    val none: Shape,
-    val extraSmall: Shape,
-    val small: Shape,
-    val medium: Shape,
-    val large: Shape,
-    val extraLarge: Shape,
-    val full: Shape,
-
-    // Component-specific shapes
-    val button: Shape,
-    val card: Shape,
-    val dialog: Shape,
-    val bottomSheet: Shape,
-    val textField: Shape,
-    val chip: Shape,
-    val fab: Shape,
-    val snackbar: Shape
+    val sm: Shape = RoundedCornerShape(8.dp),
+    val md: Shape = RoundedCornerShape(12.dp),
+    val lg: Shape = RoundedCornerShape(16.dp),
+    val xl: Shape = RoundedCornerShape(22.dp),
+    val full: Shape = RoundedCornerShape(percent = 50),
+    val sheet: Shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp),
+    /** Badge nhỏ (TONIGHT'S PICK, NEW). */
+    val badge: Shape = RoundedCornerShape(6.dp),
 )
 
-/**
- * Default app shapes
- */
-val DefaultAppShape = AppShape(
-    none = RoundedCornerShape(0.dp),
-    extraSmall = RoundedCornerShape(4.dp),
-    small = RoundedCornerShape(8.dp),
-    medium = RoundedCornerShape(12.dp),
-    large = RoundedCornerShape(16.dp),
-    extraLarge = RoundedCornerShape(24.dp),
-    full = RoundedCornerShape(50),
-
-    // Component-specific
-    button = RoundedCornerShape(16.dp),
-    card = RoundedCornerShape(16.dp),
-    dialog = RoundedCornerShape(24.dp),
-    bottomSheet = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-    textField = RoundedCornerShape(12.dp),
-    chip = RoundedCornerShape(8.dp),
-    fab = RoundedCornerShape(16.dp),
-    snackbar = RoundedCornerShape(8.dp)
-)
-
-/**
- * CompositionLocal for AppShape
- */
-val LocalAppShape = staticCompositionLocalOf { DefaultAppShape }
+val LocalAppShape = staticCompositionLocalOf { AppShape() }

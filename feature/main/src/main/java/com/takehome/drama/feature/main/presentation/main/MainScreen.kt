@@ -21,17 +21,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.navigation.core.NavigationRequest
-import com.takehome.drama.feature.main.presentation.feature.FeatureScreen
+import com.takehome.drama.core.navigation.destination.WatchRoutes
+import com.takehome.drama.feature.main.presentation.browse.BrowseScreen
 import com.takehome.drama.feature.main.presentation.home.HomeScreen
+import com.takehome.drama.feature.main.presentation.library.LibraryScreen
 import com.takehome.drama.feature.main.presentation.main.component.MainBottomNavBar
 import com.takehome.drama.feature.main.presentation.main.model.MainTab
-import com.takehome.drama.feature.main.presentation.profile.ProfileScreen
+import com.takehome.drama.feature.main.presentation.reels.ReelsScreen
+import com.takehome.drama.feature.main.presentation.settings.SettingsScreen
 
 private val tabs = MainTab.entries
 
 @Composable
 fun MainScreen(
     viewModel: MainViewModel,
+    watchRoutes: WatchRoutes,
     onNavigate: (NavigationRequest) -> Unit,
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
@@ -43,20 +47,22 @@ fun MainScreen(
     }
 
     BackHandler(enabled = viewState.selectedTab != MainTab.Home) {
-        viewModel.selectTab(MainTab.Home)
+        viewModel.processIntent(MainIntent.SelectTab(MainTab.Home))
     }
 
     MainContent(
         viewState = viewState,
         pagerState = pagerState,
-        onTabSelected = { tab -> viewModel.selectTab(tab) },
+        onIntent = { intent -> viewModel.processIntent(intent) },
         tabContent = { tab ->
             // ViewModel của tab lấy bằng koinViewModel() mặc định → scope theo back stack entry
             // của Main, nên sống qua mọi lần đổi tab và chỉ bị huỷ khi Main bị pop.
             when (tab) {
-                MainTab.Home -> HomeScreen()
-                MainTab.Feature -> FeatureScreen()
-                MainTab.Profile -> ProfileScreen(onNavigate = onNavigate)
+                MainTab.Home -> HomeScreen(watchRoutes = watchRoutes, onNavigate = onNavigate)
+                MainTab.Reels -> ReelsScreen(watchRoutes = watchRoutes, onNavigate = onNavigate)
+                MainTab.Browse -> BrowseScreen(watchRoutes = watchRoutes, onNavigate = onNavigate)
+                MainTab.Library -> LibraryScreen(watchRoutes = watchRoutes, onNavigate = onNavigate)
+                MainTab.Settings -> SettingsScreen(onNavigate = onNavigate)
             }
         },
     )
@@ -67,7 +73,7 @@ fun MainScreen(
  * - `userScrollEnabled = false`: không vuốt ngang đổi tab, tránh tranh gesture với list/map bên trong.
  * - `beyondViewportPageCount = tabs.lastIndex`: mọi tab nằm trong cửa sổ compose nên không
  *   bao giờ bị dispose → giữ nguyên scroll, text đang nhập, `remember` và không load lại.
- * - Tab chưa từng mở chỉ là ô trống ([MainViewState.visitedTabs]) nên mở app không phải dựng cả 3 tab.
+ * - Tab chưa từng mở chỉ là ô trống ([MainViewState.visitedTabs]) nên mở app không phải dựng cả 5 tab.
  *
  * Tab đang ẩn vẫn ở lifecycle RESUMED: việc chỉ nên chạy khi tab hiện (polling, video...) thì
  * gate bằng tab đang chọn, đừng dựa vào lifecycle.
@@ -76,7 +82,7 @@ fun MainScreen(
 private fun MainContent(
     viewState: MainViewState,
     pagerState: PagerState,
-    onTabSelected: (MainTab) -> Unit,
+    onIntent: (MainIntent) -> Unit,
     tabContent: @Composable (MainTab) -> Unit,
 ) {
     Column(
@@ -103,7 +109,7 @@ private fun MainContent(
 
         MainBottomNavBar(
             selectedTab = viewState.selectedTab,
-            onTabSelected = onTabSelected,
+            onTabSelected = { tab -> onIntent(MainIntent.SelectTab(tab)) },
         )
     }
 }
@@ -115,7 +121,7 @@ private fun MainContentPreview() {
         MainContent(
             viewState = MainViewState(),
             pagerState = rememberPagerState { tabs.size },
-            onTabSelected = {},
+            onIntent = {},
             tabContent = { tab ->
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(

@@ -13,22 +13,24 @@ import kotlinx.coroutines.flow.update
 import timber.log.Timber
 
 /**
- * Base ViewModel: một [StateFlow] state + một kênh event một lần.
- *
- * Hành động của user là **hàm public tên rõ** trên ViewModel (`onRefreshClick()`,
- * `selectTab(tab)`), không phải một hàm dispatch chung kiểu `processIntent(intent)` —
- * Find Usages của từng hành động mới trỏ đúng chỗ gọi.
+ * Base ViewModel kiểu MVI (theo Notica): một [StateFlow] state, một kênh event một lần, và
+ * **một cửa vào duy nhất** cho hành động của user là [processIntent].
  *
  * ```
  * class HomeViewModel(
  *     private val homeFeed: HomeFeedUseCase,
- * ) : BaseViewModel<HomeViewState, HomeSingleEvent>() {
+ * ) : BaseViewModel<HomeIntent, HomeViewState, HomeSingleEvent>() {
  *
  *     override fun initState() = HomeViewState()
  *
  *     init { load() }
  *
- *     fun onRetryClick() = load()
+ *     override fun processIntent(intent: HomeIntent) {
+ *         when (intent) {
+ *             HomeIntent.RetryClick -> load()
+ *             is HomeIntent.ShowClick -> sendEvent(HomeSingleEvent.OpenShow(intent.showId))
+ *         }
+ *     }
  *
  *     private fun load() {
  *         updateState { copy(isLoading = true) }
@@ -41,7 +43,7 @@ import timber.log.Timber
  * }
  * ```
  */
-abstract class BaseViewModel<S : ViewState, E : SingleEvent> : ViewModel() {
+abstract class BaseViewModel<I : ViewIntent, S : ViewState, E : SingleEvent> : ViewModel() {
 
     /**
      * `by lazy` chứ không khởi tạo thẳng: thân lớp cha chạy trước khi tham số constructor của
@@ -57,6 +59,9 @@ abstract class BaseViewModel<S : ViewState, E : SingleEvent> : ViewModel() {
 
     /** State ban đầu của màn hình. */
     protected abstract fun initState(): S
+
+    /** Cửa vào duy nhất cho hành động của user: `when (intent)` rồi gọi hàm private xử lý. */
+    abstract fun processIntent(intent: I)
 
     protected val currentState: S
         get() = _viewState.value

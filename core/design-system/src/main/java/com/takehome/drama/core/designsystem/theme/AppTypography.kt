@@ -1,258 +1,108 @@
 package com.takehome.drama.core.designsystem.theme
 
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.takehome.drama.core.designsystem.R
 
-val OutfitFontFamily = FontFamily(
-    Font(R.font.outfit_regular, FontWeight.Normal),
-    Font(R.font.outfit_medium, FontWeight.Medium),
-    Font(R.font.outfit_semibold, FontWeight.SemiBold),
-    Font(R.font.outfit_bold, FontWeight.Bold),
-)
-
+/**
+ * Type scale theo mockup. Font hệ thống (mockup dùng system sans) chứ không nhúng font riêng:
+ * app hiện cả tên phim tiếng Ả Rập, Hindi, Tamil — font hệ thống có sẵn glyph cho mọi script đó.
+ */
 object AppTypography {
 
-    // ========================
-    // Heading H1 - 48sp
-    // ========================
-    val headingH1Regular = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 48.sp,
-    )
-    val headingH1Medium = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 48.sp,
-    )
-    val headingH1Semibold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 48.sp,
-    )
-    val headingH1Bold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 48.sp,
+    private val family = FontFamily.Default
+
+    /** Tiêu đề hero, tên phim ở màn chi tiết — 30sp. */
+    val display = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 30.sp,
+        lineHeight = 34.sp,
+        letterSpacing = (-0.02).em,
     )
 
-    // ========================
-    // Heading H2 - 40sp
-    // ========================
-    val headingH2Regular = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 40.sp,
-    )
-    val headingH2Medium = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 40.sp,
-    )
-    val headingH2Semibold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 40.sp,
-    )
-    val headingH2Bold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 40.sp,
+    /** Wordmark FLOW DRAMA — 20sp, giãn chữ rộng. */
+    val wordmark = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 20.sp,
+        letterSpacing = 0.16.em,
     )
 
-    // ========================
-    // Heading H3 - 32sp
-    // ========================
-    val headingH3Regular = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 32.sp,
-    )
-    val headingH3Medium = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 32.sp,
-    )
-    val headingH3Semibold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 32.sp,
-    )
-    val headingH3Bold = TextStyle(
-        fontFamily = OutfitFontFamily,
+    /** Tiêu đề màn / sheet — 19sp. */
+    val title = TextStyle(
+        fontFamily = family,
         fontWeight = FontWeight.Bold,
-        fontSize = 32.sp,
+        fontSize = 19.sp,
+        lineHeight = 24.sp,
+        letterSpacing = (-0.015).em,
     )
 
-    // ========================
-    // Heading H4 - 28sp
-    // ========================
-    val headingH4Regular = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 28.sp,
-    )
-    val headingH4Medium = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 28.sp,
-    )
-    val headingH4Semibold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 28.sp,
-    )
-    val headingH4Bold = TextStyle(
-        fontFamily = OutfitFontFamily,
+    /** Tiêu đề section / rail — 17sp. */
+    val titleSmall = TextStyle(
+        fontFamily = family,
         fontWeight = FontWeight.Bold,
-        fontSize = 28.sp,
+        fontSize = 17.sp,
+        lineHeight = 22.sp,
+        letterSpacing = (-0.01).em,
     )
 
-    // ========================
-    // Subtitle Large - 26sp
-    // ========================
-    val subtitleLargeRegular = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 26.sp,
-    )
-    val subtitleLargeMedium = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 26.sp,
-    )
-    val subtitleLargeSemibold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 26.sp,
-    )
-    val subtitleLargeBold = TextStyle(
-        fontFamily = OutfitFontFamily,
+    /** Nhãn nút — 15sp. */
+    val button = TextStyle(
+        fontFamily = family,
         fontWeight = FontWeight.Bold,
-        fontSize = 26.sp,
+        fontSize = 15.sp,
     )
 
-    // ========================
-    // Subtitle - 22sp
-    // ========================
-    val subtitleRegular = TextStyle(
-        fontFamily = OutfitFontFamily,
+    val bodyLarge = TextStyle(
+        fontFamily = family,
         fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-    )
-    val subtitleMedium = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 22.sp,
-    )
-    val subtitleSemibold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 22.sp,
-    )
-    val subtitleBold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 22.sp,
+        fontSize = 15.sp,
+        lineHeight = 22.sp,
     )
 
-    // ========================
-    // Body Large - 18sp
-    // ========================
-    val bodyLargeRegular = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 18.sp,
-    )
-    val bodyLargeMedium = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 18.sp,
-    )
-    val bodyLargeSemibold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp,
-    )
-    val bodyLargeBold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 18.sp,
-    )
-
-    // ========================
-    // Body - 16sp
-    // ========================
-    val bodyRegular = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-    )
-    val bodyMedium = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 16.sp,
-    )
-    val bodySemibold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 16.sp,
-    )
-    val bodyBold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 16.sp,
-    )
-
-    // ========================
-    // Caption - 14sp
-    // ========================
-    val captionRegular = TextStyle(
-        fontFamily = OutfitFontFamily,
+    val body = TextStyle(
+        fontFamily = family,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
-    )
-    val captionMedium = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-    )
-    val captionSemibold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 14.sp,
-    )
-    val captionBold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 14.sp,
+        lineHeight = 20.sp,
     )
 
-    // ========================
-    // Micro - 12sp
-    // ========================
-    val microRegular = TextStyle(
-        fontFamily = OutfitFontFamily,
+    val bodySemibold = body.copy(fontWeight = FontWeight.SemiBold)
+
+    /** Chip, metadata — 13sp. */
+    val label = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.Medium,
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+    )
+
+    val labelSemibold = label.copy(fontWeight = FontWeight.SemiBold)
+
+    val caption = TextStyle(
+        fontFamily = family,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
+        lineHeight = 16.sp,
     )
-    val microMedium = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 12.sp,
+
+    val captionSemibold = caption.copy(fontWeight = FontWeight.SemiBold)
+
+    /** Badge, eyebrow viết hoa — 11sp. */
+    val micro = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 11.sp,
+        letterSpacing = 0.08.em,
     )
-    val microSemibold = TextStyle(
-        fontFamily = OutfitFontFamily,
+
+    /** Nhãn tab bar — 10.5sp. */
+    val tab = TextStyle(
+        fontFamily = family,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 12.sp,
-    )
-    val microBold = TextStyle(
-        fontFamily = OutfitFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 12.sp,
+        fontSize = 10.5.sp,
     )
 }

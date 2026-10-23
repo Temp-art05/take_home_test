@@ -10,8 +10,7 @@ import androidx.core.os.LocaleListCompat
 enum class AppLocale(val tag: String?) {
     /** Theo ngôn ngữ hệ thống. */
     System(null),
-    English("en"),
-    Vietnamese("vi");
+    English("en");
 
     companion object {
         /**

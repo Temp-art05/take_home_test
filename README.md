@@ -22,7 +22,7 @@ Clone về là chạy được ngay — kể cả khi chưa cấu hình Firebase
 ```
 build-logic/          convention plugins (included build)
 
-:app                  BaseApp, MainActivity, navigation/AppNavGraph, di/, fcm/
+:app                  FlowDramaApp, MainActivity, navigation/AppNavGraph, di/, fcm/
 :feature:main         Main 3 tab (Home / Feature / Profile) + Settings
                         di/ navigation/ presentation/<màn>/{component,model}
 :core:utils           toast/ (Toasty), extension/, network/, notification/, bridge/

@@ -11,7 +11,7 @@ Android app template: Clean Architecture, 100% Compose, 9 module (tổ chức th
 | [`docs/rules/architecture.md`](docs/rules/architecture.md) | module, chiều phụ thuộc, **khi nào được tạo module mới** |
 | [`docs/rules/usecase.md`](docs/rules/usecase.md) | use case **gộp theo nghiệp vụ**, rule nằm ở đâu, khi nào VM inject thẳng |
 | [`docs/rules/data-layer.md`](docs/rules/data-layer.md) | repository + datasource **có interface/Impl**, mapper, DTO, network, Room |
-| [`docs/rules/presentation.md`](docs/rules/presentation.md) | ViewModel/Screen, **không dispatch intent**, navigation, Main 3 tab |
+| [`docs/rules/presentation.md`](docs/rules/presentation.md) | ViewModel/Screen, **MVI: mọi hành động qua `processIntent`**, navigation, Main 5 tab |
 | [`docs/rules/error-handling.md`](docs/rules/error-handling.md) | `Result`, chuỗi `ApiException → DomainException → @StringRes` |
 
 Hướng dẫn & mẫu:
@@ -37,7 +37,7 @@ Base không kèm test. Thêm test thì khai lib vào catalog + `testImplementati
 
 ## Toolchain
 
-AGP 9.2 · Gradle 9.8 · JDK 17 · Kotlin 2.4 · compileSdk/targetSdk 37 · minSdk 26.
+AGP 9.2 · Gradle 9.8 · JDK 17 · Kotlin 2.4 · compileSdk/targetSdk 37 · minSdk 24 (đề bài yêu cầu).
 
 AGP ghim ở 9.2.1 vì Android Studio Quail 1 (2026.1.1) chỉ sync được tới bản này (Quail 2 → 9.3.x,
 9.4.x cần Studio mới hơn). Nâng AGP phải đối chiếu bản Studio của cả team. Kiểm nhanh:
@@ -79,7 +79,7 @@ thiếu thì APK unsigned.
 
 ## DI (Koin)
 
-`BaseApp.onCreate()` gọi `startKoin` với `configModule`, `appModule` (`AppScope` — coroutine scope
+`FlowDramaApp.onCreate()` gọi `startKoin` với `configModule`, `appModule` (`AppScope` — coroutine scope
 theo process), `analyticsModule(isDebug)`, `remoteConfigModule`, `dataModule`, và một module cho mỗi
 feature (`mainModule`). Feature tự khai DI của mình; ViewModel inject qua `koinViewModel()`.
 
@@ -105,7 +105,7 @@ từ DataStore lúc khởi tạo; debug build fetch interval = 0.
 
 ## Theme, i18n, ảnh
 
-- `AppTheme` light + dark theo hệ thống. Chủ ý **không** bật dynamic color.
-- Ngôn ngữ `en` + `vi`. Thêm locale sửa **cả 3 chỗ**: `res/xml/locales_config.xml`, `localeFilters`
+- `AppTheme` mặc định **dark** (design Sunset Flow), light là bộ token tạm. Chủ ý **không** bật dynamic color.
+- Ngôn ngữ UI: `en` (Phase 6 thêm `ar` RTL). Thêm locale sửa **cả 3 chỗ**: `res/xml/locales_config.xml`, `localeFilters`
   trong `app/build.gradle.kts`, enum `AppLocale` (`:core:ui-foundation`).
 - Ảnh qua `AppAsyncImage`; `appImageLoader`: memory cache theo % RAM, disk cache 100 MB TTL 7 ngày.

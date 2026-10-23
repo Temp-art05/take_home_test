@@ -123,8 +123,10 @@ val chatModule = module {
 
 // :feature:settings — ViewModel/Screen chỉ biết interface
 class SettingsViewModel(private val chatBridge: ChatBridge) : BaseViewModel<...>() {
-    fun onClearChatClick() {
-        viewModelScope.launch { chatBridge.clearHistory() }
+    override fun processIntent(intent: SettingsIntent) {
+        when (intent) {
+            SettingsIntent.ClearChatClick -> viewModelScope.launch { chatBridge.clearHistory() }
+        }
     }
 }
 ```

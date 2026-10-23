@@ -1,122 +1,108 @@
 package com.takehome.drama.core.designsystem.theme
 
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
+/**
+ * Palette "Sunset Flow" — giá trị lấy nguyên từ `:root` CSS của mockup (design system E).
+ * Màn hình không đọc thẳng object này: màu Material đi qua `MaterialTheme.colorScheme`,
+ * phần còn lại qua [AppTheme.colors].
+ */
 object AppColors {
 
-    // ======================
-    // Palette - Base
-    // ======================
-    object Base {
-        val base0 = Color(0xFFFDFBFF)
-        val base0Op16 = Color(0x29FDFBFF)
-        val base0Op32 = Color(0x52FDFBFF)
-        val base0Op64 = Color(0xA3FDFBFF)
-        val base950 = Color(0xFF020202)
-        val base950Op30 = Color(0x66020202)
-        val base950Op80 = Color(0xCC020202)
-        val base950Op90 = Color(0xE6020202)
+    object Dark {
+        val bg = Color(0xFF160F0A)
+        val surface = Color(0xFF241812)
+        val surface2 = Color(0xFF2F2018)
+        val surface3 = Color(0xFF3B2A1E)
+        val text1 = Color(0xFFFFFFFF)
+        val text2 = Color(0xFFC9BCAE)
+        val text3 = Color(0xFF8F8172)
+        val text4 = Color(0xFF5E5347)
+        val border = Color(0xFF4A3325)
     }
 
-    // ======================
-    // Palette - Neutral
-    // ======================
-    object Neutral {
-        val n50 = Color(0xFFFAFAFA)
-        val n100 = Color(0xFFF4F4F5)
-        val n200 = Color(0xFFE9E9EC)
-        val n300 = Color(0xFFD6D6DA)
-        val n400 = Color(0xFFBEBEC4)
-        val n500 = Color(0xFFA3A3AA)
-        val n600 = Color(0xFF8A8A92)
-        val n700 = Color(0xFF71717A)
-        val n800 = Color(0xFF5A5A62)
-        val n900 = Color(0xFF3F3F46)
-        val n950 = Color(0xFF27272A)
+    // Design chưa có bộ light ("Light needs a light token set, still to be designed") —
+    // đây là bộ tạm suy từ palette tối, giữ đúng hue ấm, đủ tương phản cho chữ.
+    object Light {
+        val bg = Color(0xFFFFF8F2)
+        val surface = Color(0xFFFFFFFF)
+        val surface2 = Color(0xFFF6ECE3)
+        val surface3 = Color(0xFFEDDDCF)
+        val text1 = Color(0xFF1A0E05)
+        val text2 = Color(0xFF5C4838)
+        val text3 = Color(0xFF85725F)
+        val text4 = Color(0xFFB3A291)
+        val border = Color(0xFFE3CFBE)
     }
 
-    // ======================
-    // Palette - Primary
-    // ======================
-    // PLACEHOLDER — đổi cả thang này theo brand của project.
-    // Giữ nguyên tên token (p50..p950) thì không phải sửa chỗ nào khác.
-    object Primary {
-        val p50 = Color(0xFFF2F6FC)
-        val p100 = Color(0xFFE2EBF8)
-        val p200 = Color(0xFFC7D9F2)
-        val p300 = Color(0xFF9FBEE8)
-        val p400 = Color(0xFF6F9CDA)
-        val p500 = Color(0xFF4A7CC7)
-        val p600 = Color(0xFF3A63A8)
-        val p700 = Color(0xFF305089)
-        val p800 = Color(0xFF2A4470)
-        val p900 = Color(0xFF263A5E)
-        val p950 = Color(0xFF19253D)
+    object Brand {
+        val accent = Color(0xFFFF7A3C)
+        val accentPress = Color(0xFFE5602A)
+        val onAccent = Color(0xFF1A0E05)
+        val gradientStart = Color(0xFFFFB020)
+        val gradientMid = Color(0xFFFF6A3D)
+        val gradientEnd = Color(0xFFF5405F)
+
+        /** Chỉ dùng cho khoá tập — mọi ô vàng đơn sắc trong app được hiểu là khoá. */
+        val gold = Color(0xFFE0B44C)
     }
 
-    // ======================
-    // Tokens - Border
-    // ======================
-    object Border {
-        val baseOp16 = Base.base0Op16
-        val baseOp32 = Base.base0Op32
-        val primary = Primary.p500
+    object Status {
+        val success = Color(0xFF2ECC71)
+        val warning = Color(0xFFF5A623)
+        val error = Color(0xFFFF453A)
     }
 
-    // ======================
-    // Tokens - Icon
-    // ======================
-    object Icon {
-        val base = Base.base0
-        val baseOp64 = Base.base0Op64
-        val dark = Base.base950
-        val grey = Neutral.n700
-    }
-
-    // ======================
-    // Tokens - Surface
-    // ======================
-    object Surface {
-        val base = Base.base0
-        val baseOp16 = Base.base0Op16
-        val baseOp32 = Base.base0Op32
-        val dark = Base.base950
-        val darkOp50 = Base.base950Op30
-        val darkOp80 = Base.base950Op80
-        val darkOp90 = Base.base950Op90
-        val primary = Primary.p500
-    }
-
-    // ======================
-    // Tokens - Text
-    // ======================
-    object Text {
-        val base = Base.base0
-        val baseOp64 = Base.base0Op64
-        val grey = Neutral.n700
-        val inverse = Base.base950
-        val primary = Primary.p500
-    }
-
-    // ======================
-    // Tokens - Gradient
-    // ======================
-    object Gradient {
-        // Suy ra từ thang Primary -> đổi brand là gradient đổi theo, không phải sửa ở đây.
-        val button = Brush.linearGradient(
-            colors = listOf(Primary.p700, Primary.p500, Primary.p300),
-            start = Offset(0f, Float.POSITIVE_INFINITY),
-            end = Offset(Float.POSITIVE_INFINITY, 0f)
+    object Scrim {
+        val bottom = Brush.verticalGradient(
+            0f to Color.Black.copy(alpha = 0f),
+            0.55f to Color.Black.copy(alpha = 0.45f),
+            1f to Color.Black.copy(alpha = 0.88f),
+        )
+        val top = Brush.verticalGradient(
+            0f to Color.Black.copy(alpha = 0.60f),
+            1f to Color.Black.copy(alpha = 0f),
         )
     }
 
-    // ======================
-    // Tokens - Shadow
-    // ======================
-    object Shadow {
-        val dropShadow = Primary.p500.copy(alpha = 0.5f)
-        val innerShadow = Base.base0.copy(alpha = 0.8f)
-    }
+    /** CTA chính, progress, tab active, chữ DRAMA của wordmark — ngoài mấy chỗ đó không dùng. */
+    val gradientCta = Brush.horizontalGradient(
+        0f to Brand.gradientStart,
+        0.55f to Brand.gradientMid,
+        1f to Brand.gradientEnd,
+    )
 }
+
+/** Token không có chỗ trong Material `ColorScheme`. Đọc qua [AppTheme.colors]. */
+@Immutable
+data class AppExtendedColors(
+    val text3: Color,
+    val text4: Color,
+    val lock: Color,
+    val success: Color,
+    val warning: Color,
+    val gradientCta: Brush,
+    val scrimTop: Brush,
+    val scrimBottom: Brush,
+)
+
+internal val DarkExtendedColors = AppExtendedColors(
+    text3 = AppColors.Dark.text3,
+    text4 = AppColors.Dark.text4,
+    lock = AppColors.Brand.gold,
+    success = AppColors.Status.success,
+    warning = AppColors.Status.warning,
+    gradientCta = AppColors.gradientCta,
+    scrimTop = AppColors.Scrim.top,
+    scrimBottom = AppColors.Scrim.bottom,
+)
+
+internal val LightExtendedColors = DarkExtendedColors.copy(
+    text3 = AppColors.Light.text3,
+    text4 = AppColors.Light.text4,
+)
+
+val LocalAppExtendedColors = staticCompositionLocalOf { DarkExtendedColors }

@@ -1,0 +1,13 @@
+<resources>
+    <string name="onboarding_splash_title">Splash</string>
+    <string name="onboarding_language_title">Your language</string>
+    <string name="onboarding_value_prop_title">Every episode open</string>
+    <string name="onboarding_taste_title">How should tonight feel?</string>
+    <string name="onboarding_notification_title">Your flow runs three times a day</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_step_into_flow">Step into the flow</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_turn_on_notifications">Turn on notifications</string>
+    <string name="onboarding_not_now">Not now</string>
+    <string name="onboarding_skip_to_home">Skip onboarding</string>
+</resources>

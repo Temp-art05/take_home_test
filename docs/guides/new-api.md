@@ -84,21 +84,31 @@ data class ProfileViewState(
     @param:StringRes val errorRes: Int? = null,
 ) : ViewState
 
+sealed interface ProfileIntent : ViewIntent {
+    data object RetryClick : ProfileIntent
+    data class RenameConfirm(val name: String) : ProfileIntent
+}
+
 sealed interface ProfileSingleEvent : SingleEvent {
     data class ShowError(@param:StringRes val messageRes: Int) : ProfileSingleEvent
 }
 
 // presentation/profile/ProfileViewModel.kt
 class ProfileViewModel(private val profileUseCase: ProfileUseCase) :
-    BaseViewModel<ProfileViewState, ProfileSingleEvent>() {
+    BaseViewModel<ProfileIntent, ProfileViewState, ProfileSingleEvent>() {
 
     init { load() }
 
     override fun initState() = ProfileViewState()
 
-    fun onRetryClick() = load()
+    override fun processIntent(intent: ProfileIntent) {
+        when (intent) {
+            ProfileIntent.RetryClick -> load()
+            is ProfileIntent.RenameConfirm -> rename(intent.name)
+        }
+    }
 
-    fun onRenameConfirm(name: String) {
+    private fun rename(name: String) {
         viewModelScope.launch {
             profileUseCase.rename(name)
                 .onSuccess { updateState { copy(profile = it) } }
@@ -119,8 +129,7 @@ class ProfileViewModel(private val profileUseCase: ProfileUseCase) :
 // presentation/profile/ProfileScreen.kt
 ProfileContent(
     viewState = viewState,
-    onRetryClick = { viewModel.onRetryClick() },
-    onRenameConfirm = { name -> viewModel.onRenameConfirm(name) },
+    onIntent = { intent -> viewModel.processIntent(intent) },
 )
 
 // di/MainModule.kt
