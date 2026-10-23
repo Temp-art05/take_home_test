@@ -3,5 +3,5 @@ plugins {
 }
 
 android {
-    namespace = "com.base.app.feature.main"
+    namespace = "com.takehome.drama.feature.main"
 }

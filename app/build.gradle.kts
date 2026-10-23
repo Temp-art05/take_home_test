@@ -4,9 +4,8 @@ import java.util.Properties
 plugins {
     id("base.android.application")
     id("base.android.compose")
-    // Thêm app/google-services.json rồi bật 2 plugin dưới là dùng Firebase thật, không phải sửa code.
-    // alias(libs.plugins.google.services)
-    // alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 val localProperties = Properties().apply {
@@ -16,10 +15,10 @@ val localProperties = Properties().apply {
 fun localProperty(key: String): String? = localProperties.getProperty(key)?.takeIf { it.isNotBlank() }
 
 android {
-    namespace = "com.base.app"
+    namespace = "com.takehome.drama"
 
     defaultConfig {
-        applicationId = "com.base.app"
+        applicationId = "com.takehome.drama"
         versionCode = 1
         versionName = "1.0.0"
     }
@@ -51,8 +50,7 @@ android {
     productFlavors {
         create("dev") {
             dimension = "environment"
-            applicationIdSuffix = ".dev"
-            versionNameSuffix = "-dev"
+            // Không có applicationIdSuffix/versionNameSuffix: Firebase chỉ đăng ký một app, dev và prod dùng chung package và versionName.
             buildConfigField("boolean", "IS_DEV_FLAVOR", "true")
             // TODO: đổi sang BE thật
             stringBuildConfig("BASE_URL", "https://dummyjson.com/")

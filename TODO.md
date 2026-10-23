@@ -5,9 +5,8 @@ Xem `README.md` cho cấu trúc, `docs/rules/` cho quy ước code.
 ## 1. Đổi định danh
 
 - [ ] `settings.gradle.kts` → `rootProject.name` (hiện: `BaseApp`)
-- [ ] `app/build.gradle.kts` → `applicationId` (hiện: `com.base.app`)
-- [ ] Android Studio → Refactor > Rename package `com.base.app` cho mọi module
-      (nhớ `namespace` từng module)
+- [x] `app/build.gradle.kts` → `applicationId` = `com.takehome.drama`
+- [x] Package + `namespace` mọi module → `com.takehome.drama.*` (`build-logic` giữ `com.base.app.convention`)
 - [ ] `app/src/main/res/values/strings.xml` → `app_name`
 - [ ] Launcher icon: `app/src/main/res/mipmap-*` + `ic_launcher_background/foreground.xml`
 
@@ -29,9 +28,9 @@ Xem `README.md` cho cấu trúc, `docs/rules/` cho quy ước code.
 
 ## 4. Firebase (tuỳ chọn)
 
-- [ ] Tạo Firebase project, đăng ký **cả** `com.base.app` và `com.base.app.dev`
-- [ ] Đặt `google-services.json` vào `app/` (đang gitignore — muốn commit thì bỏ dòng đó)
-- [ ] Bỏ comment 2 plugin `google.services` + `firebase.crashlytics` trong `app/build.gradle.kts`
+- [x] Firebase project `take-home-test-c5997`, một app `com.takehome.drama` dùng chung dev/prod
+- [x] `google-services.json` trong `app/`, đã bỏ khỏi gitignore
+- [x] Bỏ comment 2 plugin `google.services` + `firebase.crashlytics` trong `app/build.gradle.kts`
 - [ ] Khai báo remote config key ở `:core:analytics` → `RemoteKeys.ALL_KEYS`
 
 ## 5. Signing

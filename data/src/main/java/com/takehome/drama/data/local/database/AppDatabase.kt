@@ -1,0 +1,24 @@
+package com.takehome.drama.data.local.database
+
+import androidx.room.Database
+import androidx.room.RoomDatabase
+import com.takehome.drama.data.local.dao.BookmarkDao
+import com.takehome.drama.data.local.entity.BookmarkEntity
+
+/**
+ * Bump [version] khi đổi schema và viết `Migration` — chủ ý không dùng
+ * `fallbackToDestructiveMigration()` vì nó xoá sạch dữ liệu user.
+ */
+@Database(
+    entities = [BookmarkEntity::class],
+    version = 1,
+    exportSchema = true,
+)
+abstract class AppDatabase : RoomDatabase() {
+
+    abstract fun bookmarkDao(): BookmarkDao
+
+    companion object {
+        const val NAME = "app_database"
+    }
+}

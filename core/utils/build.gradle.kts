@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.base.app.core.utils"
+    namespace = "com.takehome.drama.core.utils"
 }
 
 dependencies {

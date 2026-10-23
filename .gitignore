@@ -59,8 +59,7 @@ Thumbs.db
 .externalNativeBuild/
 .cxx/
 
-# Google Services — mỗi project tự thêm, base không kèm
-google-services.json
+# google-services.json được commit: đề bài yêu cầu, file này không phải secret
 
 # Secrets / Environment files
 *.env

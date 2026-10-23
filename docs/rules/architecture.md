@@ -6,15 +6,15 @@ Clean Architecture: `presentation → domain ← data`. `:domain` là tâm, khô
 
 | Module | Package gốc | Chứa |
 |---|---|---|
-| `:app` | `com.base.app` | `BaseApp`, `MainActivity`, `navigation/AppNavGraph`, `di/`, `fcm/` |
-| `:domain` | `com.base.app.domain` | Kotlin thuần: `model/`, `repository/` (interface), `usecase/<area>/`, `error/`, `config/` |
-| `:data` | `com.base.app.data` | `remote/`, `local/`, `mapper/`, `repository/` (impl), `util/`, `di/` |
-| `:core:utils` | `com.base.app.core.utils` | `toast/` (Toasty), `extension/`, `network/`, `notification/`, `bridge/` — tiện ích không UI-Compose, không nghiệp vụ |
-| `:core:navigation` | `com.base.app.core.navigation` | `core/` (ScreenProvider, NavigationRequest, throttle), `destination/`, `deeplink/`, `launcher/` |
-| `:core:analytics` | `com.base.app.core.analytics` | `Analytics`, `plugin/`, `crash/`, `remoteconfig/`, `util/` — mọi thứ Firebase, sau interface |
-| `:core:ui-foundation` | `com.base.app.core.ui.foundation` | `vm/` (BaseViewModel), `ext/` (CollectAsEffect), `error/` (→ string res), `locale/` |
-| `:core:design-system` | `com.base.app.core.designsystem` | `theme/`, `component/`, `ext/` |
-| `:feature:main` | `com.base.app.feature.main` | Main 3 tab + Settings |
+| `:app` | `com.takehome.drama` | `BaseApp`, `MainActivity`, `navigation/AppNavGraph`, `di/`, `fcm/` |
+| `:domain` | `com.takehome.drama.domain` | Kotlin thuần: `model/`, `repository/` (interface), `usecase/<area>/`, `error/`, `config/` |
+| `:data` | `com.takehome.drama.data` | `remote/`, `local/`, `mapper/`, `repository/` (impl), `util/`, `di/` |
+| `:core:utils` | `com.takehome.drama.core.utils` | `toast/` (Toasty), `extension/`, `network/`, `notification/`, `bridge/` — tiện ích không UI-Compose, không nghiệp vụ |
+| `:core:navigation` | `com.takehome.drama.core.navigation` | `core/` (ScreenProvider, NavigationRequest, throttle), `destination/`, `deeplink/`, `launcher/` |
+| `:core:analytics` | `com.takehome.drama.core.analytics` | `Analytics`, `plugin/`, `crash/`, `remoteconfig/`, `util/` — mọi thứ Firebase, sau interface |
+| `:core:ui-foundation` | `com.takehome.drama.core.ui.foundation` | `vm/` (BaseViewModel), `ext/` (CollectAsEffect), `error/` (→ string res), `locale/` |
+| `:core:design-system` | `com.takehome.drama.core.designsystem` | `theme/`, `component/`, `ext/` |
+| `:feature:main` | `com.takehome.drama.feature.main` | Main 3 tab + Settings |
 
 ```
 app          → mọi module
@@ -36,7 +36,7 @@ Quy tắc cứng:
 ### Feature
 
 ```
-feature/foo/src/main/java/com/base/app/feature/foo/
+feature/foo/src/main/java/com/takehome/drama/feature/foo/
   di/                 FooModule.kt — viewModelOf(...), bind bridge impl
   navigation/         FooScreenProvider.kt (Destination @Serializable khai bên trong)
   presentation/
@@ -94,7 +94,7 @@ chạy một tác vụ: khai interface ở `:core:utils/bridge`, impl trong feat
 A inject interface, không import B.
 
 ```kotlin
-// :core:utils — com.base.app.core.utils.bridge (bridge có @Composable → thêm id("base.android.compose") vào core/utils/build.gradle.kts)
+// :core:utils — com.takehome.drama.core.utils.bridge (bridge có @Composable → thêm id("base.android.compose") vào core/utils/build.gradle.kts)
 interface ChatBridge {
     @Composable
     fun ChatPanel(conversationId: String, modifier: Modifier)
@@ -102,7 +102,7 @@ interface ChatBridge {
     suspend fun clearHistory()
 }
 
-// :feature:chat — com.base.app.feature.chat.bridge
+// :feature:chat — com.takehome.drama.feature.chat.bridge
 class ChatBridgeImpl(
     private val chatHistory: ChatHistoryUseCase,
 ) : ChatBridge {

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.base.app.core.designsystem"
+    namespace = "com.takehome.drama.core.designsystem"
 }
 
 dependencies {

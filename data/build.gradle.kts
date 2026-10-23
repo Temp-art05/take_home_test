@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.base.app.data"
+    namespace = "com.takehome.drama.data"
 }
 
 room {

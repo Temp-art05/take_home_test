@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.base.app.core.navigation"
+    namespace = "com.takehome.drama.core.navigation"
 }
 
 dependencies {

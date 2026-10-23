@@ -96,8 +96,9 @@ Base **không kèm `google-services.json`** và vẫn chạy được. Mọi th�
 | `CrashReporter` | `NoOpCrashReporter` | `FirebaseCrashReporter` |
 | `RemoteConfigSource` | `NoOpRemoteConfigSource` | `RemoteConfigManager` |
 
-Guard duy nhất: `isFirebaseAvailable(context)`. Thêm `app/google-services.json` + bỏ comment 2 plugin
-trong `app/build.gradle.kts` là dùng impl thật. Đăng ký cả `com.base.app` và `com.base.app.dev`.
+Guard duy nhất: `isFirebaseAvailable(context)`. `app/google-services.json` đã commit (project
+`take-home-test-c5997`), 2 plugin Firebase đã bật. Firebase chỉ đăng ký **một** app `com.takehome.drama`
+nên flavor `dev` không có `applicationIdSuffix`/`versionNameSuffix` — đừng thêm lại.
 
 Remote config: fetch single-flight, seed default của `RemoteKeys` vào Firebase, nạp giá trị phiên trước
 từ DataStore lúc khởi tạo; debug build fetch interval = 0.

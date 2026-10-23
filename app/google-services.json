@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "831021208405",
+    "project_id": "take-home-test-c5997",
+    "storage_bucket": "take-home-test-c5997.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:831021208405:android:1826b126352525799795dc",
+        "android_client_info": {
+          "package_name": "com.takehome.drama"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQsGIaC1YfALewn7Nv0bQQ0tEWIdo0X-8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
