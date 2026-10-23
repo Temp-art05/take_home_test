@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.navigation.AppNavGraph
+import com.takehome.drama.navigation.DebugScreenLauncher
 
 /**
  * Dùng AppCompatActivity (không phải ComponentActivity) vì in-app language picker gọi
@@ -26,6 +27,13 @@ class MainActivity : AppCompatActivity() {
         // không phải mặc định của base.
         enableEdgeToEdge()
 
+        // Chỉ bản dev, và chỉ lần mở đầu (không phải recreate): mở thẳng màn theo mã SCR để chụp so mockup.
+        val debugStart = if (BuildConfig.IS_DEV_FLAVOR && savedInstanceState == null) {
+            DebugScreenLauncher.startDestination(intent)
+        } else {
+            null
+        }
+
         setContent {
             AppTheme {
                 Surface(
@@ -33,7 +41,11 @@ class MainActivity : AppCompatActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    AppNavGraph(navController = navController)
+                    if (debugStart != null) {
+                        AppNavGraph(navController = navController, startDestination = debugStart)
+                    } else {
+                        AppNavGraph(navController = navController)
+                    }
                 }
             }
         }

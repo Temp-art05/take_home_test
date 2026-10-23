@@ -15,8 +15,12 @@ class MainScreenProvider(
     private val watchRoutes: WatchRoutes,
 ) : ScreenProvider<MainScreenProvider.Main, MainViewModel>() {
 
+    /**
+     * [initialTab] là tên một `MainTab` (null = Home). Dùng khi một lối vào cần mở thẳng một tab —
+     * hiện là launcher debug mở màn theo mã SCR để chụp so mockup.
+     */
     @Serializable
-    data object Main : Destination
+    data class Main(val initialTab: String? = null) : Destination
 
     override val typeMap: Map<KType, NavType<*>> = emptyMap()
 

@@ -11,6 +11,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.takehome.drama.core.navigation.core.LocalNavController
 import com.takehome.drama.core.navigation.core.applyDestination
+import com.takehome.drama.core.navigation.destination.Destination
 import com.takehome.drama.feature.main.navigation.HistoryScreenProvider
 import com.takehome.drama.feature.main.navigation.LanguageScreenProvider
 import com.takehome.drama.feature.main.navigation.MainScreenProvider
@@ -32,11 +33,14 @@ private const val NAV_ANIM_OFFSET_FRACTION = 0.1f
  * truyền destination vào ScreenProvider. Nhờ vậy feature không phụ thuộc lẫn nhau.
  */
 @Composable
-fun AppNavGraph(navController: NavHostController) {
+fun AppNavGraph(
+    navController: NavHostController,
+    startDestination: Destination = SplashScreenProvider.Splash,
+) {
     CompositionLocalProvider(LocalNavController provides navController) {
         NavHost(
             navController = navController,
-            startDestination = SplashScreenProvider.Splash,
+            startDestination = startDestination,
             enterTransition = {
                 slideInHorizontally(
                     initialOffsetX = { (it * NAV_ANIM_OFFSET_FRACTION).toInt() },
@@ -62,7 +66,7 @@ fun AppNavGraph(navController: NavHostController) {
                 ) + fadeOut(animationSpec = tween(NAV_ANIM_DURATION))
             }
         ) {
-            val home = MainScreenProvider.Main
+            val home = MainScreenProvider.Main()
 
             // Onboarding — SCR-0001…0005
             applyDestination(SplashScreenProvider(home = home))

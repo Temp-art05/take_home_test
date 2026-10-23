@@ -1,0 +1,9 @@
+{
+  "name": "ui-check",
+  "private": true,
+  "description": "Chụp khung màn trong mockup HTML theo mã SCR để so với ảnh chụp app trên emulator.",
+  "type": "module",
+  "dependencies": {
+    "playwright-core": "1.48.2"
+  }
+}
