@@ -41,6 +41,9 @@ class FakeWatchProgressRepository : WatchProgressRepository {
     override fun observeLatestPerShow(): Flow<List<WatchProgress>> = rows.map { list ->
         list.groupBy { it.showId }.values.map { it.maxBy { p -> p.updatedAt } }.sortedByDescending { it.updatedAt }
     }
+
+    override fun observeForShow(showId: String): Flow<List<WatchProgress>> =
+        rows.map { list -> list.filter { it.showId == showId }.sortedBy { it.episodeIndex } }
 }
 
 class FakeSavedShowRepository : SavedShowRepository {

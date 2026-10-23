@@ -16,4 +16,6 @@ interface UserPreferencesRepository {
     suspend fun setOnboardingDone(done: Boolean): Result<Unit>
 
     suspend fun setAutoplayPreviewWifiOnly(wifiOnly: Boolean): Result<Unit>
+
+    suspend fun setAutoplayNextEpisode(enabled: Boolean): Result<Unit>
 }

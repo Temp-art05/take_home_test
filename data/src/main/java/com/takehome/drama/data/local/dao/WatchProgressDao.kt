@@ -27,4 +27,7 @@ interface WatchProgressDao {
         """,
     )
     fun observeLatestPerShow(): Flow<List<WatchProgressEntity>>
+
+    @Query("SELECT * FROM watch_progress WHERE show_id = :showId ORDER BY episode_index")
+    fun observeForShow(showId: String): Flow<List<WatchProgressEntity>>
 }

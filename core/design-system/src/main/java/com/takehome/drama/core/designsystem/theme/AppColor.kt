@@ -68,6 +68,29 @@ object AppColors {
         )
     }
 
+    /**
+     * Chữ/nút đè lên video (`.pl`, `.btn-g`, `.eppill`, `.ptrack` của mockup). Luôn trắng/đen trên
+     * media nên không đổi theo theme.
+     */
+    object Media {
+        val glass = Color.White.copy(alpha = 0.12f)
+        val glassStrong = Color.White.copy(alpha = 0.14f)
+        val glassBorder = Color.White.copy(alpha = 0.20f)
+        val track = Color.White.copy(alpha = 0.25f)
+        /** Progress khi đang buffer (SCR-0604) — mờ để không gợi ý đang phát. */
+        val trackDimmed = Color.White.copy(alpha = 0.45f)
+        val spinnerTrack = Color.White.copy(alpha = 0.22f)
+        val textBody = Color.White.copy(alpha = 0.82f)
+        val textSecondary = Color.White.copy(alpha = 0.70f)
+        val textMuted = Color.White.copy(alpha = 0.60f)
+        val textFaint = Color.White.copy(alpha = 0.55f)
+        /** Nền mờ sau sheet (`.dim`). */
+        val sheetScrim = Color.Black.copy(alpha = 0.72f)
+        /** Art tối 50% lúc buffering (`filter: brightness(.5)`). */
+        val bufferingDim = Color.Black.copy(alpha = 0.50f)
+        val textShadow = Color.Black.copy(alpha = 0.60f)
+    }
+
     /** CTA chính, progress, tab active, chữ DRAMA của wordmark — ngoài mấy chỗ đó không dùng. */
     val gradientCta = Brush.horizontalGradient(
         0f to Brand.gradientStart,
@@ -87,6 +110,27 @@ data class AppExtendedColors(
     val gradientCta: Brush,
     val scrimTop: Brush,
     val scrimBottom: Brush,
+    val media: MediaColors = MediaColors(),
+)
+
+/** Màu cho lớp UI đè lên video — xem [AppColors.Media]. */
+@Immutable
+data class MediaColors(
+    val glass: Color = AppColors.Media.glass,
+    val glassStrong: Color = AppColors.Media.glassStrong,
+    val glassBorder: Color = AppColors.Media.glassBorder,
+    val track: Color = AppColors.Media.track,
+    val trackDimmed: Color = AppColors.Media.trackDimmed,
+    val spinnerTrack: Color = AppColors.Media.spinnerTrack,
+    val text: Color = Color.White,
+    val textBody: Color = AppColors.Media.textBody,
+    val textSecondary: Color = AppColors.Media.textSecondary,
+    val textMuted: Color = AppColors.Media.textMuted,
+    val textFaint: Color = AppColors.Media.textFaint,
+    val sheetScrim: Color = AppColors.Media.sheetScrim,
+    val bufferingDim: Color = AppColors.Media.bufferingDim,
+    val textShadow: Color = AppColors.Media.textShadow,
+    val background: Color = Color.Black,
 )
 
 internal val DarkExtendedColors = AppExtendedColors(

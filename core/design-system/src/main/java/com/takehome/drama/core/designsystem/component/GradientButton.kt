@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -62,6 +63,48 @@ fun OutlinePillButton(
         contentColor = MaterialTheme.colorScheme.onBackground,
         leadingIcon = leadingIcon,
     )
+}
+
+/** `.btn-g` của mockup: kính mờ trắng 12% + viền 20% — nút phụ đặt trên ảnh/video. */
+@Composable
+fun GhostPillButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    leadingIcon: (@Composable () -> Unit)? = null,
+) {
+    val media = AppTheme.colors.media
+    PillButton(
+        text = text,
+        onClick = onClick,
+        modifier = modifier
+            .background(media.glass, AppTheme.shapes.full)
+            .border(1.dp, media.glassBorder, AppTheme.shapes.full),
+        enabled = true,
+        contentColor = media.text,
+        leadingIcon = leadingIcon,
+    )
+}
+
+/** `.btn-g` chỉ có icon (nút ＋ lưu ở SCR-0301): tròn, cao bằng nút chính. */
+@Composable
+fun GhostIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val media = AppTheme.colors.media
+    Box(
+        modifier = modifier
+            .size(AppTheme.dimensions.touchTarget)
+            .clip(AppTheme.shapes.full)
+            .background(media.glass, AppTheme.shapes.full)
+            .border(1.dp, media.glassBorder, AppTheme.shapes.full)
+            .clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        content()
+    }
 }
 
 @Composable

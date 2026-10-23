@@ -42,6 +42,9 @@ firebaseCrashlytics = "3.0.8"
 # Coil
 coil = "3.6.3"
 
+# Media3 (ExoPlayer)
+media3 = "1.11.1"
+
 # Test
 junit = "4.13.2"
 turbine = "1.2.1"
@@ -117,6 +120,10 @@ firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 coil-gif = { group = "io.coil-kt.coil3", name = "coil-gif", version.ref = "coil" }
+
+# Media3
+media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+media3-ui-compose = { group = "androidx.media3", name = "media3-ui-compose", version.ref = "media3" }
 
 # Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }

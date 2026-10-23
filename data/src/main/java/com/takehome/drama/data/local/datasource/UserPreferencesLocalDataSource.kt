@@ -42,4 +42,5 @@ object UserPreferencesKeys {
     val THEME = stringPreferencesKey("theme")
     val ONBOARDING_DONE = booleanPreferencesKey("onboarding_done")
     val AUTOPLAY_PREVIEW_WIFI_ONLY = booleanPreferencesKey("autoplay_preview_wifi_only")
+    val AUTOPLAY_NEXT_EPISODE = booleanPreferencesKey("autoplay_next_episode")
 }

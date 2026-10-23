@@ -7,6 +7,8 @@ data class UserPreferences(
     val theme: ThemeMode = ThemeMode.Dark,
     val onboardingDone: Boolean = false,
     val autoplayPreviewWifiOnly: Boolean = true,
+    /** Hết tập thì tự sang tập kế (nếu tập kế free) — switch ở sheet SCR-0304. */
+    val autoplayNextEpisode: Boolean = true,
 )
 
 enum class ThemeMode { Dark, Light }

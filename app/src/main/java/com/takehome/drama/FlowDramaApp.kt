@@ -10,6 +10,7 @@ import com.takehome.drama.core.analytics.analyticsModule
 import com.takehome.drama.core.analytics.remoteconfig.RemoteConfigSource
 import com.takehome.drama.core.analytics.remoteconfig.remoteConfigModule
 import com.takehome.drama.core.designsystem.component.appImageLoader
+import com.takehome.drama.core.media.mediaModule
 import com.takehome.drama.core.navigation.core.skeletonModule
 import com.takehome.drama.core.utils.notification.NotificationHelper
 import com.takehome.drama.data.di.dataModule
@@ -17,6 +18,8 @@ import com.takehome.drama.di.AppScope
 import com.takehome.drama.di.appModule
 import com.takehome.drama.di.configModule
 import com.takehome.drama.feature.main.di.mainModule
+import com.takehome.drama.feature.watch.di.watchModule
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
@@ -49,8 +52,11 @@ class FlowDramaApp : Application(), SingletonImageLoader.Factory {
                 analyticsModule(isDebug = BuildConfig.IS_DEBUG),
                 remoteConfigModule,
                 dataModule,
+                // Dev: `adb shell run-as com.takehome.drama touch files/force_low_tier` để ép chính sách máy yếu.
+                mediaModule(forceLowTier = { BuildConfig.IS_DEV_FLAVOR && File(filesDir, "force_low_tier").exists() }),
                 skeletonModule,
                 mainModule,
+                watchModule,
             )
         }
 

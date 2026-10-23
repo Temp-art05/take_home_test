@@ -38,6 +38,9 @@ class UserPreferencesRepositoryImpl(
     override suspend fun setAutoplayPreviewWifiOnly(wifiOnly: Boolean) =
         write(UserPreferencesKeys.AUTOPLAY_PREVIEW_WIFI_ONLY, wifiOnly)
 
+    override suspend fun setAutoplayNextEpisode(enabled: Boolean) =
+        write(UserPreferencesKeys.AUTOPLAY_NEXT_EPISODE, enabled)
+
     private suspend fun <T> write(key: Preferences.Key<T>, value: T): Result<Unit> =
         withLocalCatching { local.set(key, value) }
 
@@ -49,6 +52,7 @@ class UserPreferencesRepositoryImpl(
             theme = ThemeMode.entries.firstOrNull { it.name == this[UserPreferencesKeys.THEME] } ?: defaults.theme,
             onboardingDone = this[UserPreferencesKeys.ONBOARDING_DONE] ?: defaults.onboardingDone,
             autoplayPreviewWifiOnly = this[UserPreferencesKeys.AUTOPLAY_PREVIEW_WIFI_ONLY] ?: defaults.autoplayPreviewWifiOnly,
+            autoplayNextEpisode = this[UserPreferencesKeys.AUTOPLAY_NEXT_EPISODE] ?: defaults.autoplayNextEpisode,
         )
     }
 }

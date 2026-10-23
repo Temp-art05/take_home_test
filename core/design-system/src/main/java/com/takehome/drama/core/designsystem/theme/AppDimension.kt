@@ -25,6 +25,12 @@ data class AppDimension(
     val iconButton: Dp = 40.dp,
     val icon: Dp = 22.dp,
     val tabIcon: Dp = 23.dp,
+
+    /** Ô tập `.ep` (SCR-0301/0303). */
+    val episodeCell: Dp = 48.dp,
+    val episodeLock: Dp = 11.dp,
+    /** Icon rail player `.rail svg`. */
+    val railIcon: Dp = 29.dp,
 )
 
 val LocalAppDimension = staticCompositionLocalOf { AppDimension() }

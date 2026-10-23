@@ -67,6 +67,18 @@ log/analytics hành động gắn được ở một chỗ, và luồng dữ li�
 - Ảnh: `AppAsyncImage`, không gọi thẳng Coil.
 - String thuộc module nào nằm ở module đó.
 
+## Màn có video (`:core:media`)
+
+- ViewModel **sở hữu** `EpisodeFeedPlayer` (tạo qua `EpisodeFeedPlayerFactory`, `release()` ở `onCleared`) — xoay
+  máy không dựng lại player, không rebuffer. Screen chỉ vẽ `VideoSurface(viewModel.player)`.
+- Luồng vuốt dọc (Player, Reels): **một** player gắn vào trang đã settle, trang lân cận hiện poster; preload
+  do player lo theo `MediaProfile` (máy yếu preload ít hơn). Pager báo `PageSettled` → VM; VM đổi tập từ chỗ
+  khác thì phát `ScrollToEpisode` → pager cuộn. Vị trí phát (tick 500ms) chỉ thanh track đọc.
+- Lifecycle là intent: `LifecycleEventEffect(ON_START/ON_STOP)` → `ScreenStarted` / `ScreenStopped`; VM quyết
+  định pause + lưu vị trí, và chỉ phát lại nếu trước khi vào nền đang phát.
+- Thứ cần sống qua process death (tập đang xem, tốc độ, quality) ghi vào `SavedStateHandle`; vị trí phát lấy
+  lại từ Room. Test VM bằng player giả, không cần ExoPlayer.
+
 ## Navigation
 
 - Destination là `@Serializable data object/class : Destination`, khai **bên trong** `ScreenProvider`.
