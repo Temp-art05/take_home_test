@@ -22,6 +22,7 @@ fun Throwable.toDomainException(): DomainException = when (this) {
     is DomainException -> this
     is ApiException -> when {
         isUnauthorized -> DomainException.Unauthorized(this)
+        isNotFound -> DomainException.NotFound(this)
         else -> DomainException.Server(statusCode = status, message = serverMessage, cause = this)
     }
     is HttpRequestTimeoutException,

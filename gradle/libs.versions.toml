@@ -42,6 +42,12 @@ firebaseCrashlytics = "3.0.8"
 # Coil
 coil = "3.6.3"
 
+# Test
+junit = "4.13.2"
+turbine = "1.2.1"
+robolectric = "4.17"
+androidxTestCore = "1.7.0"
+
 [libraries]
 # Gradle plugin artifacts — chỉ dùng trong build-logic (convention plugins)
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -112,9 +118,17 @@ coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref 
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 coil-gif = { group = "io.coil-kt.coil3", name = "coil-gif", version.ref = "coil" }
 
+# Test
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+androidx-test-core = { group = "androidx.test", name = "core-ktx", version.ref = "androidxTestCore" }
+
 [bundles]
 ktor = ["ktor-client-core", "ktor-client-okhttp", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging"]
 room = ["room-runtime", "room-ktx"]
+unit-test = ["junit", "kotlinx-coroutines-test", "turbine"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

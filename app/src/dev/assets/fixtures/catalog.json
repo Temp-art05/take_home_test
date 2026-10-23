@@ -1,0 +1,450 @@
+{
+  "version": 1,
+  "defaultLanguage": "en",
+  "availableLanguages": [
+    "en",
+    "ar",
+    "hi",
+    "id",
+    "ta"
+  ],
+  "tags": [
+    {
+      "id": "trending",
+      "name": {
+        "en": "Trending"
+      },
+      "isCategory": false,
+      "orderPriority": 10
+    },
+    {
+      "id": "popular",
+      "name": {
+        "en": "Popular"
+      },
+      "isCategory": false,
+      "orderPriority": 20
+    },
+    {
+      "id": "newest",
+      "name": {
+        "en": "Newest"
+      },
+      "isCategory": false,
+      "orderPriority": 30
+    },
+    {
+      "id": "fantasy",
+      "name": {
+        "en": "Fantasy",
+        "ar": "فانتازيا",
+        "hi": "फैंटेसी",
+        "id": "Fantasi",
+        "ta": "ஃபேண்டஸி"
+      },
+      "isCategory": true,
+      "orderPriority": 40
+    },
+    {
+      "id": "ceo",
+      "name": {
+        "en": "CEO",
+        "ar": "رئيس_تنفيذي_متسلط",
+        "hi": "दबंगCEO",
+        "id": "CEODominan",
+        "ta": "ஆதிக்கமிக்கCEO"
+      },
+      "isCategory": true,
+      "orderPriority": 50
+    },
+    {
+      "id": "sweet-romance",
+      "name": {
+        "en": "SweetRomance",
+        "ar": "رومانسية_حلوة",
+        "hi": "मीठारोमांस",
+        "id": "RomansaManis",
+        "ta": "இனிமையானகாதல்"
+      },
+      "isCategory": true,
+      "orderPriority": 60
+    },
+    {
+      "id": "comedy",
+      "name": {
+        "en": "Comedy",
+        "ar": "كوميديا",
+        "hi": "कॉमेडी",
+        "id": "Komedi",
+        "ta": "நகைச்சுவை"
+      },
+      "isCategory": true,
+      "orderPriority": 70
+    },
+    {
+      "id": "plot-twist",
+      "name": {
+        "en": "PlotTwist",
+        "ar": "مفاجآت",
+        "hi": "ट्विस्ट",
+        "id": "PlotTwist",
+        "ta": "எதிர்பாராததிருப்பம்"
+      },
+      "isCategory": true,
+      "orderPriority": 80
+    },
+    {
+      "id": "urban",
+      "name": {
+        "en": "Urban",
+        "ar": "حياة_مدينية",
+        "hi": "शहरी",
+        "id": "KehidupanKota",
+        "ta": "நகரவாழ்க்கை"
+      },
+      "isCategory": true,
+      "orderPriority": 90
+    },
+    {
+      "id": "contract-marriage",
+      "name": {
+        "en": "ContractMarriage",
+        "ar": "زواج_تعاقدي",
+        "hi": "अनुबंध_विवाह",
+        "id": "Pernikahan_Kontrak",
+        "ta": "ஒப்பந்தத் திருமணம்"
+      },
+      "isCategory": true,
+      "orderPriority": 100
+    },
+    {
+      "id": "marriage-first-love-later",
+      "name": {
+        "en": "MarriageFirstLoveLater"
+      },
+      "isCategory": true,
+      "orderPriority": 110
+    },
+    {
+      "id": "angsty-romance",
+      "name": {
+        "en": "AngstyRomance",
+        "ar": "حب_مؤلم",
+        "hi": "दर्दभरा_प्यार",
+        "id": "Cinta_Penuh_Luka",
+        "ta": "வலிநிறைந்த_காதல்"
+      },
+      "isCategory": true,
+      "orderPriority": 120
+    },
+    {
+      "id": "reunion",
+      "name": {
+        "en": "Reunion",
+        "ar": "عودة_الحب",
+        "hi": "बिछड़े_प्रेमियों_का_मिलन",
+        "id": "Cinta_Bersemi_Kembali",
+        "ta": "பிரிந்த_காதலர்கள்_மீண்டும்_இணைதல்"
+      },
+      "isCategory": true,
+      "orderPriority": 130
+    },
+    {
+      "id": "love",
+      "name": {
+        "en": "Love",
+        "ar": "رومانسية",
+        "hi": "रोमांस",
+        "id": "Romansa",
+        "ta": "காதல்"
+      },
+      "isCategory": true,
+      "orderPriority": 140
+    },
+    {
+      "id": "comeback",
+      "name": {
+        "en": "Comeback",
+        "ar": "نهوض",
+        "hi": "पलटवार",
+        "id": "BangkitMelawan",
+        "ta": "எதிர்த்தெழுதல்"
+      },
+      "isCategory": true,
+      "orderPriority": 150
+    },
+    {
+      "id": "revenge",
+      "name": {
+        "en": "Revenge",
+        "ar": "انتقام",
+        "hi": "बदला",
+        "id": "BalasDendam",
+        "ta": "பழிவாங்குதல்"
+      },
+      "isCategory": true,
+      "orderPriority": 160
+    },
+    {
+      "id": "underdog-triumph",
+      "name": {
+        "en": "UnderdogTriumph",
+        "ar": "النهوض_من_جديد",
+        "hi": "वापसी",
+        "id": "BangkitKembali",
+        "ta": "மீண்டெழுதல்"
+      },
+      "isCategory": true,
+      "orderPriority": 170
+    },
+    {
+      "id": "redemption",
+      "name": {
+        "en": "Redemption",
+        "ar": "الخلاص",
+        "hi": "मुक्ति",
+        "id": "Penebusan",
+        "ta": "மீட்பு"
+      },
+      "isCategory": true,
+      "orderPriority": 180
+    }
+  ],
+  "home": {
+    "heroShowId": "12485",
+    "heroRank": 1
+  },
+  "shows": [
+    {
+      "id": "12485",
+      "title": {
+        "en": "My Wolf King Employer Is Super Clingy",
+        "ar": "صاحب عملي ملك الذئاب شديد التعلّق بي",
+        "hi": "मेरा वुल्फ किंग बॉस मुझसे बेहद चिपका रहता है",
+        "id": "Majikanku Sang Raja Serigala Sangat Lengket",
+        "ta": "என் ஓநாய் ராஜா முதலாளி என்னை விட்டு பிரியவே மாட்டார்"
+      },
+      "synopsis": {
+        "en": "Bella, a destitute widow with nothing to her name, stumbles upon the gravely wounded leader of the Wolf Clan and saves his life. In a critical moment, she uses her breast milk to aid his recovery before fleeing in a panic. Upon waking, the Wolf leader is astonished to discover that Bella has broken the curse that caused him to recoil from any woman who touched him. He then mobilizes the city’s full resources in a frantic search to find her. Later, Bella takes a job as a wet nurse at a lavish estate, unaware that the owner is the very same Wolf leader she had previously saved.\n\nHis interest in Bella quickly turns into an intense obsession; he begins to pursue her with unbridled passion and a fierce desire to claim her heart. As Bella struggles to fend off enemies closing in from all sides, she also continues to evade his advances. Soon, the two find themselves entangled in a dangerous relationship where power, desire, and forbidden emotions collide.",
+        "ar": "بيلا أرملة مفلسة لا تملك شيئًا، تصادف ذات يوم زعيم عشيرة الذئاب وهو مصاب بجروح خطيرة، فتنقذه. وفي لحظة حرجة، تستخدم حليب ثديها لمساعدته على الشفاء، ثم تهرب مذعورة. عندما يستيقظ زعيم الذئاب، يكتشف بدهشة أن بيلا قد كسرت اللعنة التي كانت تجعله ينفر من جميع النساء بمجرد أن تلمسه إحداهن. عندها يسخّر كل قوى المدينة للبحث عنها بجنون. لاحقًا، تتقدم بيلا للعمل كمرضعة في قصر فخم، من دون أن تدرك أن مالك القصر هو نفسه زعيم الذئاب الذي أنقذته من قبل.\n\nيتحول اهتمامه ببيلا إلى هوس شديد، فيبدأ بملاحقتها بعاطفة جامحة ورغبة قوية في امتلاك قلبها. وبينما تحاول بيلا التصدي للأعداء القادمين من كل جانب، تواصل أيضًا الهروب من محاولاته للتقرب منها. وسرعان ما يجد الاثنان نفسيهما عالقين في علاقة خطيرة تتشابك فيها السلطة والرغبة والمشاعر المحرمة.",
+        "hi": "बेला एक निर्धन विधवा है। संयोग से वह गंभीर रूप से घायल भेड़िया कबीले के मुखिया को बचाती है। उसकी जान बचाने की हड़बड़ी में बेला अपने स्तन के दूध से उसका उपचार करती है और फिर घबराकर वहाँ से भाग जाती है। होश में आने के बाद भेड़िया कबीले का मुखिया यह जानकर हैरान रह जाता है कि बेला ने उस अभिशाप को तोड़ दिया है, जिसके कारण किसी भी महिला के छूते ही उसका शरीर उसे अस्वीकार कर देता था। वह बेला को खोजने के लिए पूरे शहर की ताकत झोंक देता है। बाद में बेला एक विशाल हवेली में धाय माँ की नौकरी स्वीकार करती है, लेकिन उसे बिल्कुल भी पता नहीं होता कि हवेली का मालिक वही भेड़िया कबीले का मुखिया है जिसे उसने उस दिन बचाया था।\n\nवह बेला के प्रति गहरी आसक्ति विकसित कर लेता है और बेहद अधिकारपूर्ण तरीके से उसका पीछा करने लगता है। दूसरी ओर, बेला को चारों तरफ से आने वाले दुश्मनों का सामना करने के साथ-साथ उसके प्रेम-प्रस्तावों से भी बचना पड़ता है। धीरे-धीरे दोनों सत्ता, इच्छा और वर्जित भावनाओं से भरे एक खतरनाक रिश्ते में उलझ जाते हैं।",
+        "id": "Bella, seorang janda yang hidup tanpa uang sepeser pun, secara tidak sengaja menyelamatkan pemimpin klan serigala yang terluka parah. Dalam keadaan mendesak, ia menggunakan ASI-nya untuk membantu menyembuhkan pria itu, lalu melarikan diri dengan panik. Setelah sadar, sang pemimpin serigala terkejut ketika mengetahui bahwa Bella telah mematahkan kutukan yang membuat tubuhnya menolak setiap wanita yang menyentuhnya. Ia pun mengerahkan seluruh kekuatan di kota untuk mencari Bella dengan mati-matian. Kemudian, Bella melamar pekerjaan sebagai pengasuh di sebuah kediaman besar, tanpa menyadari sedikit pun bahwa pemilik kediaman tersebut adalah pemimpin serigala yang pernah ia selamatkan.\n\nPria itu mulai terobsesi berat pada Bella dan mengejarnya tanpa henti dengan sikap posesif yang luar biasa. Sementara Bella harus menghadapi berbagai musuh, ia juga terus berusaha menghindari perhatian dan rayuannya. Keduanya pun terseret ke dalam hubungan berbahaya yang dipenuhi kekuasaan, hasrat, dan perasaan terlarang.",
+        "ta": "கையில் ஒரு காசுகூட இல்லாத விதவையான பெல்லா, தற்செயலாக படுகாயமடைந்த ஓநாய் குலத் தலைவனை காப்பாற்றுகிறாள். அவசரமான சூழ்நிலையில் அவனைக் குணப்படுத்த தனது தாய்ப்பாலைப் பயன்படுத்திய பின்னர், பதற்றத்துடன் அங்கிருந்து தப்பிச் செல்கிறாள். கண்விழித்த ஓநாய் குலத் தலைவன், எந்தப் பெண் தன்னைத் தொட்டாலும் அவளை நிராகரிக்கச் செய்த தனது சாபத்தை பெல்லா உடைத்துவிட்டதை அறிந்து அதிர்ச்சியடைகிறான். உடனே நகரம் முழுவதிலுமுள்ள தனது சக்தியைப் பயன்படுத்தி அவளை வெறித்தனமாகத் தேடத் தொடங்குகிறான். பின்னர் பெல்லா ஒரு பெரிய மாளிகையில் செவிலித்தாயாக வேலைக்குச் சேர்கிறாள். ஆனால் அந்த மாளிகையின் உரிமையாளர், தான் முன்பு காப்பாற்றிய அதே ஓநாய் குலத் தலைவன் என்பதை அவள் சிறிதும் உணரவில்லை.\n\nஅவன் பெல்லாவின் மீது தீவிரமான பற்றையும் வெறித்தனமான காதலையும் வளர்த்துக்கொண்டு, மிகுந்த உரிமை உணர்வுடன் அவளைத் தொடர்ந்து காதலிக்க முயல்கிறான். ஒருபுறம் பல திசைகளிலிருந்தும் வரும் எதிரிகளை எதிர்கொள்ளும் பெல்லா, மறுபுறம் அவனது காதல் முயற்சிகளிலிருந்தும் தப்பிக்க முயல்கிறாள். இறுதியில் இருவரும் அதிகாரம், ஆசை மற்றும் தடைசெய்யப்பட்ட உணர்வுகள் பின்னிப் பிணைந்த ஆபத்தான காதல் உறவில் சிக்கிக் கொள்கிறார்கள்."
+      },
+      "hook": {
+        "en": "",
+        "ar": "",
+        "hi": "",
+        "id": "",
+        "ta": ""
+      },
+      "posterUrl": "https://flowdrama.luonluon.com/thumbnails/12485.jpeg",
+      "episodeCount": 44,
+      "status": "completed",
+      "viewCount": 472000,
+      "tagIds": [
+        "fantasy",
+        "ceo",
+        "sweet-romance"
+      ]
+    },
+    {
+      "id": "12692",
+      "title": {
+        "en": "The Good Girl in the Adult Shop",
+        "ar": "الفتاة المطيعة في متجر مستلزمات البالغين",
+        "hi": "एडल्ट प्रोडक्ट स्टोर की भोली लड़की",
+        "id": "Gadis Manis di Toko Produk Dewasa",
+        "ta": "வயது வந்தோருக்கான பொருட்கள் கடையில் இருக்கும் அப்பாவிப் பெண்"
+      },
+      "synopsis": {
+        "en": "Before he passed away, my father left my mother an adult goods store; consequently, I spent much of my childhood watching my parents share romantic moments on the display bed in the shop. Now, having turned eighteen, I was suddenly struck by the idea of ​​trying out that legendary bed myself—but no sooner had I lain down than I got stuck, unable to move. Just as I was wishing the ground would open up and swallow me from sheer embarrassment, a stranger walked in, stared at me for three seconds, and asked in all seriousness, \"Is this a new model of inflatable doll?\" Frozen in shock, I tried to explain, only to discover I couldn't even speak. He stepped closer and closer, searching for my \"power button\"... I had never felt such regret in my life, yet at the same time, I had a vague premonition that this misunderstanding would steer my life in a direction I had never imagined.",
+        "ar": "ترك والدي لأمي قبل وفاته متجرًا لمستلزمات البالغين، ولذلك قضيت طفولتي تقريبًا وأنا أشاهد والديّ يتبادلان لحظاتهما الرومانسية على السرير المخصص للعرض في المتجر. والآن، بعد أن بلغت الثامنة عشرة، راودتني فجأة فكرة تجربة ذلك السرير الأسطوري بنفسي، لكن ما إن استلقيت عليه حتى علقت فيه ولم أعد قادرة على الحركة. وبينما كنت أشعر بإحراج شديد وأتمنى لو تنشق الأرض وتبتلعني، دخل رجل غريب إلى المتجر، وحدق بي لثلاث ثوانٍ، ثم سأل بجدية تامة: «هل هذه دمية هوائية من الطراز الجديد؟» تجمدت في مكاني من شدة الصدمة، وحاولت أن أشرح له، لكنني اكتشفت أنني عاجزة حتى عن الكلام. أخذ يقترب أكثر فأكثر، وبدأ يبحث عن مكان «زر التشغيل» الخاص بي... لم أشعر بالندم في حياتي كما شعرت في تلك اللحظة، لكن في الوقت نفسه، كان لدي إحساس غامض بأن سوء الفهم هذا سيقود حياتي إلى اتجاه لم أتوقعه على الإطلاق.",
+        "hi": "मेरे पापा अपनी मौत से पहले मेरी माँ के लिए एक एडल्ट प्रोडक्ट की दुकान छोड़ गए थे। मेरा बचपन लगभग इसी दुकान में बीता, जहाँ मैं उन्हें डिस्प्ले के लिए रखे खास रोमांटिक बेड पर प्यार जताते हुए देखकर बड़ी हुई। अब मैं अठारह साल की हो चुकी हूँ और अचानक मेरे मन में दुकान के उस मशहूर बेड को खुद आज़माने का ख्याल आया—लेकिन जैसे ही मैं उस पर लेटी, मैं उसमें फँस गई और बिल्कुल हिल नहीं पाई। मैं शर्मिंदगी से जमीन में गड़ जाना चाहती थी कि तभी एक अनजान आदमी अंदर आया। उसने तीन सेकंड तक मुझे घूरा और फिर पूरी गंभीरता से पूछा, “क्या यह नए मॉडल की इन्फ्लेटेबल डॉल है?” मैं वहीं सन्न रह गई। समझाने की कोशिश की, लेकिन पता चला कि मेरे मुँह से आवाज़ तक नहीं निकल रही थी। वह धीरे-धीरे मेरे और करीब आने लगा और यह पता लगाने लगा कि मेरे शरीर पर “स्विच” आखिर कहाँ है… मुझे अपनी जिंदगी में किसी फैसले पर इतना पछतावा कभी नहीं हुआ था, लेकिन साथ ही कहीं न कहीं मुझे लग रहा था कि यह गलतफहमी मेरी जिंदगी को ऐसी दिशा में ले जाने वाली है जिसकी मैंने कभी कल्पना भी नहीं की थी।",
+        "id": "Sebelum meninggal, ayahku meninggalkan sebuah toko produk dewasa untuk ibuku. Masa kecilku pada dasarnya kuhabiskan dengan melihat mereka bermesraan di atas ranjang khusus dewasa yang dipajang di toko. Sekarang aku sudah berusia delapan belas tahun, dan entah kenapa tiba-tiba ingin mencoba sendiri ranjang legendaris di toko itu—tapi begitu berbaring, aku malah tersangkut dan sama sekali tidak bisa bergerak. Saat aku begitu malu sampai rasanya ingin menghilang saja, seorang pria asing masuk. Dia menatapku selama tiga detik, lalu bertanya dengan wajah serius, “Ini boneka tiup model terbaru?” Aku langsung terpaku. Aku ingin menjelaskan, tetapi bahkan tidak mampu mengeluarkan sepatah kata pun. Dia semakin mendekat dan mulai mencari-cari di mana letak “tombol” pada tubuhku... Seumur hidup aku belum pernah menyesali sesuatu seperti ini, tetapi di saat yang sama, samar-samar aku merasa kesalahpahaman ini akan membawa hidupku ke arah yang sama sekali tidak pernah kubayangkan.",
+        "ta": "என் அப்பா இறப்பதற்கு முன்பு, அம்மாவுக்காக வயது வந்தோருக்கான பொருட்கள் விற்கும் ஒரு கடையை விட்டுச் சென்றார். என் குழந்தைப் பருவம் முழுவதும், கடையில் காட்சிக்காக வைக்கப்பட்டிருந்த பிரத்யேக படுக்கையில் அவர்கள் அன்பாக இருப்பதைப் பார்த்தபடியே வளர்ந்தேன் என்று சொல்லலாம். இப்போது எனக்கு பதினெட்டு வயது. திடீரென்று ஒரு நாள், கடையில் இருக்கும் அந்தப் புகழ்பெற்ற படுக்கையை நானே முயற்சி செய்து பார்க்க வேண்டும் என்று தோன்றியது—ஆனால் அதில் படுத்தவுடன் சிக்கிக்கொண்டேன்; அசையவே முடியவில்லை. வெட்கத்தில் பூமிக்குள் புதைந்துவிடலாம் போல உணர்ந்துகொண்டிருந்த நேரத்தில், அறிமுகமில்லாத ஓர் ஆண் உள்ளே வந்தான். மூன்று விநாடிகள் என்னை உற்றுப் பார்த்துவிட்டு, மிகவும் தீவிரமான முகத்துடன், “இது புதிய மாடல் காற்று நிரப்பும் பொம்மையா?” என்று கேட்டான். நான் அங்கேயே அதிர்ச்சியில் உறைந்துபோனேன். விளக்க முயன்றபோதும், ஒரு வார்த்தைகூட வாயிலிருந்து வரவில்லை. அவன் மேலும் மேலும் அருகில் வந்து, என் உடலில் இருக்கும் “சுவிட்ச்” எங்கே என்று ஆராயத் தொடங்கினான்… என் வாழ்க்கையில் இதுபோல் நான் எதற்காகவும் வருந்தியதில்லை. ஆனால் அதே நேரத்தில், இந்தத் தவறான புரிதல் என் வாழ்க்கையை நான் ஒருபோதும் எதிர்பார்க்காத முற்றிலும் புதிய திசைக்கு அழைத்துச் செல்லப்போகிறது என்ற விசித்திரமான உணர்வும் எனக்குள் தோன்றியது."
+      },
+      "hook": {
+        "en": "",
+        "ar": "",
+        "hi": "",
+        "id": "",
+        "ta": ""
+      },
+      "posterUrl": "https://flowdrama.luonluon.com/thumbnails/12692.jpeg",
+      "episodeCount": 32,
+      "status": "completed",
+      "viewCount": 2982000,
+      "tagIds": [
+        "comedy",
+        "plot-twist",
+        "urban"
+      ]
+    },
+    {
+      "id": "12818",
+      "title": {
+        "en": "Prince of the Celestials",
+        "ar": "أمير إلف النجوم",
+        "hi": "स्टार एल्फ प्रिंस",
+        "id": "Pangeran Elf Bintang",
+        "ta": "நட்சத்திர எல்ஃப் இளவரசன்"
+      },
+      "synopsis": {
+        "en": "After a night shared between Lyra—a half-blood elf—and Orlan, the Prince of the Star Elves, she unexpectedly discovered she was pregnant with triplets. The two found themselves with no choice but to enter into a marriage of convenience. Amidst the arrogance and prejudice of the pure-blood elves—who constantly sought to make life difficult for her—Orlan offered her genuine tenderness and steadfast protection. Through true love, not only did a formidable magical gift awaken within Lyra, but the astonishing, long-hidden truth of her lineage as the \"Princess of the Forest Elves\" also began to come to light.",
+        "ar": "بعد ليلة جمعت ليرا، الإلف ذات الدم المختلط، بأورلان، أمير إلف النجوم، اكتشفت بشكل غير متوقع أنها حامل بثلاثة توائم. ولم يجد الاثنان أمامهما سوى الدخول في زواج تعاقدي. وبين غرور الإلف ذوي الدم النقي وتحاملهم ومحاولاتهم المستمرة للتضييق عليها، منحها أورلان أصدق مشاعر الحنان وأقوى حماية. وبفضل الحب الحقيقي، لم تستيقظ داخل ليرا موهبة سحرية هائلة فحسب، بل بدأت أيضاً حقيقة نسبها المذهلة والمخفية بصفتها «أميرة إلف الغابة» في الظهور إلى النور.",
+        "hi": "मिश्रित रक्त वाली एल्फ लीरा और स्टार एल्फ प्रिंस ओरलान के बीच एक रात का रिश्ता होने के बाद, लीरा को अप्रत्याशित रूप से पता चलता है कि वह तीन बच्चों की माँ बनने वाली है। मजबूर होकर दोनों एक अनुबंध विवाह में बंध जाते हैं। शुद्ध रक्त वाले एल्फों के अहंकार, भेदभाव और लगातार मुश्किलें खड़ी करने के बीच, ओरलान हमेशा लीरा को अपनी अटूट कोमलता और सुरक्षा देता है। सच्चे प्यार के सहारे लीरा न केवल अपनी शक्तिशाली जादुई प्रतिभा को जागृत करती है, बल्कि उसकी चौंका देने वाली छिपी पहचान—वास्तव में वह “वुड एल्फ प्रिंसेस” है—भी धीरे-धीरे दुनिया के सामने आने लगती है।",
+        "id": "Setelah menghabiskan satu malam bersama Orlan, Pangeran Elf Bintang, Lira yang merupakan elf berdarah campuran secara tak terduga mengetahui bahwa dirinya mengandung anak kembar tiga. Karena keadaan, keduanya pun terpaksa menjalani sebuah pernikahan kontrak. Di tengah kesombongan, prasangka, dan berbagai perlakuan buruk dari para elf berdarah murni, Orlan selalu memberikan kelembutan dan perlindungan yang paling teguh kepada Lira. Berkat cinta sejati, Lira tidak hanya membangkitkan bakat sihirnya yang luar biasa kuat, tetapi identitas tersembunyinya yang mengejutkan sebagai “Putri Elf Kayu” juga perlahan terungkap.",
+        "ta": "கலப்பின எல்ஃப் லிரா மற்றும் நட்சத்திர எல்ஃப் இளவரசன் ஓர்லன் இருவரும் ஓர் இரவை ஒன்றாகக் கழித்த பிறகு, எதிர்பாராத விதமாக லிரா மூன்று குழந்தைகளை கருவுற்றிருப்பதை அறிகிறாள். வேறு வழியின்றி, இருவரும் ஒரு ஒப்பந்தத் திருமணத்தில் இணைகிறார்கள். தூய இரத்த எல்ஃப்களின் ஆணவமான பாரபட்சத்தையும் இடைவிடாத தொல்லைகளையும் எதிர்கொள்ளும் லிராவுக்கு, ஓர்லன் உறுதியான அன்பையும் மென்மையான பாதுகாப்பையும் அளிக்கிறான். உண்மையான காதலின் அரவணைப்பில், லிரா தனது சக்திவாய்ந்த மந்திரத் திறமையை விழிப்பூட்டுவதோடு மட்டுமல்லாமல், அவள் உண்மையில் “மர எல்ஃப் இளவரசி” என்ற அதிர்ச்சியூட்டும் மறைக்கப்பட்ட பிறப்பின் ரகசியமும் மெல்ல வெளிச்சத்திற்கு வருகிறது."
+      },
+      "hook": {
+        "en": "",
+        "ar": "",
+        "hi": "",
+        "id": "",
+        "ta": ""
+      },
+      "posterUrl": "https://flowdrama.luonluon.com/thumbnails/12818.png",
+      "episodeCount": 45,
+      "status": "completed",
+      "viewCount": 708000,
+      "tagIds": [
+        "fantasy",
+        "contract-marriage",
+        "marriage-first-love-later"
+      ]
+    },
+    {
+      "id": "12930",
+      "title": {
+        "en": "Deifying you before the destruction.",
+        "ar": "قبل الدمار، سأجعلكِ إلهة",
+        "hi": "विनाश से पहले, तुम्हें देवी बना दूँगा",
+        "id": "Sebelum Kehancuran, Aku Menjadikanmu Dewi",
+        "ta": "அழிவுக்கு முன், உன்னைத் தெய்வமாக்குவேன்"
+      },
+      "synopsis": {
+        "en": "Li Xingyan found herself inadvertently entangled in a dispute, landing in a precarious and awkward situation. Amidst the confusion, she unexpectedly crossed paths with her first love, Gu Huaian, after a five-year separation. The deep love and joy that once filled their hearts had vanished; now, she saw nothing in his eyes but coldness and detachment. Former lovers reunited, yet everything had changed, and long-buried feelings of regret and missed opportunities resurfaced to overwhelm their hearts once more.",
+        "ar": "تورطت لي شينغيان عن طريق الصدفة في نزاع، لتجد نفسها في موقف محرج وعصيب. وبينما كانت غارقة في الارتباك، التقت على نحو غير متوقع بحبها الأول، غو هواي آن، بعد فراق دام خمس سنوات. وبعد كل تلك السنوات، لم يبقَ من الحب العميق والفرح اللذين ملآ قلبيهما في الماضي شيء، ولم تعد ترى في عينيه سوى البرود والجفاء. يلتقي حبيبان من الماضي من جديد، لكن كل شيء قد تغير، فتعود كل مشاعر الندم والفرص الضائعة المدفونة في ثنايا الزمن لتجتاح قلبيهما من جديد.",
+        "hi": "ली शिंगयान अनजाने में एक विवाद में फँस जाती है और खुद को बेहद असहज और शर्मनाक परिस्थिति में पाती है। घबराहट के बीच अचानक उसकी मुलाकात अपने पहले प्यार गु हुआईआन से होती है, जिससे वह पाँच साल पहले अलग हो गई थी। इतने वर्षों बाद दोबारा मिलने पर कभी खुशी और गहरे प्रेम से भरे उनके रिश्ते की गर्माहट कब की मिट चुकी थी, और अब उसकी आँखों में केवल दूरी और ठंडापन दिखाई देता था। पुराने प्रेमी फिर मिले, लेकिन समय सब कुछ बदल चुका था। बीते वक्त में दबी तमाम अधूरी इच्छाएँ, पछतावे और छूटे हुए मौके एक बार फिर उनके दिलों में उमड़ने लगे।",
+        "id": "Li Xingyan secara tak sengaja terseret ke dalam sebuah perselisihan dan terjebak dalam situasi yang serba sulit serta memalukan. Di tengah kepanikan, tanpa diduga ia kembali bertemu dengan cinta pertamanya, Gu Huai'an, setelah berpisah selama lima tahun. Ketika mereka dipertemukan kembali setelah sekian lama, cinta mendalam yang dahulu dipenuhi kebahagiaan telah memudar, menyisakan tatapan asing dan dingin. Dua orang dari masa lalu kembali bertemu, tetapi segalanya sudah berubah. Penyesalan dan kesempatan yang terlewat, yang selama ini terkubur dalam perjalanan waktu, kini kembali membanjiri hati mereka.",
+        "ta": "லீ சிங்யான் எதிர்பாராத விதமாக ஒரு பிரச்சினையில் சிக்கி, மிகவும் சங்கடமான சூழ்நிலைக்குத் தள்ளப்படுகிறாள். பதற்றத்தில் இருந்த அந்த நேரத்தில், ஐந்து ஆண்டுகளுக்கு முன்பு பிரிந்த தனது முதல் காதலன் கு ஹுவாய் ஆனைக் திடீரென மீண்டும் சந்திக்கிறாள். பல ஆண்டுகளுக்குப் பிறகு அவர்கள் மீண்டும் சந்தித்தபோது, ஒரு காலத்தில் மகிழ்ச்சியும் ஆழமான காதலும் நிறைந்திருந்த உணர்வுகள் ஏற்கனவே மறைந்துவிட்டன; இப்போது அவனது கண்களில் விலகலும் குளிர்ச்சியும் மட்டுமே எஞ்சியிருந்தன. கடந்த காலத்தைச் சேர்ந்த இருவர் மீண்டும் சந்திக்கிறார்கள், ஆனால் எல்லாமே மாறிவிட்டது. காலத்தின் ஆழத்தில் புதைந்திருந்த வருத்தங்களும் தவறவிட்ட வாய்ப்புகளும் மீண்டும் அவர்களின் இதயங்களில் அலைமோதத் தொடங்குகின்றன."
+      },
+      "hook": {
+        "en": "",
+        "ar": "",
+        "hi": "",
+        "id": "",
+        "ta": ""
+      },
+      "posterUrl": "https://flowdrama.luonluon.com/thumbnails/12930.png",
+      "episodeCount": 50,
+      "status": "completed",
+      "viewCount": 582000,
+      "tagIds": [
+        "angsty-romance",
+        "reunion",
+        "love"
+      ]
+    },
+    {
+      "id": "13069",
+      "title": {
+        "en": "The Gangster Boss's Secret Lover",
+        "ar": "فتاة الثعلب الصغيرة لا يُستهان بها",
+        "hi": "छोटी लोमड़ी लड़की से पंगा मत लेना",
+        "id": "Gadis Rubah Kecil Jangan Diremehkan",
+        "ta": "குட்டி நரிப் பெண்ணை சீண்டாதே"
+      },
+      "synopsis": {
+        "en": "After her mother’s death, poor little Molly finds herself on the verge of being sent to an orphanage. However, a spontaneous lick from a small fox suddenly awakens a mysterious nature within her—a blend of human and beast! In her moment of greatest helplessness, she is unexpectedly adopted by the wealthiest man around. In return, Molly uses her unique ability to attract good fortune, showering her new family with an endless stream of luck. Meanwhile, the relatives who had cruelly abandoned her in the past do more than just regret their actions; one by one, they face bizarre and unforeseen punishments. Between this sudden stroke of luck and a whirlwind of wondrous adventures, little Molly’s extraordinary life is just beginning. Will she ultimately manage to break free from the shadows of the past and make the villains pay the price for their deeds?",
+        "ar": "بعد وفاة والدتها، تجد مولي الصغيرة المسكينة نفسها على وشك أن تُرسل إلى دار للأيتام. لكن لعقة عفوية من ثعلب صغير توقظ داخلها بشكل مفاجئ طبيعة غامضة تجمع بين الإنسان والوحش! وفي أكثر لحظات حياتها عجزًا، يتبناها أغنى رجل على نحو غير متوقع. وردًا للجميل، تستخدم مولي قدرتها الفريدة على جلب الحظ لتغمر عائلتها الجديدة بسلسلة متواصلة من الحظ السعيد. وفي الوقت نفسه، لا يكتفي أقاربها الذين تخلوا عنها بقسوة في الماضي بالندم على أفعالهم، بل يتعرضون واحدًا تلو الآخر لعقوبات غريبة وغير متوقعة. وبين الحظ الذي هبط عليها فجأة والمغامرات العجيبة التي تتوالى بلا توقف، تبدأ للتو حياة مولي الصغيرة الاستثنائية. فهل ستتمكن في النهاية من التحرر تمامًا من ظلال الماضي وجعل جميع الأشرار يدفعون ثمن أفعالهم؟",
+        "hi": "माँ की मृत्यु के बाद, बेचारी नन्ही मोली को अनाथालय भेजे जाने की नौबत आ जाती है। लेकिन एक छोटी लोमड़ी के अचानक उसे चाटने से उसके भीतर रहस्यमयी पशु-मानव शक्ति जाग उठती है! जब वह सबसे ज्यादा असहाय होती है, तभी देश का सबसे अमीर व्यक्ति अचानक उसे गोद ले लेता है। इस एहसान का बदला चुकाने के लिए, मोली अपनी अनोखी भाग्यशाली शक्ति से अपने नए परिवार के जीवन में लगातार खुशकिस्मती लाने लगती है। वहीं, जिन रिश्तेदारों ने कभी बेरहमी से उसे छोड़ दिया था, वे न केवल अपने किए पर पछताते हैं, बल्कि एक के बाद एक रहस्यमयी सज़ाओं का शिकार भी होने लगते हैं। अचानक बरसती किस्मत और लगातार होने वाले चमत्कारी रोमांचों के बीच, नन्ही मोली की असाधारण जिंदगी तो अभी शुरू ही हुई है। क्या वह आखिरकार अपने अतीत की परछाइयों से पूरी तरह मुक्त होकर उन सभी बुरे लोगों को उनके किए की कीमत चुकवा पाएगी?",
+        "id": "Setelah ibunya meninggal, Molly kecil yang malang terancam dikirim ke panti asuhan. Namun, jilatan tak sengaja dari seekor rubah kecil justru membangkitkan kekuatan manusia-binatang misterius dalam dirinya! Saat Molly berada di titik paling tak berdaya, orang terkaya tiba-tiba mengangkatnya sebagai anak. Untuk membalas kebaikan tersebut, Molly menggunakan kemampuan uniknya yang membawa keberuntungan, membuat keluarga barunya terus-menerus dilimpahi nasib baik. Sementara itu, para kerabat yang dahulu tega menelantarkannya bukan hanya menyesali perbuatan mereka, tetapi juga satu demi satu mengalami hukuman aneh dan tak terduga. Di tengah keberuntungan yang datang secara tiba-tiba dan berbagai petualangan ajaib yang terus bermunculan, kehidupan luar biasa Molly kecil baru saja dimulai. Akankah ia akhirnya mampu sepenuhnya melepaskan diri dari bayang-bayang masa lalu dan membuat semua orang jahat membayar perbuatan mereka?",
+        "ta": "தாயின் மறைவுக்குப் பிறகு, பரிதாபமான குட்டி மோலி அனாதை இல்லத்திற்கு அனுப்பப்படும் நிலைக்குத் தள்ளப்படுகிறாள். ஆனால் எதிர்பாராத விதமாக ஒரு குட்டி நரி அவளை நக்கியதும், அவளுக்குள் மறைந்திருந்த மர்மமான மிருகமனித உடலமைப்பு விழித்தெழுகிறது! அவள் மிகவும் ஆதரவற்ற நிலையில் இருந்தபோது, நாட்டின் மிகப்பெரிய பணக்காரர் எதிர்பாராத விதமாக அவளைத் தத்தெடுக்கிறார். இந்த அன்பிற்குப் பதிலளிக்க, மோலி தனது தனித்துவமான அதிர்ஷ்ட சக்தியைப் பயன்படுத்தி தனது புதிய குடும்பத்திற்கு தொடர்ந்து நல்ல அதிர்ஷ்டத்தை கொண்டு வருகிறாள். அதே சமயம், ஒருகாலத்தில் அவளை இரக்கமின்றிக் கைவிட்ட உறவினர்கள் தங்கள் செயலுக்காக கடுமையாக வருந்துவதோடு, ஒன்றன்பின் ஒன்றாக விசித்திரமான தண்டனைகளையும் சந்திக்கிறார்கள். திடீரென வந்து குவியும் அதிர்ஷ்டமும் தொடர்ச்சியான அற்புதமான சம்பவங்களும் மத்தியில், குட்டி மோலியின் அசத்தலான வாழ்க்கை இப்போதுதான் தொடங்குகிறது. கடந்த காலத்தின் நிழல்களிலிருந்து அவள் முழுமையாக விடுபட்டு, தன்னைத் துன்புறுத்திய அனைத்து தீயவர்களையும் அவர்களுக்குரிய விலையைச் செலுத்த வைக்க முடியுமா?"
+      },
+      "hook": {
+        "en": "",
+        "ar": "",
+        "hi": "",
+        "id": "",
+        "ta": ""
+      },
+      "posterUrl": "https://flowdrama.luonluon.com/thumbnails/13069.jpg",
+      "episodeCount": 30,
+      "status": "completed",
+      "viewCount": 4394000,
+      "tagIds": [
+        "comeback",
+        "revenge",
+        "angsty-romance"
+      ]
+    },
+    {
+      "id": "13075",
+      "title": {
+        "en": "Bonds of the Silver Moon",
+        "ar": "رابطة القمر الفضي",
+        "hi": "सिल्वर मून का बंधन",
+        "id": "Ikatan Bulan Perak",
+        "ta": "வெள்ளி நிலவின் பந்தம்"
+      },
+      "synopsis": {
+        "en": "A princess is rescued from werewolves after being drugged by a human waiter; fate binds them together under the light of a blood moon, and they spend the night together. Six years later, she has become the Alpha leader of the Silvermoon pack, while he toils at a construction site. He waited for her all those years, until their daughter recognized the tattoo on his body, finally revealing the truth of what happened that night six years ago.",
+        "ar": "يتم إنقاذ أميرة من المستذئبين بعد أن تم تخديرها على يد نادل بشري، وتربط الأقدار بينهما تحت ضوء القمر الدموي، فيقضيان ليلة معًا. بعد ست سنوات، تصبح هي قائدة الألفا لقطيع Silvermoon، بينما يعمل هو في الأعمال الشاقة بموقع بناء. ظل ينتظرها طوال تلك السنوات، إلى أن تتعرف ابنتهما على الوشم الموجود على جسده، لتنكشف أخيرًا حقيقة ما حدث في تلك الليلة قبل ست سنوات.",
+        "hi": "नशीली दवा दिए जाने के बाद एक वेयरवुल्फ राजकुमारी को एक मानव वेटर बचाता है। रक्तिम चाँद के नीचे नियति उन दोनों को एक-दूसरे से बाँध देती है और वे साथ एक रात बिताते हैं। छह साल बाद, वह Silvermoon भेड़िया झुंड की Alpha मुखिया बन चुकी है, जबकि वह एक निर्माण स्थल पर मेहनत-मजदूरी कर रहा है। वह इन सभी वर्षों से उसका इंतज़ार करता रहा, जब तक कि उनकी बेटी उसके शरीर पर बने टैटू को पहचान नहीं लेती और छह साल पहले की रात का छिपा हुआ सच सामने नहीं आ जाता।",
+        "id": "Seorang putri manusia serigala yang dibius diselamatkan oleh seorang pelayan manusia. Di bawah bulan darah, takdir mengikat mereka berdua hingga mereka menghabiskan satu malam bersama. Enam tahun kemudian, sang putri telah menjadi pemimpin Alpha dari kawanan Silvermoon, sementara pria itu bekerja sebagai buruh kasar di lokasi konstruksi. Selama ini, ia terus menunggunya, hingga suatu hari putri mereka mengenali tato di tubuhnya dan mengungkap kebenaran tentang apa yang terjadi enam tahun lalu.",
+        "ta": "போதை மருந்து கொடுக்கப்பட்ட ஒரு ஓநாய்-மனித இளவரசி, மனித பணியாளர் ஒருவரால் காப்பாற்றப்படுகிறாள். இரத்த நிலவின் கீழ் விதி அவர்கள் இருவரையும் ஒன்றிணைக்க, அவர்கள் ஓர் இரவை ஒன்றாகக் கழிக்கிறார்கள். ஆறு ஆண்டுகளுக்குப் பிறகு, அவள் Silvermoon ஓநாய்க் கூட்டத்தின் Alpha தலைவியாக உயர்ந்திருக்கிறாள்; அவனோ கட்டுமானத் தளத்தில் கடினமான உடல் உழைப்பைச் செய்து வாழ்கிறான். அவன் இத்தனை ஆண்டுகளாக அவளுக்காகக் காத்திருக்கிறான். இறுதியில், அவர்களுடைய மகள் அவனது உடலில் உள்ள பச்சைக் குத்தலை அடையாளம் காணும்போது, ஆறு ஆண்டுகளுக்கு முன்பு நடந்த சம்பவத்தின் உண்மை வெளிச்சத்திற்கு வருகிறது."
+      },
+      "hook": {
+        "en": "",
+        "ar": "",
+        "hi": "",
+        "id": "",
+        "ta": ""
+      },
+      "posterUrl": "https://flowdrama.luonluon.com/thumbnails/13075.jpg",
+      "episodeCount": 48,
+      "status": "completed",
+      "viewCount": 1280000,
+      "tagIds": [
+        "fantasy",
+        "underdog-triumph",
+        "revenge"
+      ]
+    },
+    {
+      "id": "13077",
+      "title": {
+        "en": "The Black Hotel: Kiss of Redemption",
+        "ar": "الفندق الأسود: قبلة الخلاص",
+        "hi": "काला होटल: मुक्ति का चुंबन",
+        "id": "Hotel Hitam: Ciuman Penebusan",
+        "ta": "கருப்பு விடுதி: மீட்பின் முத்தம்"
+      },
+      "synopsis": {
+        "en": "Since childhood, Hazel has been relentlessly pursued by ghosts, eventually seeking refuge in a mysterious place known as the Dark Night Hotel, where lost souls gather every night. Her only hope for survival lay in striking a deal with Vincent—the hotel’s enigmatic owner—whose kiss holds the power to banish evil spirits. Yet, as passions ignite and the lines between duty and desire begin to blur, Hazel discovers that the price of saving her life might well be her heart—and her soul.",
+        "ar": "منذ طفولتها، عانت هازل باستمرار من مطاردة الأشباح، حتى لجأت بحثًا عن الأمان إلى مكان غامض يُعرف باسم فندق الليل المظلم، حيث تتجمع الأرواح التائهة كل ليلة. وكان سبيلها الوحيد للبقاء على قيد الحياة هو إبرام عقد مع فينسنت، مالك الفندق الغامض، الذي تمتلك قبلته قوة طرد الأرواح الشريرة. لكن مع اشتعال المشاعر وبدء تلاشي الحدود بين الواجب والرغبة، تكتشف هازل أن الثمن الذي قد تدفعه لإنقاذ حياتها ربما يكون قلبها—بل وروحها أيضًا.",
+        "hi": "बचपन से ही भूतों से परेशान हेज़ल शरण की तलाश में एक रहस्यमयी जगह—डार्क नाइट होटल—पहुँचती है, जहाँ हर रात भटकी हुई आत्माएँ इकट्ठा होती हैं। जीवित रहने का उसका एकमात्र रास्ता होटल के रहस्यमयी मालिक विंसेंट के साथ एक अनुबंध करना है, जिसकी एक चुंबन में बुरी आत्माओं को दूर भगाने की शक्ति है। लेकिन जैसे-जैसे उनके बीच बढ़ता जुनून कर्तव्य और इच्छा की सीमाओं को धुंधला करने लगता है, हेज़ल को एहसास होता है कि अपनी जान बचाने की कीमत शायद उसका दिल—और उसकी आत्मा भी हो सकती है।",
+        "id": "Sejak kecil, Hazel terus dihantui dan diganggu oleh arwah. Demi mencari perlindungan, ia datang ke sebuah tempat misterius bernama Hotel Malam, tempat jiwa-jiwa tersesat berkumpul setiap malam. Satu-satunya cara untuk bertahan hidup adalah membuat kontrak dengan Vincent, pemilik hotel yang penuh misteri, sementara ciumannya memiliki kekuatan untuk mengusir roh-roh jahat. Namun, ketika gairah perlahan mengaburkan batas antara kewajiban dan hasrat, Hazel menyadari bahwa harga untuk menyelamatkan hidupnya mungkin adalah hatinya—dan bahkan jiwanya.",
+        "ta": "சிறுவயது முதலே ஆவிகளால் துன்புறுத்தப்பட்டு வந்த ஹேசல், ஒவ்வொரு இரவும் வழிதவறிய ஆன்மாக்கள் கூடும் மர்மமான இடமான இரவு விடுதிக்கு அடைக்கலம் தேடி வருகிறாள். உயிர் பிழைப்பதற்கான ஒரே வழி, அந்த விடுதியின் மர்மமான உரிமையாளர் வின்சென்டுடன் ஒரு ஒப்பந்தம் செய்துகொள்வதுதான். அவனது முத்தத்திற்கு தீய ஆவிகளை விரட்டும் சக்தி உள்ளது. ஆனால் பொறுப்புக்கும் ஆசைக்கும் இடையிலான எல்லையை தீவிரமான உணர்வுகள் மெல்ல மங்கச் செய்யும்போது, தனது உயிரைக் காப்பாற்றுவதற்கான விலை தனது இதயமாகவும்—ஒருவேளை தனது ஆன்மாவாகவும் இருக்கலாம் என்பதை ஹேசல் உணர்கிறாள்."
+      },
+      "hook": {
+        "en": "",
+        "ar": "",
+        "hi": "",
+        "id": "",
+        "ta": ""
+      },
+      "posterUrl": "https://flowdrama.luonluon.com/thumbnails/13077.jpg",
+      "episodeCount": 65,
+      "status": "completed",
+      "viewCount": 4707000,
+      "tagIds": [
+        "fantasy",
+        "redemption",
+        "contract-marriage"
+      ]
+    }
+  ]
+}

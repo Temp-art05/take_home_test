@@ -19,7 +19,10 @@ sealed class DomainException(
     /** Phiên đăng nhập hết hạn hoặc không hợp lệ (HTTP 401). */
     class Unauthorized(cause: Throwable? = null) : DomainException("Unauthorized", cause)
 
-    /** Server trả lỗi (HTTP 4xx khác 401, 5xx). */
+    /** Tài nguyên không tồn tại (HTTP 404, show không có file tập). */
+    class NotFound(cause: Throwable? = null) : DomainException("Not found", cause)
+
+    /** Server trả lỗi (HTTP 4xx khác 401/404, 5xx). */
     class Server(
         val statusCode: Int,
         message: String? = null,

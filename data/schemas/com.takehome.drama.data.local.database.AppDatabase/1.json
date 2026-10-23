@@ -2,33 +2,51 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "b6fc6c4979df36db1d6d7eab63d874aa",
+    "identityHash": "e006f1e74ab3049b79eaf7a210e7dfcc",
     "entities": [
       {
-        "tableName": "bookmarks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `title` TEXT NOT NULL, `body` TEXT NOT NULL, `created_at` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "tableName": "watch_progress",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`show_id` TEXT NOT NULL, `episode_index` INTEGER NOT NULL, `episode_number` INTEGER NOT NULL, `episode_total` INTEGER NOT NULL, `position_ms` INTEGER NOT NULL, `duration_ms` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`show_id`, `episode_index`))",
         "fields": [
           {
-            "fieldPath": "id",
-            "columnName": "id",
+            "fieldPath": "showId",
+            "columnName": "show_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "episodeIndex",
+            "columnName": "episode_index",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "title",
-            "columnName": "title",
-            "affinity": "TEXT",
+            "fieldPath": "episodeNumber",
+            "columnName": "episode_number",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "body",
-            "columnName": "body",
-            "affinity": "TEXT",
+            "fieldPath": "episodeTotal",
+            "columnName": "episode_total",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "createdAt",
-            "columnName": "created_at",
+            "fieldPath": "positionMs",
+            "columnName": "position_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "durationMs",
+            "columnName": "duration_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -36,14 +54,39 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "id"
+            "show_id",
+            "episode_index"
+          ]
+        }
+      },
+      {
+        "tableName": "saved_show",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`show_id` TEXT NOT NULL, `saved_at` INTEGER NOT NULL, PRIMARY KEY(`show_id`))",
+        "fields": [
+          {
+            "fieldPath": "showId",
+            "columnName": "show_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "savedAt",
+            "columnName": "saved_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "show_id"
           ]
         }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b6fc6c4979df36db1d6d7eab63d874aa')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e006f1e74ab3049b79eaf7a210e7dfcc')"
     ]
   }
 }
