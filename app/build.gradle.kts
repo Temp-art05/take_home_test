@@ -99,6 +99,7 @@ dependencies {
     implementation(project(":core:ui-foundation"))
     implementation(project(":core:design-system"))
     implementation(project(":core:media"))
+    implementation(project(":core:ads"))
     implementation(project(":feature:onboarding"))
     implementation(project(":feature:main"))
     implementation(project(":feature:watch"))

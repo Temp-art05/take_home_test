@@ -61,4 +61,16 @@
     <string name="watch_quality_more_data">Uses more data</string>
     <string name="watch_language">Language</string>
     <string name="watch_autoplay_next">Autoplay next episode</string>
+
+    <!-- Mở tập khoá bằng rewarded ad (Phase 5) -->
+    <string name="watch_unlock_title">Unlock Episode %1$d</string>
+    <string name="watch_unlock_body">Watch a short video ad to open this episode. It stays unlocked.</string>
+    <string name="watch_unlock_watch_ad">Watch ad</string>
+    <string name="watch_unlock_not_now">Not now</string>
+    <string name="watch_unlock_unavailable">No ad available right now. Try again later.</string>
+    <string name="watch_unlock_success">Episode %1$d unlocked</string>
+    <string name="watch_unlock_incomplete">Watch the whole ad to unlock</string>
+    <string name="watch_unlock_with_ad">Watch an ad to unlock</string>
+    <string name="watch_locked_body_ad">Watch a short ad to open it, or pick a free episode.</string>
+    <string name="watch_unlock_loading_cd">Loading ad</string>
 </resources>

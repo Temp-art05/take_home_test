@@ -82,4 +82,14 @@ class EpisodeGridTest {
         val progress = listOf(progress(0, 99_000), progress(1, 10_000), progress(2, 1_000), progress(9, 99_000))
         assertEquals(2, useCase.watchedCount(episodes, progress))
     }
+
+    @Test
+    fun `a locked episode unlocked by a reward is no longer locked`() {
+        val episodes = listOf(episode(0), episode(1, isFree = false), episode(2, isFree = false))
+        val cells = useCase(episodes, listOf(progress(1, 99_000)), currentIndex = null, unlocked = setOf(1))
+        assertEquals(
+            listOf(EpisodeCellState.Unwatched, EpisodeCellState.Watched, EpisodeCellState.Locked),
+            cells.map { it.state },
+        )
+    }
 }

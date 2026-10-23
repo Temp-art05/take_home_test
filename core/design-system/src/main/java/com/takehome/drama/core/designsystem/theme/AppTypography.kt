@@ -150,6 +150,13 @@ object AppTypography {
         fontSize = 10.5.sp,
     )
 
+    /** Dòng version cuối Settings `FlowDrama v1.0.0 (128)` — mockup 11.5px mono, `text-4`. */
+    val versionFooter = TextStyle(
+        fontFamily = FontFamily.Monospace,
+        fontWeight = FontWeight.Normal,
+        fontSize = 11.5.sp,
+    )
+
     /** Nhãn tab bar — mockup 10.5px/600; ảnh chụp thiết bị nhỏ hơn ~16% nên nâng lên 12sp/700. */
     val tab = TextStyle(
         fontFamily = family,

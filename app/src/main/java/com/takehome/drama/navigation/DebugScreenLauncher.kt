@@ -24,7 +24,9 @@ import timber.log.Timber
  *
  * Sheet (0303/0304) và trạng thái hệ thống (06xx) không phải destination: mở màn cha rồi thao tác tiếp.
  * Extra phụ: `--ei debug_hour 21` ép giờ của Home Day Cycle (MainActivity áp vào `SystemWallClock`),
- * `--es debug_query ceo` mở Search với chữ sẵn.
+ * `--es debug_query ceo` mở Search với chữ sẵn,
+ * `--es debug_ads_config '{"enable":false}'` thay `ads_config` của Remote Config trong phiên (thử kill switch
+ * không cần Console; JSON hỏng → default nhúng).
  */
 object DebugScreenLauncher {
 
@@ -33,6 +35,7 @@ object DebugScreenLauncher {
     const val EXTRA_EPISODE_INDEX = "episode_index"
     const val EXTRA_HOUR = "debug_hour"
     const val EXTRA_QUERY = "debug_query"
+    const val EXTRA_ADS_CONFIG = "debug_ads_config"
 
     private const val DEFAULT_SHOW_ID = "12485"
 
@@ -48,6 +51,9 @@ object DebugScreenLauncher {
     /** Giờ ép cho Day Cycle; không có extra → null (giờ thật). */
     fun forcedHour(intent: Intent?): Int? =
         intent?.takeIf { it.hasExtra(EXTRA_HOUR) }?.getIntExtra(EXTRA_HOUR, 0)?.takeIf { it in 0..23 }
+
+    /** JSON `ads_config` ép cho phiên này; không có extra → null (dùng Remote Config). */
+    fun adsConfigOverride(intent: Intent?): String? = intent?.getStringExtra(EXTRA_ADS_CONFIG)
 
     private fun destinationFor(code: String, showId: String, episodeIndex: Int, query: String?): Destination? =
         when (code.uppercase()) {

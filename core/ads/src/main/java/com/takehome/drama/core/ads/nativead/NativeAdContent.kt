@@ -1,0 +1,67 @@
+package com.takehome.drama.core.ads.nativead
+
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.viewinterop.AndroidView
+import com.github.dinhn.ads.core.AdsSdk
+import com.github.dinhn.ads.core.NativeAdPool
+import com.google.android.gms.ads.nativead.NativeAd
+import com.takehome.drama.core.designsystem.theme.AppTheme
+import com.takehome.drama.core.designsystem.theme.AppTypography
+import com.takehome.drama.domain.model.ads.AdPlacement
+import kotlinx.coroutines.flow.Flow
+
+/**
+ * Ô native: chỉ vẽ khi placement bật **và** pool đã có ad. Đang load / lỗi / offline → không vẽ gì,
+ * nên không bao giờ có khung trống. Không dùng `AdsNative(layoutId)` của lib vì nó bind layout XML.
+ */
+@Composable
+internal fun NativeAdContent(
+    placement: AdPlacement,
+    enabledFlow: Flow<Boolean>,
+    initiallyEnabled: Boolean,
+    request: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val enabled by enabledFlow.collectAsState(initial = initiallyEnabled)
+    if (!enabled) return
+
+    // Lib chỉ cho request sau khi SDK init + remote config đã áp; key theo các cờ để request lại khi chúng lật.
+    val sdkReady by AdsSdk.ready
+    val canRequest by AdsSdk.canRequestAds
+    val configReady by AdsSdk.remoteConfigReady
+    LaunchedEffect(placement, sdkReady, canRequest, configReady) {
+        if (sdkReady && canRequest && configReady) request()
+    }
+
+    val poolState by remember(placement) { NativeAdPool.state(placement.id) }.collectAsState()
+    val ad = ((poolState as? NativeAdPool.State.Loaded)?.handle?.payload as? NativeAd) ?: return
+
+    val style = NativeAdStyle(
+        surface = MaterialTheme.colorScheme.surface.toArgb(),
+        button = MaterialTheme.colorScheme.surfaceVariant.toArgb(),
+        badge = MaterialTheme.colorScheme.primaryContainer.toArgb(),
+        border = MaterialTheme.colorScheme.outline.toArgb(),
+        text1 = MaterialTheme.colorScheme.onSurface.toArgb(),
+        text2 = MaterialTheme.colorScheme.onSurfaceVariant.toArgb(),
+        text3 = AppTheme.colors.text3.toArgb(),
+        headlineSp = AppTypography.bodySemibold.fontSize.value,
+        bodySp = AppTypography.caption.fontSize.value,
+        badgeSp = AppTypography.micro.fontSize.value,
+        buttonSp = AppTypography.button.fontSize.value,
+    )
+    AndroidView(
+        modifier = modifier.fillMaxWidth(),
+        factory = { context -> NativeAdCard(context, style).view },
+        update = { view -> NativeAdCard.from(view)?.bind(ad) },
+        // Chỉ huỷ View; NativeAd thuộc pool của lib (dùng lại khi quay về Home).
+        onRelease = { view -> view.destroy() },
+    )
+}

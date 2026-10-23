@@ -2,12 +2,15 @@ package com.takehome.drama.data.di
 
 import androidx.room.Room
 import com.takehome.drama.data.local.database.AppDatabase
+import com.takehome.drama.data.local.datasource.EpisodeUnlockLocalDataSource
+import com.takehome.drama.data.local.datasource.EpisodeUnlockLocalDataSourceImpl
 import com.takehome.drama.data.local.datasource.SavedShowLocalDataSource
 import com.takehome.drama.data.local.datasource.SavedShowLocalDataSourceImpl
 import com.takehome.drama.data.local.datasource.UserPreferencesLocalDataSource
 import com.takehome.drama.data.local.datasource.UserPreferencesLocalDataSourceImpl
 import com.takehome.drama.data.local.datasource.WatchProgressLocalDataSource
 import com.takehome.drama.data.local.datasource.WatchProgressLocalDataSourceImpl
+import com.takehome.drama.data.local.datasource.episodeUnlockDataStore
 import com.takehome.drama.data.remote.datasource.CatalogAssetDataSourceImpl
 import com.takehome.drama.data.remote.datasource.CatalogDataSource
 import com.takehome.drama.data.remote.datasource.CatalogRemoteDataSourceImpl
@@ -15,12 +18,14 @@ import com.takehome.drama.data.remote.http.ApiConfig
 import com.takehome.drama.data.remote.http.defaultJson
 import com.takehome.drama.data.remote.http.provideHttpClient
 import com.takehome.drama.data.repository.CatalogRepositoryImpl
+import com.takehome.drama.data.repository.EpisodeUnlockRepositoryImpl
 import com.takehome.drama.data.repository.SavedShowRepositoryImpl
 import com.takehome.drama.data.repository.UserPreferencesRepositoryImpl
 import com.takehome.drama.data.repository.WatchProgressRepositoryImpl
 import com.takehome.drama.data.util.SystemWallClock
 import com.takehome.drama.domain.config.AppConfig
 import com.takehome.drama.domain.repository.CatalogRepository
+import com.takehome.drama.domain.repository.EpisodeUnlockRepository
 import com.takehome.drama.domain.repository.SavedShowRepository
 import com.takehome.drama.domain.repository.UserPreferencesRepository
 import com.takehome.drama.domain.repository.WatchProgressRepository
@@ -50,7 +55,9 @@ import com.takehome.drama.domain.usecase.watch.GetEndActionUseCase
 import com.takehome.drama.domain.usecase.watch.GetEpisodeGridUseCase
 import com.takehome.drama.domain.usecase.watch.GetEpisodeRangesUseCase
 import com.takehome.drama.domain.usecase.watch.GetShowEpisodesUseCase
+import com.takehome.drama.domain.usecase.watch.ObserveUnlockedEpisodesUseCase
 import com.takehome.drama.domain.usecase.watch.PickVideoSourceUseCase
+import com.takehome.drama.domain.usecase.watch.UnlockEpisodeUseCase
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -78,12 +85,15 @@ val dataModule = module {
     single<WatchProgressLocalDataSource> { WatchProgressLocalDataSourceImpl(get()) }
     single<SavedShowLocalDataSource> { SavedShowLocalDataSourceImpl(get()) }
     single<UserPreferencesLocalDataSource> { UserPreferencesLocalDataSourceImpl(androidContext()) }
+    single<EpisodeUnlockLocalDataSource> { EpisodeUnlockLocalDataSourceImpl(androidContext().episodeUnlockDataStore) }
 
     // Repository — CatalogRepositoryImpl giữ cache in-memory nên bắt buộc single.
     single<CatalogRepository> { CatalogRepositoryImpl(get()) }
     single<WatchProgressRepository> { WatchProgressRepositoryImpl(get()) }
     single<SavedShowRepository> { SavedShowRepositoryImpl(get()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(get()) }
+    single<EpisodeUnlockRepository> { EpisodeUnlockRepositoryImpl(get()) }
+    // AdsConfigRepository + use case ads bind ở adsModule (:core:ads) — impl đọc Remote Config.
 
     // Use case — mỗi hành động một class (`operator fun invoke`), không giữ state → factory.
     factory { GetCatalogUseCase(get()) }
@@ -93,6 +103,8 @@ val dataModule = module {
     factory { GetEpisodeGridUseCase() }
     factory { GetEpisodeRangesUseCase() }
     factory { GetEndActionUseCase() }
+    factory { ObserveUnlockedEpisodesUseCase(get()) }
+    factory { UnlockEpisodeUseCase(get()) }
     factory { SaveWatchProgressUseCase(get()) }
     factory { GetResumePositionUseCase(get()) }
     factory { GetContinueTargetUseCase(get()) }

@@ -15,12 +15,16 @@ Clean Architecture: `presentation → domain ← data`. `:domain` là tâm, khô
 | `:core:ui-foundation` | `com.takehome.drama.core.ui.foundation` | `vm/` (BaseViewModel), `ext/` (CollectAsEffect), `error/` (→ string res), `locale/` |
 | `:core:design-system` | `com.takehome.drama.core.designsystem` | `theme/`, `component/`, `ext/` |
 | `:feature:main` | `com.takehome.drama.feature.main` | Main 3 tab + Settings |
+| `:core:ads` | `com.takehome.drama.core.ads` | `AdsPresenter` (cửa duy nhất feature dùng), `AdsInitializer`, `config/` (parse `ads_config`, impl `AdsConfigRepository`), `nativead/`, `sdk/` (facade lib) |
+| `:lib-ads:core`, `:lib-ads:admob` | `com.github.dinhn.ads.*` | Mã vendored của lib ads — xem `lib-ads/README.md`; chỉ `:core:ads` phụ thuộc |
 
 ```
 app          → mọi module
 feature:*    → core:*, domain               (KHÔNG data, KHÔNG feature khác)
 data         → domain
 core:ui-foundation → domain
+core:ads     → domain, core:analytics, core:design-system, lib-ads:admob
+               (ngoại lệ: impl AdsConfigRepository cần Remote Config; card native cần token màu)
 core:utils, core:navigation, core:analytics, core:design-system → (không module nào)
 domain       → (không gì — Kotlin/JVM thuần)
 ```

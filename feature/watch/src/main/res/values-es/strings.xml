@@ -62,4 +62,16 @@
     <string name="watch_quality_more_data">Usa más datos</string>
     <string name="watch_language">Idioma</string>
     <string name="watch_autoplay_next">Reproducir el siguiente automáticamente</string>
+
+    <!-- Mở tập khoá bằng rewarded ad (Phase 5) -->
+    <string name="watch_unlock_title">Desbloquear episodio %1$d</string>
+    <string name="watch_unlock_body">Mira un anuncio de video corto para abrir este episodio. Se queda desbloqueado.</string>
+    <string name="watch_unlock_watch_ad">Ver anuncio</string>
+    <string name="watch_unlock_not_now">Ahora no</string>
+    <string name="watch_unlock_unavailable">No hay anuncios disponibles ahora. Inténtalo más tarde.</string>
+    <string name="watch_unlock_success">Episodio %1$d desbloqueado</string>
+    <string name="watch_unlock_incomplete">Mira el anuncio completo para desbloquear</string>
+    <string name="watch_unlock_with_ad">Mira un anuncio para desbloquear</string>
+    <string name="watch_locked_body_ad">Mira un anuncio corto para abrirlo o elige un episodio gratis.</string>
+    <string name="watch_unlock_loading_cd">Cargando anuncio</string>
 </resources>

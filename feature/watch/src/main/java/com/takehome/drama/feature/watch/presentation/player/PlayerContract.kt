@@ -8,6 +8,7 @@ import com.takehome.drama.core.ui.foundation.vm.ViewState
 import com.takehome.drama.domain.usecase.watch.EndAction
 import com.takehome.drama.domain.usecase.watch.EpisodeCell
 import com.takehome.drama.domain.usecase.watch.EpisodeRange
+import com.takehome.drama.feature.watch.presentation.common.RewardedAdState
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerPage
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerSheet
 
@@ -26,6 +27,8 @@ data class PlayerViewState(
     val episodeNumber: Int = 0,
     val episodeTotal: Int = 0,
     val isLocked: Boolean = false,
+    /** Nút "Watch an ad to unlock" của trang khoá; null = không có nút (tập free / `rewarded_bonus` tắt). */
+    val unlockAd: RewardedAdState? = null,
     /**
      * Cờ phát đổi chậm. `positionMs`/`bufferedMs` luôn 0 ở đây: vị trí tick 500ms đi qua
      * [PlayerViewModel.playbackProgress] để không recompose cả màn.
@@ -79,6 +82,12 @@ sealed interface PlayerIntent : ViewIntent {
     data object ToggleDescription : PlayerIntent
     data object SwitchBackToHd : PlayerIntent
 
+    /** Nút mở tập bằng rewarded trên trang khoá — chỉ user bấm mới hiện rewarded. */
+    data object UnlockWithAdClick : PlayerIntent
+
+    /** Rewarded đã đóng; [earned] = xem hết, nhận thưởng. */
+    data class RewardResult(val episodeIndex: Int, val earned: Boolean) : PlayerIntent
+
     /** Pager dọc đã dừng ở trang của tập [index] (`Episode.index`) — user vuốt. */
     data class PageSettled(val index: Int) : PlayerIntent
 
@@ -89,8 +98,11 @@ sealed interface PlayerIntent : ViewIntent {
 
 sealed interface PlayerSingleEvent : SingleEvent {
     data object NavigateBack : PlayerSingleEvent
-    data class ShowToast(@StringRes val messageRes: Int, val formatArg: Int? = null) : PlayerSingleEvent
+    data class ShowToast(@StringRes val messageRes: Int, val formatArg: Int?, val success: Boolean) : PlayerSingleEvent
 
     /** VM đổi tập không qua vuốt (sheet, autoplay) → pager cuộn tới trang của tập [index]. */
     data class ScrollToEpisode(val index: Int) : PlayerSingleEvent
+
+    /** Screen cần Activity để hiện rewarded; kết quả quay lại bằng [PlayerIntent.RewardResult]. */
+    data class ShowRewarded(val episodeIndex: Int) : PlayerSingleEvent
 }

@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.takehome.drama.core.ads.config.AdsDebugOverride
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.data.util.SystemWallClock
 import com.takehome.drama.domain.usecase.discovery.WallClock
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         }
         if (BuildConfig.IS_DEV_FLAVOR) {
             DebugScreenLauncher.forcedHour(intent)?.let { (get<WallClock>() as? SystemWallClock)?.overrideHour = it }
+            DebugScreenLauncher.adsConfigOverride(intent)?.let { get<AdsDebugOverride>().set(it) }
         }
 
         setContent {

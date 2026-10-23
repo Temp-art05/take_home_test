@@ -1,12 +1,17 @@
 package com.takehome.drama.feature.main
 
 import app.cash.turbine.test
+import com.takehome.drama.domain.fake.testAppConfig
+import com.takehome.drama.domain.fake.FakeAdsConfigRepository
 import com.takehome.drama.domain.fake.FakeCatalogRepository
 import com.takehome.drama.domain.fake.FakeUserPreferencesRepository
 import com.takehome.drama.domain.fake.FakeWatchProgressRepository
 import com.takehome.drama.domain.fake.MainDispatcherRule
 import com.takehome.drama.domain.model.UserPreferences
 import com.takehome.drama.domain.model.WatchProgress
+import com.takehome.drama.domain.model.ads.AdsConfig
+import com.takehome.drama.domain.model.ads.PlacementConfig
+import com.takehome.drama.domain.usecase.ads.ObserveAdPlacementUseCase
 import com.takehome.drama.domain.usecase.catalog.GetCatalogUseCase
 import com.takehome.drama.domain.usecase.catalog.ResolveContentLanguageUseCase
 import com.takehome.drama.domain.usecase.discovery.ClockTime
@@ -20,6 +25,8 @@ import com.takehome.drama.feature.main.presentation.home.HomeSingleEvent
 import com.takehome.drama.feature.main.presentation.home.HomeViewModel
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
@@ -36,6 +43,7 @@ class HomeViewModelTest {
     private val progressRepository = FakeWatchProgressRepository()
     private val preferences = FakeUserPreferencesRepository(UserPreferences(contentLanguage = "en"))
     private val clock = FakeWallClock()
+    private val adsConfig = FakeAdsConfigRepository()
 
     private fun viewModel() = HomeViewModel(
         getCatalog = GetCatalogUseCase(catalogRepository),
@@ -46,7 +54,20 @@ class HomeViewModelTest {
         resolveContentLanguage = ResolveContentLanguageUseCase(),
         userPreferencesRepository = preferences,
         wallClock = clock,
+        observeAdPlacement = ObserveAdPlacementUseCase(adsConfig, testAppConfig),
     )
+
+    @Test
+    fun `native slot follows the remote policy, also when it changes mid session`() = runTest {
+        val vm = viewModel()
+        assertTrue(vm.viewState.value.showNativeAd)
+        adsConfig.config.value = AdsConfig(placements = mapOf("native_home" to PlacementConfig(false)))
+        assertFalse(vm.viewState.value.showNativeAd)
+        adsConfig.config.value = AdsConfig(disabledVersions = listOf(testAppConfig.versionName))
+        assertFalse(vm.viewState.value.showNativeAd)
+        adsConfig.config.value = AdsConfig.DEFAULT
+        assertTrue(vm.viewState.value.showNativeAd)
+    }
 
     @Test
     fun `hero comes from heroShowId and the rest flow by views`() = runTest {

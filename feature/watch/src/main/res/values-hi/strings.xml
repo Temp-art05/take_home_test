@@ -61,4 +61,16 @@
     <string name="watch_quality_more_data">ज़्यादा डेटा लगता है</string>
     <string name="watch_language">भाषा</string>
     <string name="watch_autoplay_next">अगला एपिसोड अपने-आप चलाएँ</string>
+
+    <!-- Mở tập khoá bằng rewarded ad (Phase 5) -->
+    <string name="watch_unlock_title">एपिसोड %1$d अनलॉक करें</string>
+    <string name="watch_unlock_body">इस एपिसोड को खोलने के लिए एक छोटा वीडियो विज्ञापन देखें। यह अनलॉक ही रहेगा।</string>
+    <string name="watch_unlock_watch_ad">विज्ञापन देखें</string>
+    <string name="watch_unlock_not_now">अभी नहीं</string>
+    <string name="watch_unlock_unavailable">अभी कोई विज्ञापन उपलब्ध नहीं है। बाद में फिर कोशिश करें।</string>
+    <string name="watch_unlock_success">एपिसोड %1$d अनलॉक हो गया</string>
+    <string name="watch_unlock_incomplete">अनलॉक करने के लिए पूरा विज्ञापन देखें</string>
+    <string name="watch_unlock_with_ad">अनलॉक करने के लिए विज्ञापन देखें</string>
+    <string name="watch_locked_body_ad">इसे खोलने के लिए छोटा विज्ञापन देखें, या कोई मुफ़्त एपिसोड चुनें।</string>
+    <string name="watch_unlock_loading_cd">विज्ञापन लोड हो रहा है</string>
 </resources>

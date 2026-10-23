@@ -62,4 +62,16 @@
     <string name="watch_quality_more_data">Consomme plus de données</string>
     <string name="watch_language">Langue</string>
     <string name="watch_autoplay_next">Lecture auto de l\'épisode suivant</string>
+
+    <!-- Mở tập khoá bằng rewarded ad (Phase 5) -->
+    <string name="watch_unlock_title">Débloquer l\'épisode %1$d</string>
+    <string name="watch_unlock_body">Regardez une courte pub vidéo pour ouvrir cet épisode. Il reste débloqué.</string>
+    <string name="watch_unlock_watch_ad">Voir la pub</string>
+    <string name="watch_unlock_not_now">Plus tard</string>
+    <string name="watch_unlock_unavailable">Aucune pub disponible pour le moment. Réessayez plus tard.</string>
+    <string name="watch_unlock_success">Épisode %1$d débloqué</string>
+    <string name="watch_unlock_incomplete">Regardez la pub jusqu\'au bout pour débloquer</string>
+    <string name="watch_unlock_with_ad">Voir une pub pour débloquer</string>
+    <string name="watch_locked_body_ad">Regardez une courte pub pour l\'ouvrir, ou choisissez un épisode gratuit.</string>
+    <string name="watch_unlock_loading_cd">Chargement de la pub</string>
 </resources>

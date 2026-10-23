@@ -5,6 +5,8 @@ import android.os.Build
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
+import com.takehome.drama.core.ads.AdsInitializer
+import com.takehome.drama.core.ads.di.adsModule
 import com.takehome.drama.core.analytics.Analytics
 import com.takehome.drama.core.analytics.analyticsModule
 import com.takehome.drama.core.analytics.remoteconfig.RemoteConfigSource
@@ -57,6 +59,7 @@ class FlowDramaApp : Application(), SingletonImageLoader.Factory {
                 analyticsModule(isDebug = BuildConfig.IS_DEBUG),
                 remoteConfigModule,
                 dataModule,
+                adsModule,
                 // Dev: `adb shell run-as com.takehome.drama touch files/force_low_tier` (hoặc force_normal_tier) để ép mức máy.
                 mediaModule(tierOverride = ::devTierOverride),
                 skeletonModule,
@@ -73,6 +76,8 @@ class FlowDramaApp : Application(), SingletonImageLoader.Factory {
 
         // Không có bước này thì remote config không bao giờ được fetch.
         get<CoroutineScope>(AppScope).launch { get<RemoteConfigSource>().fetchAndSync() }
+        // MobileAds init chạy nền; request ad đầu tiên chờ remote config áp xong (tối đa 3 s).
+        get<AdsInitializer>().start()
         // Cache video theo phiên: xoá bản của lần mở trước ngay khi app lên.
         get<CoroutineScope>(AppScope).launch(Dispatchers.IO) { getKoin().prepareMediaCache() }
     }

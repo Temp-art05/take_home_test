@@ -1,5 +1,6 @@
 package com.takehome.drama.domain.fake
 
+import com.takehome.drama.domain.config.AppConfig
 import com.takehome.drama.domain.model.Catalog
 import com.takehome.drama.domain.model.Episode
 import com.takehome.drama.domain.model.LocalizedText
@@ -63,3 +64,15 @@ fun episode(
     durationSeconds = 0,
     sources = sources,
 )
+
+/** AppConfig cho test — versionName như bản dev/prod thật (`1.0.0`). */
+fun appConfig(versionName: String = "1.0.0") = AppConfig(
+    baseUrl = "https://example.com/",
+    isDebug = true,
+    isDevFlavor = true,
+    useFixtures = true,
+    versionCode = 1,
+    versionName = versionName,
+)
+
+val testAppConfig = appConfig()

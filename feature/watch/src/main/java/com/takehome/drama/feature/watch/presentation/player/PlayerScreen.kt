@@ -1,6 +1,7 @@
 package com.takehome.drama.feature.watch.presentation.player
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.takehome.drama.core.ads.AdsPresenter
 import com.takehome.drama.core.designsystem.component.AppAsyncImage
 import com.takehome.drama.core.designsystem.component.AppBottomSheet
 import com.takehome.drama.core.designsystem.component.AppToastHost
@@ -69,8 +72,11 @@ import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.core.ui.foundation.format.formatCompactCount
 import com.takehome.drama.core.utils.extension.findActivity
+import com.takehome.drama.domain.model.ads.AdPlacement
 import com.takehome.drama.domain.usecase.watch.EndAction
 import com.takehome.drama.feature.watch.R
+import com.takehome.drama.feature.watch.presentation.common.RewardedAdState
+import com.takehome.drama.feature.watch.presentation.common.RewardedUnlockButton
 import com.takehome.drama.feature.watch.presentation.player.component.CenterPlayIcon
 import com.takehome.drama.feature.watch.presentation.player.component.EpisodePickerSheet
 import com.takehome.drama.feature.watch.presentation.player.component.EpisodesPill
@@ -81,8 +87,9 @@ import com.takehome.drama.feature.watch.presentation.player.component.PlayerTopB
 import com.takehome.drama.feature.watch.presentation.player.component.PlayerTrack
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerPage
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerSheet
-import kotlin.math.abs
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import kotlin.math.abs
 
 /** Overlay mờ hết khi trang lệch ~60% chiều cao. */
 private const val OVERLAY_FADE = 1.6f
@@ -94,6 +101,7 @@ private const val AUTO_SCROLL_MS = 650
 fun PlayerScreen(
     viewModel: PlayerViewModel,
     onNavigate: (NavigationRequest) -> Unit,
+    adsPresenter: AdsPresenter = koinInject(),
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     // Không `by`: chỉ thanh track đọc `.value` → tick 500ms không recompose cả màn.
@@ -104,14 +112,20 @@ fun PlayerScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val resources = LocalResources.current
+    val activity = LocalActivity.current
 
     viewModel.singleEvent.CollectAsEffect { event ->
         when (event) {
             PlayerSingleEvent.NavigateBack -> onNavigate(NavigationRequest.PopBackStack)
             is PlayerSingleEvent.ShowToast -> toastState.show(
                 text = event.formatArg?.let { resources.getString(event.messageRes, it) } ?: resources.getString(event.messageRes),
-                success = false,
+                success = event.success,
             )
+            is PlayerSingleEvent.ShowRewarded -> {
+                // VM đã pause player trước khi phát event này — không ad nào chạy đè video đang phát.
+                val onResult = { earned: Boolean -> viewModel.processIntent(PlayerIntent.RewardResult(event.episodeIndex, earned)) }
+                if (activity != null) adsPresenter.showRewarded(activity, AdPlacement.RewardedBonus, onResult) else onResult(false)
+            }
             is PlayerSingleEvent.ScrollToEpisode -> {
                 val page = viewState.pages.indexOfFirst { it.episodeIndex == event.index }
                 if (page >= 0) {
@@ -316,12 +330,32 @@ private fun EpisodePage(
 
         Box(Modifier.fillMaxSize().graphicsLayer { alpha = overlayAlpha() }) {
             when {
-                page.isLocked -> CenterMessage(
-                    title = stringResource(R.string.watch_locked_title, page.episodeNumber),
-                    body = stringResource(R.string.watch_locked_body),
-                    actionLabel = stringResource(R.string.watch_episodes),
-                    onAction = { onIntent(PlayerIntent.EpisodesClick) },
-                )
+                page.isLocked -> {
+                    val unlockAd = viewState.unlockAd.takeIf { active }
+                    CenterMessage(
+                        title = stringResource(R.string.watch_locked_title, page.episodeNumber),
+                        body = stringResource(if (unlockAd != null) R.string.watch_locked_body_ad else R.string.watch_locked_body),
+                        actionLabel = stringResource(R.string.watch_episodes),
+                        onAction = { onIntent(PlayerIntent.EpisodesClick) },
+                        primaryAction = unlockAd?.let { state ->
+                            {
+                                RewardedUnlockButton(
+                                    text = stringResource(R.string.watch_unlock_with_ad),
+                                    state = state,
+                                    onClick = { onIntent(PlayerIntent.UnlockWithAdClick) },
+                                )
+                                if (state == RewardedAdState.Unavailable) {
+                                    Text(
+                                        text = stringResource(R.string.watch_unlock_unavailable),
+                                        style = AppTypography.caption,
+                                        color = AppTheme.colors.media.textMuted,
+                                        textAlign = TextAlign.Center,
+                                    )
+                                }
+                            }
+                        },
+                    )
+                }
                 !active -> Unit
                 viewState.hasPlaybackError -> CenterMessage(
                     title = stringResource(R.string.watch_error_playback),
@@ -467,6 +501,8 @@ private fun BoxScope.CenterMessage(
     actionLabel: String,
     onAction: () -> Unit,
     body: String? = null,
+    /** Nút chính phía trên nút phụ (mở tập bằng rewarded). */
+    primaryAction: (@Composable () -> Unit)? = null,
 ) {
     val media = AppTheme.colors.media
     Column(
@@ -484,6 +520,10 @@ private fun BoxScope.CenterMessage(
         )
         if (body != null) {
             Text(body, style = AppTypography.label, color = media.textMuted, textAlign = TextAlign.Center)
+        }
+        if (primaryAction != null) {
+            Spacer(Modifier.height(AppTheme.dimensions.s2))
+            primaryAction()
         }
         GhostPillButton(text = actionLabel, onClick = onAction, modifier = Modifier.padding(top = AppTheme.dimensions.s2))
     }

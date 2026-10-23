@@ -65,4 +65,16 @@
     <string name="watch_quality_more_data">يستهلك بيانات أكثر</string>
     <string name="watch_language">اللغة</string>
     <string name="watch_autoplay_next">تشغيل الحلقة التالية تلقائيًا</string>
+
+    <!-- Mở tập khoá bằng rewarded ad (Phase 5) -->
+    <string name="watch_unlock_title">افتح الحلقة %1$d</string>
+    <string name="watch_unlock_body">شاهد إعلان فيديو قصيرًا لفتح هذه الحلقة. ستبقى مفتوحة.</string>
+    <string name="watch_unlock_watch_ad">شاهد الإعلان</string>
+    <string name="watch_unlock_not_now">ليس الآن</string>
+    <string name="watch_unlock_unavailable">لا يتوفر إعلان الآن. حاول مرة أخرى لاحقًا.</string>
+    <string name="watch_unlock_success">تم فتح الحلقة %1$d</string>
+    <string name="watch_unlock_incomplete">شاهد الإعلان كاملًا لفتح الحلقة</string>
+    <string name="watch_unlock_with_ad">شاهد إعلانًا لفتح الحلقة</string>
+    <string name="watch_locked_body_ad">شاهد إعلانًا قصيرًا لفتحها، أو اختر حلقة مجانية.</string>
+    <string name="watch_unlock_loading_cd">جارٍ تحميل الإعلان</string>
 </resources>

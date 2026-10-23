@@ -1,10 +1,15 @@
 package com.takehome.drama.feature.onboarding
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
+import com.takehome.drama.core.ads.FakeAdsPresenter
 import com.takehome.drama.domain.fake.MainDispatcherRule
+import com.takehome.drama.domain.model.ads.AdPlacement
 import com.takehome.drama.feature.onboarding.presentation.flow.OnboardingFlowIntent
+import com.takehome.drama.feature.onboarding.presentation.flow.OnboardingFlowSingleEvent
 import com.takehome.drama.feature.onboarding.presentation.flow.OnboardingFlowViewModel
 import com.takehome.drama.feature.onboarding.presentation.flow.OnboardingStep
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -21,8 +26,64 @@ class OnboardingFlowViewModelTest {
     @get:Rule
     val mainRule = MainDispatcherRule()
 
+    private val ads = FakeAdsPresenter()
+
     private fun viewModel(startStep: Int = 0, savedState: SavedStateHandle = SavedStateHandle(mapOf("startStep" to startStep))) =
-        OnboardingFlowViewModel(savedState)
+        OnboardingFlowViewModel(savedState, ads)
+
+    @Test
+    fun `interstitial is preloaded when the flow opens so the end never waits for it`() {
+        viewModel()
+        assertEquals(listOf(AdPlacement.InterstitialOnboarding), ads.preloaded)
+    }
+
+    @Test
+    fun `finish asks the screen for the interstitial exactly once`() = runTest {
+        val vm = viewModel(startStep = 3)
+        vm.singleEvent.test {
+            vm.processIntent(OnboardingFlowIntent.Finish)
+            vm.processIntent(OnboardingFlowIntent.Finish)
+            assertEquals(OnboardingFlowSingleEvent.FinishWithAd, awaitItem())
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `closing the interstitial navigates home exactly once`() = runTest {
+        val vm = viewModel(startStep = 3)
+        vm.singleEvent.test {
+            vm.processIntent(OnboardingFlowIntent.Finish)
+            assertEquals(OnboardingFlowSingleEvent.FinishWithAd, awaitItem())
+            vm.processIntent(OnboardingFlowIntent.AdClosed)
+            vm.processIntent(OnboardingFlowIntent.AdClosed)
+            assertEquals(OnboardingFlowSingleEvent.NavigateHome, awaitItem())
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `navigate home waits for a new collector when the activity is recreated during the ad`() = runTest {
+        val vm = viewModel(startStep = 3)
+        vm.singleEvent.test {
+            vm.processIntent(OnboardingFlowIntent.Finish)
+            assertEquals(OnboardingFlowSingleEvent.FinishWithAd, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        // Composition cũ đã huỷ; ad đóng khi chưa có ai collect → event phải chờ composition mới.
+        vm.processIntent(OnboardingFlowIntent.AdClosed)
+        vm.singleEvent.test {
+            assertEquals(OnboardingFlowSingleEvent.NavigateHome, awaitItem())
+        }
+    }
+
+    @Test
+    fun `ad closed before finish is ignored`() = runTest {
+        val vm = viewModel(startStep = 3)
+        vm.singleEvent.test {
+            vm.processIntent(OnboardingFlowIntent.AdClosed)
+            expectNoEvents()
+        }
+    }
 
     @Test
     fun `starts at the first step and moves forward one step at a time`() {

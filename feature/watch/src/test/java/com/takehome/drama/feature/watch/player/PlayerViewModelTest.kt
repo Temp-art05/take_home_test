@@ -6,6 +6,17 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import app.cash.turbine.test
+import com.takehome.drama.core.ads.FakeAdsPresenter
+import com.takehome.drama.domain.fake.FakeAdsConfigRepository
+import com.takehome.drama.domain.fake.FakeEpisodeUnlockRepository
+import com.takehome.drama.domain.fake.testAppConfig
+import com.takehome.drama.domain.model.ads.AdPlacement
+import com.takehome.drama.domain.model.ads.AdsConfig
+import com.takehome.drama.domain.model.ads.PlacementConfig
+import com.takehome.drama.domain.usecase.ads.IsAdPlacementEnabledUseCase
+import com.takehome.drama.domain.usecase.watch.ObserveUnlockedEpisodesUseCase
+import com.takehome.drama.domain.usecase.watch.UnlockEpisodeUseCase
+import com.takehome.drama.feature.watch.presentation.common.RewardedAdState
 import com.takehome.drama.core.media.FakeFeedPlayer
 import com.takehome.drama.core.media.FakeFeedPlayer.Load
 import com.takehome.drama.core.media.PlaybackState
@@ -65,6 +76,13 @@ class PlayerViewModelTest {
     private val progressRepository = FakeWatchProgressRepository()
     private val preferences = FakeUserPreferencesRepository()
     private val player = FakeFeedPlayer()
+    private val unlockRepository = FakeEpisodeUnlockRepository()
+    private val adsConfig = FakeAdsConfigRepository()
+    private val ads = FakeAdsPresenter()
+
+    private fun rewardedOff() {
+        adsConfig.config.value = AdsConfig(placements = mapOf(AdPlacement.RewardedBonus.id to PlacementConfig(false)))
+    }
 
     private fun viewModel(
         episodeIndex: Int = 0,
@@ -84,6 +102,10 @@ class PlayerViewModelTest {
         observeShowProgress = ObserveShowProgressUseCase(progressRepository),
         userPreferencesRepository = preferences,
         playerFactory = { player },
+        observeUnlockedEpisodes = ObserveUnlockedEpisodesUseCase(unlockRepository),
+        unlockEpisode = UnlockEpisodeUseCase(unlockRepository),
+        isAdPlacementEnabled = IsAdPlacementEnabledUseCase(adsConfig, testAppConfig),
+        adsPresenter = ads,
     )
 
     private fun url(index: Int, language: String = "en", quality: String = "720p") =
@@ -252,12 +274,13 @@ class PlayerViewModelTest {
     }
 
     @Test
-    fun `picking a locked episode in the sheet keeps the sheet and shows a toast`() = runTest(mainRule.dispatcher) {
+    fun `rewarded off - picking a locked episode in the sheet keeps the sheet and shows a toast`() = runTest(mainRule.dispatcher) {
+        rewardedOff()
         val viewModel = viewModel()
         viewModel.processIntent(PlayerIntent.EpisodesClick)
         viewModel.singleEvent.test {
             viewModel.processIntent(PlayerIntent.EpisodeSelect(index = 6))
-            assertEquals(PlayerSingleEvent.ShowToast(R.string.watch_episode_locked, 7), awaitItem())
+            assertEquals(PlayerSingleEvent.ShowToast(R.string.watch_episode_locked, 7, success = false), awaitItem())
         }
         assertEquals(PlayerSheet.Episodes, viewModel.viewState.value.sheet)
         assertEquals(1, player.loads.size)
@@ -464,4 +487,96 @@ class PlayerViewModelTest {
         store.clear()
         assertTrue(player.released)
     }
+
+    @Test
+    fun `locked page offers the rewarded unlock once the ad is ready`() = runTest(mainRule.dispatcher) {
+        ads.rewardedGate = CompletableDeferred()
+        val viewModel = viewModel(episodeIndex = 5)
+        assertEquals(RewardedAdState.Loading, viewModel.viewState.value.unlockAd)
+        ads.rewardedGate!!.complete(Unit)
+        assertEquals(RewardedAdState.Ready, viewModel.viewState.value.unlockAd)
+    }
+
+    @Test
+    fun `rewarded off - locked page has no ad button`() = runTest(mainRule.dispatcher) {
+        rewardedOff()
+        assertNull(viewModel(episodeIndex = 5).viewState.value.unlockAd)
+        assertEquals(0, ads.rewardedLoads)
+    }
+
+    @Test
+    fun `free page has no ad button`() = runTest(mainRule.dispatcher) {
+        assertNull(viewModel(episodeIndex = 2).viewState.value.unlockAd)
+    }
+
+    @Test
+    fun `watch ad pauses playback before asking the screen to show it`() = runTest(mainRule.dispatcher) {
+        val viewModel = viewModel(episodeIndex = 5)
+        player.play()
+        viewModel.singleEvent.test {
+            viewModel.processIntent(PlayerIntent.UnlockWithAdClick)
+            viewModel.processIntent(PlayerIntent.UnlockWithAdClick)
+            assertEquals(PlayerSingleEvent.ShowRewarded(episodeIndex = 5), awaitItem())
+            expectNoEvents()
+        }
+        assertFalse(player.state.value.playWhenReady)
+    }
+
+    @Test
+    fun `reward earned unlocks the page in place and plays it from the start`() = runTest(mainRule.dispatcher) {
+        val viewModel = viewModel(episodeIndex = 5)
+        assertTrue(player.loads.isEmpty())
+        viewModel.singleEvent.test {
+            viewModel.processIntent(PlayerIntent.UnlockWithAdClick)
+            assertEquals(PlayerSingleEvent.ShowRewarded(episodeIndex = 5), awaitItem())
+            viewModel.processIntent(PlayerIntent.RewardResult(episodeIndex = 5, earned = true))
+            assertEquals(PlayerSingleEvent.ShowToast(R.string.watch_unlock_success, 6, success = true), awaitItem())
+        }
+        val state = viewModel.viewState.value
+        assertFalse(state.isLocked)
+        assertNull(state.unlockAd)
+        assertFalse(state.pages[5].isLocked)
+        assertEquals(PlayerLoad(url(5), 0), player.loads.single().let { PlayerLoad(it.url, it.startPositionMs) })
+        assertEquals(url(5), player.items[5].url)
+    }
+
+    @Test
+    fun `closing the ad early keeps the page locked`() = runTest(mainRule.dispatcher) {
+        val viewModel = viewModel(episodeIndex = 5)
+        viewModel.singleEvent.test {
+            viewModel.processIntent(PlayerIntent.UnlockWithAdClick)
+            assertEquals(PlayerSingleEvent.ShowRewarded(episodeIndex = 5), awaitItem())
+            viewModel.processIntent(PlayerIntent.RewardResult(episodeIndex = 5, earned = false))
+            assertEquals(PlayerSingleEvent.ShowToast(R.string.watch_unlock_incomplete, formatArg = null, success = false), awaitItem())
+        }
+        assertTrue(viewModel.viewState.value.isLocked)
+        assertTrue(player.loads.isEmpty())
+        // Xem lại được: ad mới load cho lần bấm sau.
+        assertEquals(RewardedAdState.Ready, viewModel.viewState.value.unlockAd)
+    }
+
+    @Test
+    fun `an unlocked episode plays and autoplay runs into it`() = runTest(mainRule.dispatcher) {
+        unlockRepository.unlock(SHOW_ID, 5)
+        val viewModel = viewModel(episodeIndex = 4)
+        assertFalse(viewModel.viewState.value.pages[5].isLocked)
+        viewModel.singleEvent.test {
+            player.emit(PlaybackState(ended = true, positionMs = 100_000, durationMs = 100_000))
+            assertEquals(PlayerSingleEvent.ScrollToEpisode(5), awaitItem())
+        }
+    }
+
+    @Test
+    fun `rewarded on - picking a locked episode in the sheet goes to its page where the unlock button is`() =
+        runTest(mainRule.dispatcher) {
+            val viewModel = viewModel()
+            viewModel.processIntent(PlayerIntent.EpisodesClick)
+            viewModel.singleEvent.test {
+                viewModel.processIntent(PlayerIntent.EpisodeSelect(index = 6))
+                assertEquals(PlayerSingleEvent.ScrollToEpisode(6), awaitItem())
+            }
+            assertEquals(PlayerSheet.None, viewModel.viewState.value.sheet)
+        }
+
+    private data class PlayerLoad(val url: String, val startPositionMs: Long)
 }

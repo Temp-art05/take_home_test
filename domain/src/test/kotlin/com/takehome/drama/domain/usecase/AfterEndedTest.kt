@@ -46,4 +46,25 @@ class AfterEndedTest {
         assertEquals(3, useCase.nextOf(holes, currentIndex = 0)?.index)
         assertNull(useCase.nextOf(holes, currentIndex = 7))
     }
+
+    @Test
+    fun `next locked episode already unlocked plays like a free one`() {
+        assertEquals(PlayNextIndex2, useCase(episodes, currentIndex = 1, autoplay = true, unlocked = setOf(2)))
+        assertEquals(
+            EndAction.NextAvailable(index = 2, episodeNumber = 3),
+            useCase(episodes, currentIndex = 1, autoplay = false, unlocked = setOf(2)),
+        )
+    }
+
+    @Test
+    fun `unlocking another episode does not open the next one`() {
+        assertEquals(
+            EndAction.NextLocked(index = 2, episodeNumber = 3),
+            useCase(episodes, currentIndex = 1, autoplay = true, unlocked = setOf(5)),
+        )
+    }
+
+    private companion object {
+        val PlayNextIndex2 = EndAction.PlayNext(index = 2)
+    }
 }
