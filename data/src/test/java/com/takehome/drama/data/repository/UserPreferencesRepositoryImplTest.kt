@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -23,8 +24,11 @@ class UserPreferencesRepositoryImplTest {
         override val data: Flow<Preferences>,
         private val writeError: Throwable? = null,
     ) : UserPreferencesLocalDataSource {
+        val written = mutableMapOf<Preferences.Key<*>, Any?>()
+
         override suspend fun <T> set(key: Preferences.Key<T>, value: T) {
             writeError?.let { throw it }
+            written[key] = value
         }
     }
 
@@ -45,5 +49,19 @@ class UserPreferencesRepositoryImplTest {
         val repository = UserPreferencesRepositoryImpl(FakeLocal(flowOf(mutablePreferencesOf()), IOException("disk full")))
         val error = repository.setOnboardingDone(true).exceptionOrNull()
         assertTrue(error is DomainException.Unknown)
+    }
+
+    @Test
+    fun `autoplay next episode defaults to on and reads the stored value`() = runTest {
+        assertTrue(UserPreferencesRepositoryImpl(FakeLocal(flowOf(mutablePreferencesOf()))).preferences.first().autoplayNextEpisode)
+        val stored = mutablePreferencesOf(UserPreferencesKeys.AUTOPLAY_NEXT_EPISODE to false)
+        assertFalse(UserPreferencesRepositoryImpl(FakeLocal(flowOf(stored))).preferences.first().autoplayNextEpisode)
+    }
+
+    @Test
+    fun `setting autoplay next episode writes its key`() = runTest {
+        val local = FakeLocal(flowOf(mutablePreferencesOf()))
+        UserPreferencesRepositoryImpl(local).setAutoplayNextEpisode(false)
+        assertEquals(mapOf<Preferences.Key<*>, Any?>(UserPreferencesKeys.AUTOPLAY_NEXT_EPISODE as Preferences.Key<*> to false), local.written)
     }
 }

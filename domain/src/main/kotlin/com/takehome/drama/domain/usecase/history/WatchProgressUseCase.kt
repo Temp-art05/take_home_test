@@ -66,4 +66,6 @@ class WatchProgressUseCase(
             WatchHistory(watching = watching, finished = finished)
         }
 
+    /** Tiến độ từng tập của một show — cho ô "đã xem" của lưới tập. */
+    fun observeForShow(showId: String): Flow<List<WatchProgress>> = watchProgressRepository.observeForShow(showId)
 }

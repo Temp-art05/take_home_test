@@ -14,4 +14,7 @@ interface WatchProgressRepository {
 
     /** Bản ghi mới nhất của mỗi show, mới → cũ. Lỗi đọc DB → rỗng (đã log). */
     fun observeLatestPerShow(): Flow<List<WatchProgress>>
+
+    /** Mọi tập đã lưu của một show, theo `episodeIndex`. Lỗi đọc DB → rỗng (đã log). */
+    fun observeForShow(showId: String): Flow<List<WatchProgress>>
 }

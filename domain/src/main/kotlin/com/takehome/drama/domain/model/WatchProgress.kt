@@ -22,11 +22,18 @@ data class WatchProgress(
         get() = durationMs > 0 &&
             (positionMs >= durationMs * COMPLETED_RATIO || remainingMs < COMPLETED_TAIL_MS)
 
+    /**
+     * "Đã xem" trên lưới tập (ô xám, "N watched"): xem xong, hoặc đã xem ít nhất [WATCHED_MIN_MS] —
+     * lướt qua khi vuốt pager không tính. Continue/History vẫn dựa vào [isEpisodeCompleted].
+     */
+    val isWatched: Boolean get() = isEpisodeCompleted || positionMs >= WATCHED_MIN_MS
+
     val isLastEpisode: Boolean get() = episodeIndex >= episodeTotal - 1
 
     private companion object {
         const val COMPLETED_RATIO = 0.95
         const val COMPLETED_TAIL_MS = 3_000L
+        const val WATCHED_MIN_MS = 5_000L
     }
 }
 

@@ -30,4 +30,9 @@ class WatchProgressRepositoryImpl(
         local.observeLatestPerShow()
             .map { rows -> rows.map { it.toDomain() } }
             .catch { Timber.e(it, "Observe watch history failed"); emit(emptyList()) }
+
+    override fun observeForShow(showId: String): Flow<List<WatchProgress>> =
+        local.observeForShow(showId)
+            .map { rows -> rows.map { it.toDomain() } }
+            .catch { Timber.e(it, "Observe show progress failed"); emit(emptyList()) }
 }

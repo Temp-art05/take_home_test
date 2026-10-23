@@ -12,7 +12,7 @@ tools/ui-check/compare.sh SCR-0301 /tmp/ui   # → SCR-0301.mockup.png / .app.pn
 | File | Việc |
 |---|---|
 | `mockup-shot.mjs` | Chụp khung điện thoại của một mã SCR trong mockup, rộng 1080px (`--list` liệt kê các màn) |
-| `device-shot.sh` | Mở thẳng màn trên emulator bằng extra `debug_screen` rồi `adb screencap` |
+| `device-shot.sh` | Mở thẳng màn trên emulator bằng extra `debug_screen` rồi `adb screencap`. Sheet: `TAP_TEXT=Eps` / `LONGPRESS_TEXT=1×` chạm/nhấn giữ node trước khi chụp |
 | `side-by-side.mjs` | Ghép mockup và app thành một ảnh hai cột cùng chiều rộng |
 | `compare.sh` | Ba bước trên trong một lệnh |
 

@@ -57,4 +57,15 @@ class WatchProgressDaoTest {
             assertEquals(listOf("a"), awaitItem().map { it.showId })
         }
     }
+
+    @Test
+    fun `progress of one show only, sorted by episode index`() = runTest {
+        dao.upsert(row("a", 3, 1, updatedAt = 1))
+        dao.upsert(row("b", 0, 1, updatedAt = 2))
+        dao.upsert(row("a", 1, 1, updatedAt = 3))
+
+        dao.observeForShow("a").test {
+            assertEquals(listOf(1, 3), awaitItem().map { it.episodeIndex })
+        }
+    }
 }

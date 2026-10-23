@@ -87,4 +87,14 @@ class WatchProgressUseCaseTest {
             assertEquals(listOf("b"), history.finished.map { it.show.id })
         }
     }
+
+    @Test
+    fun `progress of one show is observed sorted by episode index`() = runTest {
+        repository.save(progress("1", index = 3, position = 1, updatedAt = 1))
+        repository.save(progress("2", index = 0, position = 1, updatedAt = 2))
+        repository.save(progress("1", index = 1, position = 1, updatedAt = 3))
+        useCase.observeForShow("1").test {
+            assertEquals(listOf(1, 3), awaitItem().map { it.episodeIndex })
+        }
+    }
 }

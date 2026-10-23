@@ -99,6 +99,13 @@ object AppTypography {
         letterSpacing = 0.08.em,
     )
 
+    /** Thời gian phát `0:42 / 1:31` — mono để số không nhảy khi chạy. */
+    val timecode = TextStyle(
+        fontFamily = FontFamily.Monospace,
+        fontWeight = FontWeight.Normal,
+        fontSize = 10.5.sp,
+    )
+
     /** Nhãn tab bar — 10.5sp. */
     val tab = TextStyle(
         fontFamily = family,

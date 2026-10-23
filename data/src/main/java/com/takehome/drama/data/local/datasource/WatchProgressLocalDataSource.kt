@@ -12,6 +12,8 @@ interface WatchProgressLocalDataSource {
     suspend fun latestForShow(showId: String): WatchProgressEntity?
 
     fun observeLatestPerShow(): Flow<List<WatchProgressEntity>>
+
+    fun observeForShow(showId: String): Flow<List<WatchProgressEntity>>
 }
 
 class WatchProgressLocalDataSourceImpl(
@@ -24,4 +26,6 @@ class WatchProgressLocalDataSourceImpl(
     override suspend fun latestForShow(showId: String) = dao.latestForShow(showId)
 
     override fun observeLatestPerShow() = dao.observeLatestPerShow()
+
+    override fun observeForShow(showId: String) = dao.observeForShow(showId)
 }
