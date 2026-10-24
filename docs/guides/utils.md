@@ -1,22 +1,19 @@
 # Tiện ích có sẵn (`:core:utils`)
 
-## Toasty — toast có icon + màu
+## Toast — `AppToastHost` (Compose, `:core:design-system`)
+
+Toast của app vẽ bằng Compose (đề cấm XML layout, nên `Toasty` của base đã gỡ):
 
 ```kotlin
-Toasty.success(context, R.string.saved).show()
-Toasty.error(context, event.messageRes, allowQueue = false).show()
-Toasty.info(context, "Đã copy").show()
-Toasty.warning(context, R.string.low_storage, Toast.LENGTH_LONG).show()
-Toasty.normal(context, R.string.hello).show()
+val toastState = rememberToastState()
+viewModel.singleEvent.CollectAsEffect { event ->
+    if (event is XxxSingleEvent.ShowToast) toastState.show(text = resources.getString(event.messageRes), success = true)
+}
+AppToastHost(state = toastState, modifier = Modifier.align(Alignment.BottomCenter))
 ```
 
-- Hiện ở mép trên màn hình, nền bo tròn, icon tô màu theo loại (`res/values/colors.xml` của
-  `:core:utils` — đổi màu brand ở đó).
-- `allowQueue = false`: huỷ toast đang hiện để toast mới hiện ngay — dùng cho lỗi lặp lại / bấm liên tục.
-- Gọi từ `CollectAsEffect` của screen khi nhận `SingleEvent` — ViewModel **không** gọi Toasty (không giữ Context).
-- Từ Android 11, toast custom chỉ hiện khi app ở foreground. Báo khi app ở nền → `NotificationHelper`.
-
-Mẫu thật: `feature/main/.../presentation/home/HomeScreen.kt`.
+- 2 s, chấm xanh = thành công, chấm vàng = thông báo khoá/không khả dụng (SCR-0605).
+- ViewModel chỉ phát `SingleEvent` mang `@StringRes`, không giữ Context.
 
 ## Context extension
 

@@ -77,8 +77,8 @@ import com.takehome.drama.feature.main.presentation.common.ShowCard
 import com.takehome.drama.feature.main.presentation.common.label
 import org.koin.androidx.compose.koinViewModel
 
-/** Poster không được chọn mờ 72% (design). */
-private const val UNSELECTED_ALPHA = 0.55f
+/** Poster không được chọn: opacity .72 như mockup. */
+private const val UNSELECTED_ALPHA = 0.72f
 
 @Composable
 internal fun BrowseScreen(
@@ -255,7 +255,7 @@ private fun PreviewDock(viewState: BrowseViewState, slot: VideoSlot?, modifier: 
                     // "97% match" của mockup bỏ: không có dữ liệu để tính.
                     text = listOfNotNull(preview.genre, episodes, preview.status.label()).joinToString(" · "),
                     style = AppTypography.caption.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = AppTheme.colors.media.textSecondary,
                     maxLines = 1,
                     modifier = Modifier.padding(top = 3.dp),
                 )

@@ -1,5 +1,6 @@
 package com.takehome.drama.domain.model
 
+import com.takehome.drama.domain.model.languageSubtag
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -44,5 +45,12 @@ class LocalizedTextTest {
     fun `empty map resolves to empty string`() {
         assertEquals("", LocalizedText.Empty.resolve(preferred = "en", fallback = "en"))
         assertTrue(LocalizedText(mapOf("en" to "")).isEmpty)
+    }
+
+    @Test
+    fun `legacy Indonesian code from Locale matches the catalogue id key`() {
+        val text = LocalizedText(mapOf("en" to "Hello", "id" to "Halo"))
+        assertEquals("Halo", text.resolve(preferred = "in", fallback = "en"))
+        assertEquals("id", "in_ID".languageSubtag())
     }
 }

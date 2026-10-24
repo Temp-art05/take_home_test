@@ -43,7 +43,10 @@
         <item quantity="one">%1$d bölüm</item>
         <item quantity="other">%1$d bölüm</item>
     </plurals>
-    <string name="watch_episodes_summary">%1$s · %2$d izlendi</string>
+    <plurals name="watch_episodes_summary">
+        <item quantity="one">%1$s · %2$d izlendi</item>
+        <item quantity="other">%1$s · %2$d izlendi</item>
+    </plurals>
     <string name="watch_playback_options">Oynatma seçenekleri</string>
     <string name="watch_quality">Kalite</string>
     <string name="watch_quality_auto">Otomatik</string>

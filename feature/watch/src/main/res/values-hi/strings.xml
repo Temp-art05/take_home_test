@@ -51,7 +51,10 @@
         <item quantity="one">%1$d एपिसोड</item>
         <item quantity="other">%1$d एपिसोड</item>
     </plurals>
-    <string name="watch_episodes_summary">%1$s · %2$d देखे</string>
+    <plurals name="watch_episodes_summary">
+        <item quantity="one">%1$s · %2$d देखा</item>
+        <item quantity="other">%1$s · %2$d देखे</item>
+    </plurals>
 
     <!-- SCR-0304 Playback options -->
     <string name="watch_playback_options">प्लेबैक विकल्प</string>

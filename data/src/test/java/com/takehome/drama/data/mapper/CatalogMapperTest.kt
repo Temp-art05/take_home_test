@@ -62,6 +62,12 @@ class CatalogMapperTest {
     }
 
     @Test
+    fun `a broken tagIds element drops only that element, not the show`() {
+        val show = parse("""{"shows":[{"id":"1","tagIds":["ceo",null,7,{"x":1},"love"]}]}""").shows.single()
+        assertEquals(listOf("ceo", "7", "love"), show.tagIds)
+    }
+
+    @Test
     fun `explicit null fields fall back to defaults instead of dropping the show`() {
         val show = parse(
             """{"shows":[{"id":"1","viewCount":null,"episodeCount":null,"posterUrl":null,"tagIds":null,"title":null}]}""",

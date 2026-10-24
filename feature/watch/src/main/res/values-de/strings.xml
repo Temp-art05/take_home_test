@@ -43,7 +43,10 @@
         <item quantity="one">%1$d Folge</item>
         <item quantity="other">%1$d Folgen</item>
     </plurals>
-    <string name="watch_episodes_summary">%1$s · %2$d gesehen</string>
+    <plurals name="watch_episodes_summary">
+        <item quantity="one">%1$s · %2$d gesehen</item>
+        <item quantity="other">%1$s · %2$d gesehen</item>
+    </plurals>
     <string name="watch_playback_options">Wiedergabeoptionen</string>
     <string name="watch_quality">Qualität</string>
     <string name="watch_quality_auto">Auto</string>

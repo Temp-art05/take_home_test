@@ -245,7 +245,7 @@ private fun HeroCard(hero: ShowCard, daypart: Daypart, onClick: () -> Unit) {
             Text(
                 text = heroMeta(hero),
                 style = AppTypography.caption.copy(fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = AppTheme.colors.media.textSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(top = 3.dp),
@@ -264,7 +264,7 @@ private fun heroMeta(hero: ShowCard): String {
             add(stringResource(R.string.home_eps_complete, episodes))
         } else {
             add(episodes)
-            add(hero.status.label())
+            hero.status.label()?.let(::add)
         }
         hero.genre?.let(::add)
     }

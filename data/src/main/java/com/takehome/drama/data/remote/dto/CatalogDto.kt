@@ -51,5 +51,7 @@ data class ShowDto(
     @SerialName("status") val status: String? = null,
     // Server khai 64-bit; mẫu lớn nhất 4_707_000 vẫn vừa Int nhưng phim hot sẽ vượt.
     @SerialName("viewCount") val viewCount: Long = 0,
+    // Một phần tử hỏng (null, số) chỉ mất phần tử đó, không mất cả show.
+    @Serializable(with = SkipInvalidListSerializer::class)
     @SerialName("tagIds") val tagIds: List<String> = emptyList(),
 )

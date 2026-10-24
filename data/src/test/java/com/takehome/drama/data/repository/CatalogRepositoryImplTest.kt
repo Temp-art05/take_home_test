@@ -24,6 +24,7 @@ class CatalogRepositoryImplTest {
         val catalogCalls = AtomicInteger()
         var gate: CompletableDeferred<Unit>? = null
         var catalogError: Throwable? = null
+        var catalogShows = listOf(ShowDto(id = "1"))
         var episodesError: Throwable? = null
         val episodeGates = mutableMapOf<String, CompletableDeferred<Unit>>()
         val episodeCalls = AtomicInteger()
@@ -32,7 +33,7 @@ class CatalogRepositoryImplTest {
             catalogCalls.incrementAndGet()
             gate?.await()
             catalogError?.let { throw it }
-            return CatalogDto(shows = listOf(ShowDto(id = "1")))
+            return CatalogDto(shows = catalogShows)
         }
 
         override suspend fun getShowEpisodes(showId: String): ShowEpisodesDto {
@@ -169,5 +170,14 @@ class CatalogRepositoryImplTest {
 
         val cached = CatalogRepositoryImpl(source, cache).getEpisodes("7")
         assertEquals("7", cached.getOrThrow().showId)
+    }
+
+    @Test
+    fun `a payload that parses to no shows keeps the good copy on disk`() = runTest {
+        cache.catalog = CatalogDto(shows = listOf(ShowDto(id = "cached")))
+        source.catalogShows = emptyList()
+
+        assertEquals(listOf("cached"), repository.getCatalog().getOrThrow().shows.map { it.id })
+        assertEquals(listOf("cached"), cache.catalog?.shows?.map { it.id })
     }
 }

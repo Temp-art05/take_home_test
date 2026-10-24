@@ -1,6 +1,8 @@
 # Built application files
 *.apk
 *.aar
+# Lib ads vendor dạng maven local (settings.gradle.kts) — phải vào git.
+!third_party/maven/**/*.aar
 *.ap_
 *.aab
 

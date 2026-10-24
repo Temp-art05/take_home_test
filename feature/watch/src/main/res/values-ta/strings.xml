@@ -51,7 +51,10 @@
         <item quantity="one">%1$d எபிசோடு</item>
         <item quantity="other">%1$d எபிசோடுகள்</item>
     </plurals>
-    <string name="watch_episodes_summary">%1$s · %2$d பார்த்தவை</string>
+    <plurals name="watch_episodes_summary">
+        <item quantity="one">%1$s · %2$d பார்த்தது</item>
+        <item quantity="other">%1$s · %2$d பார்த்தவை</item>
+    </plurals>
 
     <!-- SCR-0304 Playback options -->
     <string name="watch_playback_options">இயக்க விருப்பங்கள்</string>

@@ -38,7 +38,11 @@ class CatalogRepositoryImpl(
 
     override suspend fun getCatalog(forceRefresh: Boolean): Result<Catalog> = catalogMutex.withLock {
         catalog?.takeUnless { forceRefresh }?.let { return@withLock Result.success(it) }
-        withCatching { dataSource.getCatalog().also { cache.writeCatalog(it) }.toDomain() }
+        withCatching {
+            val dto = dataSource.getCatalog()
+            // Sai kiểu cả mảng `shows` → parser khoan dung trả rỗng: coi là lỗi, không ghi đè bản tốt trên đĩa.
+            dto.toDomain().also { check(it.shows.isNotEmpty()) { "Catalogue has no readable show" }; cache.writeCatalog(dto) }
+        }
             .onSuccess { catalog = it }
             .recoverFromCache { cache.readCatalog()?.toDomain() }
             .mapError { it.toDomainException() }

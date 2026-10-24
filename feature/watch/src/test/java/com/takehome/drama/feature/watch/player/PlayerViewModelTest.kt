@@ -418,30 +418,37 @@ class PlayerViewModelTest {
     }
 
     @Test
-    fun `swiping back plays the episode again from the start - like a feed`() = runTest(mainRule.dispatcher) {
+    fun `swiping back to a half watched episode continues where it stopped`() = runTest(mainRule.dispatcher) {
         val viewModel = viewModel()
         player.playing(positionMs = 30_000)
         viewModel.processIntent(PlayerIntent.PageSettled(index = 1))
         viewModel.processIntent(PlayerIntent.PageSettled(index = 0))
-        assertEquals(Load(url(0), 0, playWhenReady = true), player.loads.last())
+        assertEquals(Load(url(0), 30_000, playWhenReady = true), player.loads.last())
     }
 
     @Test
-    fun `swiping onto a half watched episode starts it from the beginning, the progress stays saved`() = runTest(mainRule.dispatcher) {
+    fun `swiping onto a half watched episode continues from the saved position`() = runTest(mainRule.dispatcher) {
         progressRepository.save(progress(index = 1, positionMs = 40_000))
         val viewModel = viewModel()
         viewModel.processIntent(PlayerIntent.PageSettled(index = 1))
-        assertEquals(Load(url(1), 0, playWhenReady = true), player.loads.last())
-        assertEquals(40_000L, progressRepository.get(SHOW_ID, 1)?.positionMs)
+        assertEquals(Load(url(1), 40_000, playWhenReady = true), player.loads.last())
     }
 
     @Test
-    fun `picking a half watched episode in the sheet starts it from the beginning`() = runTest(mainRule.dispatcher) {
+    fun `swiping onto an episode watched to the end starts it over`() = runTest(mainRule.dispatcher) {
+        progressRepository.save(progress(index = 1, positionMs = 100_000, durationMs = 100_000))
+        val viewModel = viewModel()
+        viewModel.processIntent(PlayerIntent.PageSettled(index = 1))
+        assertEquals(Load(url(1), 0, playWhenReady = true), player.loads.last())
+    }
+
+    @Test
+    fun `picking a half watched episode in the sheet continues from the saved position`() = runTest(mainRule.dispatcher) {
         progressRepository.save(progress(index = 2, positionMs = 40_000))
         val viewModel = viewModel()
         viewModel.processIntent(PlayerIntent.EpisodeSelect(index = 2))
         viewModel.processIntent(PlayerIntent.PageSettled(index = 2))
-        assertEquals(Load(url(2), 0, playWhenReady = true), player.loads.last())
+        assertEquals(Load(url(2), 40_000, playWhenReady = true), player.loads.last())
     }
 
     @Test

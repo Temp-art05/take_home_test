@@ -20,7 +20,7 @@ Hướng dẫn & mẫu:
 |---|---|
 | [`docs/guides/sample-flow.md`](docs/guides/sample-flow.md) | luồng mẫu post feed (tab Home) đủ tầng — đọc để hiểu base; cách xoá |
 | [`docs/guides/new-api.md`](docs/guides/new-api.md) | thêm một API mới từng bước (domain → data → presentation) |
-| [`docs/guides/utils.md`](docs/guides/utils.md) | Toasty, Context ext, NetworkUtils, NotificationHelper |
+| [`docs/guides/utils.md`](docs/guides/utils.md) | Toast Compose, Context ext, NetworkUtils, NotificationHelper |
 
 ## Build
 
@@ -87,9 +87,9 @@ SDK analytics bên thứ ba thêm ở `:app` bằng `single { ExtraAnalyticsPlug
 
 ## Lib ads
 
-Lib của tác giả `com.github.dinhn:ads-core|ads-admob|ads-firebase` kéo từ GitHub Packages (`lurdsoft/lib-ads-android`),
-cred `gpr.user`/`gpr.key` trong `gradle.properties` — PAT `read:packages` **commit có chủ đích** (tác giả lib cho phép),
-đừng gỡ. `ads-admob` kéo theo adapter mediation → cần repo Pangle + Mintegral trong `settings.gradle.kts`. Chỉ `:core:ads`
+Lib của tác giả `com.github.dinhn:ads-core|ads-admob|ads-firebase` 1.1.1 (`lurdsoft/lib-ads-android`): bản build AAR + POM +
+`.module` **vendor** ở `third_party/maven` (maven `file://` trong `settings.gradle.kts`). Không dùng GitHub Packages/token nữa —
+token trong repo public bị GitHub thu hồi, clone sạch hỏng. Nâng lib = chép bản build mới vào đó. `ads-admob` kéo theo adapter mediation → cần repo Pangle + Mintegral trong `settings.gradle.kts`. Chỉ `:core:ads`
 phụ thuộc lib; native dựng `NativeAdView` bằng code (đề cấm XML layout), không dùng `AdsNative(layoutId)`.
 
 ## Firebase

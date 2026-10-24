@@ -9,7 +9,7 @@ Clean Architecture: `presentation → domain ← data`. `:domain` là tâm, khô
 | `:app` | `com.takehome.drama` | `BaseApp`, `MainActivity`, `navigation/AppNavGraph`, `di/`, `fcm/` |
 | `:domain` | `com.takehome.drama.domain` | Kotlin thuần: `model/`, `repository/` (interface), `usecase/<area>/`, `error/`, `config/` |
 | `:data` | `com.takehome.drama.data` | `remote/`, `local/`, `mapper/`, `repository/` (impl), `util/`, `di/` |
-| `:core:utils` | `com.takehome.drama.core.utils` | `toast/` (Toasty), `extension/`, `network/`, `notification/`, `bridge/` — tiện ích không UI-Compose, không nghiệp vụ |
+| `:core:utils` | `com.takehome.drama.core.utils` | `extension/`, `network/`, `notification/`, `bridge/` — tiện ích không UI-Compose, không nghiệp vụ |
 | `:core:navigation` | `com.takehome.drama.core.navigation` | `core/` (ScreenProvider, NavigationRequest, throttle), `destination/`, `deeplink/`, `launcher/` |
 | `:core:analytics` | `com.takehome.drama.core.analytics` | `Analytics`, `plugin/`, `crash/`, `remoteconfig/`, `util/` — mọi thứ Firebase, sau interface |
 | `:core:ui-foundation` | `com.takehome.drama.core.ui.foundation` | `vm/` (BaseViewModel), `ext/` (CollectAsEffect), `error/` (→ string res), `locale/` |

@@ -305,9 +305,11 @@ class PlayerViewModel(
 
     /** Ngôn ngữ / quality đổi: dựng lại URL cả playlist rồi nạp tập hiện tại tại vị trí đang phát. */
     private fun reloadAtCurrentPosition(playWhenReady: Boolean = player.state.value.playWhenReady) {
+        // Đọc vị trí trước: playlist mới đổi URL tập đang phát → player giải phóng bản cũ, vị trí về 0.
+        val positionMs = player.currentPositionMs()
         refreshPlaylist()
         val episode = currentEpisode?.takeIf { it.isWatchable() } ?: return
-        startPlayback(episode, player.currentPositionMs(), playWhenReady && isScreenStarted)
+        startPlayback(episode, positionMs, playWhenReady && isScreenStarted)
     }
 
     private fun onPlayback(playback: PlaybackState) {
@@ -414,7 +416,8 @@ class PlayerViewModel(
         if (index == currentState.episodeIndex || episodes.none { it.index == index }) return
         saveCurrentProgress()
         updateState { copy(sheet = PlayerSheet.None) }
-        openEpisode(index, positionMs = 0)
+        // Vuốt / chọn lại tập xem dở → xem tiếp đúng chỗ (đề §2.2: "mở lại tập là xem tiếp"); xem hết thì từ đầu.
+        openEpisode(index)
     }
 
     private fun togglePlay() {
@@ -475,8 +478,7 @@ class PlayerViewModel(
             return
         }
         saveCurrentProgress()
-        // Chỉ cuộn; tập mở ở PageSettled như vuốt tay / tự sang tập — lúc đó trang cũ đã khuất nên player của nó
-        // tua về 0 ngay mà không lộ ra màn (vuốt ngược lại không thấy khung hình cũ nhảy về đầu).
+        // Chỉ cuộn; tập mở ở PageSettled như vuốt tay / tự sang tập (xem tiếp từ vị trí đã lưu).
         sendEvent(PlayerSingleEvent.ScrollToEpisode(index))
     }
 
