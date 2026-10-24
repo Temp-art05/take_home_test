@@ -7,6 +7,8 @@ import com.takehome.drama.domain.fake.FakeUserPreferencesRepository
 import com.takehome.drama.domain.fake.MainDispatcherRule
 import com.takehome.drama.domain.fake.catalog
 import com.takehome.drama.domain.fake.tag
+import com.takehome.drama.domain.error.DomainException
+import com.takehome.drama.core.ui.foundation.error.ErrorKind
 import com.takehome.drama.domain.model.UserPreferences
 import com.takehome.drama.domain.usecase.catalog.GetCatalogUseCase
 import com.takehome.drama.domain.usecase.catalog.ResolveContentLanguageUseCase
@@ -35,9 +37,11 @@ class TastePickerViewModelTest {
     private val preferences = FakeUserPreferencesRepository(UserPreferences())
     private val savedState = SavedStateHandle()
 
+    private val catalogRepository = FakeCatalogRepository(Result.success(catalog(emptyList(), tags = tags)))
+
     private fun viewModel() = TastePickerViewModel(
         savedStateHandle = savedState,
-        getCatalog = GetCatalogUseCase(FakeCatalogRepository(Result.success(catalog(emptyList(), tags = tags)))),
+        getCatalog = GetCatalogUseCase(catalogRepository),
         getMoodOptions = GetMoodOptionsUseCase(),
         saveTaste = SaveTasteUseCase(preferences),
         completeOnboarding = CompleteOnboardingUseCase(preferences),
@@ -168,5 +172,26 @@ class TastePickerViewModelTest {
         val restored = viewModel().viewState.value
         assertEquals(setOf(Mood.Rage), restored.selectedMoods)
         assertEquals(rage, restored.selectedTags)
+    }
+
+    @Test
+    fun `offline with no catalogue shows the offline state instead of an empty grid`() = runTest {
+        catalogRepository.catalog = Result.failure(DomainException.Network())
+        val state = viewModel().viewState.value
+        assertEquals(ErrorKind.Offline, state.error?.kind)
+        assertTrue(state.moods.isEmpty())
+    }
+
+    @Test
+    fun `retry after reconnecting loads the moods`() = runTest {
+        catalogRepository.catalog = Result.failure(DomainException.Network())
+        val vm = viewModel()
+
+        catalogRepository.catalog = Result.success(catalog(emptyList(), tags = tags))
+        vm.processIntent(TastePickerIntent.Retry)
+
+        assertEquals(null, vm.viewState.value.error)
+        assertTrue(vm.viewState.value.moods.isNotEmpty())
+        assertEquals(2, catalogRepository.catalogCalls)
     }
 }

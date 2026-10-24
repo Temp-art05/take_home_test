@@ -1,5 +1,6 @@
 package com.takehome.drama.data.repository
 
+import com.takehome.drama.data.local.datasource.CatalogCacheLocalDataSource
 import com.takehome.drama.data.remote.datasource.CatalogDataSource
 import com.takehome.drama.data.remote.dto.CatalogDto
 import com.takehome.drama.data.remote.dto.ShowDto
@@ -42,8 +43,24 @@ class CatalogRepositoryImplTest {
         }
     }
 
+    private class FakeCache : CatalogCacheLocalDataSource {
+        var catalog: CatalogDto? = null
+        val episodes = mutableMapOf<String, ShowEpisodesDto>()
+
+        override suspend fun readCatalog(): CatalogDto? = catalog
+        override suspend fun writeCatalog(catalog: CatalogDto) {
+            this.catalog = catalog
+        }
+
+        override suspend fun readEpisodes(showId: String): ShowEpisodesDto? = episodes[showId]
+        override suspend fun writeEpisodes(showId: String, episodes: ShowEpisodesDto) {
+            this.episodes[showId] = episodes
+        }
+    }
+
     private val source = FakeDataSource()
-    private val repository = CatalogRepositoryImpl(source)
+    private val cache = FakeCache()
+    private val repository = CatalogRepositoryImpl(source, cache)
 
     @Test
     fun `concurrent callers share one request - host rate limits with 403`() = runTest {
@@ -118,5 +135,39 @@ class CatalogRepositoryImplTest {
     @Test
     fun `episodes file without showId gets the requested id`() = runTest {
         assertEquals("42", repository.getEpisodes("42").getOrThrow().showId)
+    }
+
+    @Test
+    fun `successful catalogue is written to the disk cache`() = runTest {
+        repository.getCatalog()
+        assertEquals(listOf("1"), cache.catalog?.shows?.map { it.id })
+    }
+
+    @Test
+    fun `offline falls back to the last catalogue on disk`() = runTest {
+        cache.catalog = CatalogDto(shows = listOf(ShowDto(id = "cached")))
+        source.catalogError = IOException("offline")
+
+        assertEquals(listOf("cached"), repository.getCatalog().getOrThrow().shows.map { it.id })
+    }
+
+    @Test
+    fun `disk fallback is not kept in memory so the next call tries the network`() = runTest {
+        cache.catalog = CatalogDto(shows = listOf(ShowDto(id = "cached")))
+        source.catalogError = IOException("offline")
+        repository.getCatalog()
+
+        source.catalogError = null
+        assertEquals(listOf("1"), repository.getCatalog().getOrThrow().shows.map { it.id })
+        assertEquals(2, source.catalogCalls.get())
+    }
+
+    @Test
+    fun `offline episodes fall back to disk, keeping the requested id`() = runTest {
+        repository.getEpisodes("7")
+        source.episodesError = IOException("offline")
+
+        val cached = CatalogRepositoryImpl(source, cache).getEpisodes("7")
+        assertEquals("7", cached.getOrThrow().showId)
     }
 }

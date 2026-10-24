@@ -1,7 +1,9 @@
 package com.takehome.drama.data.repository
 
+import com.takehome.drama.data.local.datasource.CatalogCacheLocalDataSource
 import com.takehome.drama.data.mapper.toDomain
 import com.takehome.drama.data.remote.datasource.CatalogDataSource
+import com.takehome.drama.data.remote.dto.ShowEpisodesDto
 import com.takehome.drama.data.remote.error.toDomainException
 import com.takehome.drama.data.util.mapError
 import com.takehome.drama.data.util.withCatching
@@ -17,9 +19,13 @@ import kotlinx.coroutines.sync.withLock
  * Home, Browse cùng xin catalogue thì chỉ một lần gọi — host thật trả 403 khi bị gọi dồn. Lỗi
  * không được cache để Retry gọi lại thật. Mất khi process chết; lần mở sau tải lại.
  * File tập single-flight **theo từng show**: show A tải chậm không chặn show B (Reels lướt nhiều show).
+ *
+ * Tải thành công thì ghi [cache] đĩa; tải lỗi (mất mạng, 403...) mà đĩa có bản cũ thì trả bản đó thay vì lỗi.
+ * Bản đĩa **không** giữ vào RAM — lần gọi sau (Try again, màn khác) vẫn thử mạng trước.
  */
 class CatalogRepositoryImpl(
     private val dataSource: CatalogDataSource,
+    private val cache: CatalogCacheLocalDataSource,
 ) : CatalogRepository {
 
     private val catalogMutex = Mutex()
@@ -32,21 +38,30 @@ class CatalogRepositoryImpl(
 
     override suspend fun getCatalog(forceRefresh: Boolean): Result<Catalog> = catalogMutex.withLock {
         catalog?.takeUnless { forceRefresh }?.let { return@withLock Result.success(it) }
-        withCatching { dataSource.getCatalog().toDomain() }
-            .mapError { it.toDomainException() }
+        withCatching { dataSource.getCatalog().also { cache.writeCatalog(it) }.toDomain() }
             .onSuccess { catalog = it }
+            .recoverFromCache { cache.readCatalog()?.toDomain() }
+            .mapError { it.toDomainException() }
     }
 
     override suspend fun getEpisodes(showId: String, forceRefresh: Boolean): Result<ShowEpisodes> =
         episodeMutex(showId).withLock {
             episodes[showId]?.takeUnless { forceRefresh }?.let { return@withLock Result.success(it) }
-            withCatching {
-                // File tập thiếu showId thì dùng id đã xin — tra cứu về sau không lệch.
-                dataSource.getShowEpisodes(showId).toDomain().let { if (it.showId.isBlank()) it.copy(showId = showId) else it }
-            }
-                .mapError { it.toDomainException() }
+            withCatching { dataSource.getShowEpisodes(showId).also { cache.writeEpisodes(showId, it) }.toDomain(showId) }
                 .onSuccess { episodes[showId] = it }
+                .recoverFromCache { cache.readEpisodes(showId)?.toDomain(showId) }
+                .mapError { it.toDomainException() }
         }
+
+    // File tập thiếu showId thì dùng id đã xin — tra cứu về sau không lệch.
+    private fun ShowEpisodesDto.toDomain(showId: String): ShowEpisodes =
+        toDomain().let { if (it.showId.isBlank()) it.copy(showId = showId) else it }
+
+    /** Lỗi tải mà đĩa có bản cũ → thành công với bản đó; không có → giữ lỗi gốc. */
+    private suspend fun <T> Result<T>.recoverFromCache(read: suspend () -> T?): Result<T> {
+        val error = exceptionOrNull() ?: return this
+        return read()?.let { Result.success(it) } ?: Result.failure(error)
+    }
 
     private suspend fun episodeMutex(showId: String): Mutex =
         episodeMutexesLock.withLock { episodeMutexes.getOrPut(showId) { Mutex() } }

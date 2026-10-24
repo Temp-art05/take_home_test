@@ -18,16 +18,22 @@ import kotlinx.coroutines.flow.map
  * Bề mặt vẽ video của một player trong pool, phủ kín khung (crop) như mockup: video dọc 9:16 trên
  * màn 20:9 chỉ mất ~10% hai bên thay vì viền đen trên dưới. [shutter] (poster) che tới khi player có
  * khung hình đầu. Slot không phải của [ExoEpisodeFeedPlayer] (preview, test) thì chỉ hiện [shutter].
+ * Màn ngang: caller truyền [ContentScale.Fit] — crop video dọc lên khung ngang cắt mất gần hết hình.
  */
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-fun VideoSurface(slot: VideoSlot, modifier: Modifier = Modifier, shutter: @Composable () -> Unit = {}) {
+fun VideoSurface(
+    slot: VideoSlot,
+    modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Crop,
+    shutter: @Composable () -> Unit = {},
+) {
     val exoPlayer = (slot as? ExoEpisodeFeedPlayer.Slot)?.exoPlayer ?: return shutter()
     ContentFrame(
         player = exoPlayer,
         modifier = modifier,
         surfaceType = SURFACE_TYPE_SURFACE_VIEW,
-        contentScale = ContentScale.Crop,
+        contentScale = contentScale,
         shutter = shutter,
     )
 }

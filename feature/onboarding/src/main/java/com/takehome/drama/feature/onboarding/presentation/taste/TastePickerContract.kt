@@ -1,6 +1,7 @@
 package com.takehome.drama.feature.onboarding.presentation.taste
 
 import androidx.compose.runtime.Immutable
+import com.takehome.drama.core.ui.foundation.error.UiError
 import com.takehome.drama.core.ui.foundation.vm.SingleEvent
 import com.takehome.drama.core.ui.foundation.vm.ViewIntent
 import com.takehome.drama.core.ui.foundation.vm.ViewState
@@ -21,6 +22,8 @@ data class TastePickerViewState(
     val selectedMoods: Set<Mood> = emptySet(),
     val selectedTags: Set<String> = emptySet(),
     val chipsExpanded: Boolean = false,
+    /** Chưa có catalogue (cài mới + offline): mood dựa trên tag thật nên không có gì để chọn — hiện 0603. */
+    val error: UiError? = null,
 ) : ViewState {
     val visibleChips: List<TasteChip> get() = if (chipsExpanded) chips else chips.take(COLLAPSED_CHIPS)
     val hiddenChipCount: Int get() = chips.size - visibleChips.size
@@ -38,6 +41,8 @@ sealed interface TastePickerIntent : ViewIntent {
 
     /** Chip "+ N more" mở rộng **tại chỗ** — không popup. */
     data object ExpandChips : TastePickerIntent
+
+    data object Retry : TastePickerIntent
 
     /** [sdkInt] / [notificationsGranted] để quyết định có bước pre-prompt SCR-0005 hay không. */
     data class Continue(val sdkInt: Int, val notificationsGranted: Boolean) : TastePickerIntent

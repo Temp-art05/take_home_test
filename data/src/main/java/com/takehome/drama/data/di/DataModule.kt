@@ -2,6 +2,8 @@ package com.takehome.drama.data.di
 
 import androidx.room.Room
 import com.takehome.drama.data.local.database.AppDatabase
+import com.takehome.drama.data.local.datasource.CatalogCacheLocalDataSource
+import com.takehome.drama.data.local.datasource.CatalogCacheLocalDataSourceImpl
 import com.takehome.drama.data.local.datasource.EpisodeUnlockLocalDataSource
 import com.takehome.drama.data.local.datasource.EpisodeUnlockLocalDataSourceImpl
 import com.takehome.drama.data.local.datasource.SavedShowLocalDataSource
@@ -66,6 +68,7 @@ import com.takehome.drama.domain.usecase.watch.GetShowEpisodesUseCase
 import com.takehome.drama.domain.usecase.watch.ObserveUnlockedEpisodesUseCase
 import com.takehome.drama.domain.usecase.watch.PickVideoSourceUseCase
 import com.takehome.drama.domain.usecase.watch.UnlockEpisodeUseCase
+import java.io.File
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.binds
 import org.koin.dsl.module
@@ -94,13 +97,16 @@ val dataModule = module {
         // Dev: cho launcher debug ép tải chậm / lỗi mạng để chụp SCR-0601 / SCR-0603.
         if (config.isDevFlavor) FaultInjectingCatalogDataSource(source, get()) else source
     }
+    single<CatalogCacheLocalDataSource> {
+        CatalogCacheLocalDataSourceImpl(File(androidContext().filesDir, "catalog_cache"), defaultJson)
+    }
     single<WatchProgressLocalDataSource> { WatchProgressLocalDataSourceImpl(get()) }
     single<SavedShowLocalDataSource> { SavedShowLocalDataSourceImpl(get()) }
     single<UserPreferencesLocalDataSource> { UserPreferencesLocalDataSourceImpl(androidContext()) }
     single<EpisodeUnlockLocalDataSource> { EpisodeUnlockLocalDataSourceImpl(androidContext().episodeUnlockDataStore) }
 
     // Repository — CatalogRepositoryImpl giữ cache in-memory nên bắt buộc single.
-    single<CatalogRepository> { CatalogRepositoryImpl(get()) }
+    single<CatalogRepository> { CatalogRepositoryImpl(get(), get()) }
     single<WatchProgressRepository> { WatchProgressRepositoryImpl(get()) }
     single<SavedShowRepository> { SavedShowRepositoryImpl(get()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(get()) }

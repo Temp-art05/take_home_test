@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -120,23 +121,31 @@ private fun BrowseContent(
     onIntent: (BrowseIntent) -> Unit,
 ) {
     BoxWithConstraints(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        // Ngang: dock cố định 378dp nuốt hết màn → giới hạn để lưới còn chỗ.
-        val dockHeight = min(AppTheme.dimensions.previewDock, maxHeight * MAX_DOCK_FRACTION)
-        Column(Modifier.fillMaxSize()) {
-            BrowseColumn(viewState, slot, dockHeight, onIntent)
+        if (maxWidth > maxHeight) {
+            // Ngang (xoay máy): dock trên-dưới chỉ còn ~150dp, tiêu đề đè header → dock bên trái cao hết màn, lưới bên phải.
+            val dockWidth = maxWidth * LANDSCAPE_DOCK_FRACTION
+            Row(Modifier.fillMaxSize()) {
+                PreviewDock(viewState, slot, Modifier.width(dockWidth).fillMaxHeight(), onIntent)
+                Column(Modifier.weight(1f).fillMaxHeight().statusBarsPadding()) {
+                    BrowseGrid(viewState, onIntent)
+                }
+            }
+        } else {
+            val dockHeight = min(AppTheme.dimensions.previewDock, maxHeight * MAX_DOCK_FRACTION)
+            Column(Modifier.fillMaxSize()) {
+                PreviewDock(viewState, slot, Modifier.fillMaxWidth().height(dockHeight), onIntent)
+                BrowseGrid(viewState, onIntent)
+            }
         }
     }
 }
 
 @Composable
-private fun ColumnScope.BrowseColumn(
+private fun ColumnScope.BrowseGrid(
     viewState: BrowseViewState,
-    slot: VideoSlot?,
-    dockHeight: Dp,
     onIntent: (BrowseIntent) -> Unit,
 ) {
     val gutter = AppTheme.dimensions.screenGutter
-    PreviewDock(viewState, slot, dockHeight, onIntent)
     if (viewState.error != null) {
         UiErrorState(error = viewState.error, onRetry = { onIntent(BrowseIntent.Retry) }, modifier = Modifier.weight(1f))
         return
@@ -183,16 +192,14 @@ private fun ColumnScope.BrowseColumn(
 
 /** Tầng trên cố định: video câm (hoặc key art) + scrim + tiêu đề + Play Ep 1 / lưu. */
 @Composable
-private fun PreviewDock(viewState: BrowseViewState, slot: VideoSlot?, height: Dp, onIntent: (BrowseIntent) -> Unit) {
+private fun PreviewDock(viewState: BrowseViewState, slot: VideoSlot?, modifier: Modifier, onIntent: (BrowseIntent) -> Unit) {
     val preview = viewState.preview
     val media = AppTheme.colors.media
     val art: @Composable () -> Unit = {
         KeyArt(posterUrl = preview?.posterUrl, seed = preview?.id.orEmpty(), modifier = Modifier.fillMaxSize())
     }
     Box(
-        Modifier
-            .fillMaxWidth()
-            .height(height)
+        modifier
             // Video crop phủ kín khung lớn hơn dock — không clip thì tràn xuống chip/lưới.
             .clipToBounds()
             .clickable(enabled = !viewState.autoplay, role = Role.Button, onClickLabel = stringResource(R.string.browse_play_preview_cd)) {
@@ -337,6 +344,7 @@ private const val GRID_COLUMNS = 4
 
 /** Dock không chiếm quá 45% chiều cao (máy ngang). */
 private const val MAX_DOCK_FRACTION = 0.45f
+private const val LANDSCAPE_DOCK_FRACTION = 0.42f
 
 /** Nút "Play Ep 1" và nút lưu của dock cao 42dp (mockup). */
 private val PLAY_BUTTON_HEIGHT = 42.dp
