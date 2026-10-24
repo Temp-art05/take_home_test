@@ -51,11 +51,30 @@ internal class LibAdsSdkFacade : AdsSdkFacade {
     override fun preloadFullScreen(context: Context, name: String, onLoaded: () -> Unit, onFailed: () -> Unit) =
         AdsSdk.preloadFullScreen(context, name, onLoaded, onFailed)
 
-    override fun showInterstitial(activity: Activity, name: String, onDone: () -> Unit) =
-        AdsSdk.showInterstitial(activity, name, onNext = onDone)
+    override fun showInterstitial(activity: Activity, name: String, onDone: () -> Unit) = guarded(activity) {
+        AdsSdk.showInterstitial(activity, name, onNext = {
+            AdTransitionGuard.hide(activity)
+            onDone()
+        })
+    }
 
-    override fun showRewarded(activity: Activity, name: String, onResult: (Boolean) -> Unit) =
-        AdsSdk.showRewarded(activity, name, onNext = onResult)
+    override fun showRewarded(activity: Activity, name: String, onResult: (Boolean) -> Unit) = guarded(activity) {
+        AdsSdk.showRewarded(activity, name, onNext = { earned ->
+            AdTransitionGuard.hide(activity)
+            onResult(earned)
+        })
+    }
+
+    /** Phủ [AdTransitionGuard] suốt lúc ad lên; lib ném thì gỡ ngay (caller coi như không có ad). */
+    private inline fun guarded(activity: Activity, show: () -> Unit) {
+        AdTransitionGuard.show(activity)
+        try {
+            show()
+        } catch (e: Exception) {
+            AdTransitionGuard.hide(activity)
+            throw e
+        }
+    }
 
     override fun requestNative(context: Context, name: String) = AdsSdk.preloadNative(context, name)
 }
