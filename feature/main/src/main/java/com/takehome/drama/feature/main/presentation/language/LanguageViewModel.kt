@@ -5,8 +5,8 @@ import com.takehome.drama.core.ui.foundation.vm.BaseViewModel
 
 /**
  * SCR-0502. VM quyết no-op / chống bấm lặp; Screen gọi `AppLocale.apply` (cần Activity AppCompat).
- * VM sống qua lần Activity dựng lại, nên cờ [LanguageViewState.applying] được gỡ ở `ScreenStarted`, hoặc ở
- * `ApplyFinished` khi ngôn ngữ hiển thị không đổi (không chắc có lần dựng lại).
+ * Cờ [LanguageViewState.applying] được gỡ ở `DisplayedLocaleChanged` (Activity không dựng lại, chỉ nhận config
+ * change), hoặc ở `ApplyFinished` khi ngôn ngữ hiển thị không đổi (không có config change nào).
  */
 class LanguageViewModel : BaseViewModel<LanguageIntent, LanguageViewState, LanguageSingleEvent>() {
 
@@ -16,7 +16,8 @@ class LanguageViewModel : BaseViewModel<LanguageIntent, LanguageViewState, Langu
         when (intent) {
             LanguageIntent.BackClick -> sendEvent(LanguageSingleEvent.NavigateBack)
             is LanguageIntent.SelectLocale -> selectLocale(intent.locale)
-            LanguageIntent.ScreenStarted -> updateState { copy(selected = AppLocale.current(), applying = false) }
+            LanguageIntent.ScreenStarted,
+            LanguageIntent.DisplayedLocaleChanged -> updateState { copy(selected = AppLocale.current(), applying = false) }
             LanguageIntent.ApplyFinished -> updateState { copy(applying = false) }
         }
     }
