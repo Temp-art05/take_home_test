@@ -119,7 +119,7 @@ class FakeUserPreferencesRepository(initial: UserPreferences = UserPreferences(c
     /** Khác null → `setTheme` trả lỗi này, không đổi state (DataStore ghi hỏng). */
     var themeFailure: Throwable? = null
 
-    override suspend fun setContentLanguage(language: String) = set { copy(contentLanguage = language) }
+    override suspend fun setContentLanguage(language: String?) = set { copy(contentLanguage = language) }
 
     override suspend fun setTasteTagIds(tagIds: Set<String>) = set { copy(tasteTagIds = tagIds) }
 

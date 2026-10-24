@@ -43,6 +43,7 @@ class ReelsViewModelTest {
     )
     private val savedRepository = FakeSavedShowRepository()
     private val player = FakeFeedPlayer()
+    private val preferences = FakeUserPreferencesRepository()
     private val savedState = SavedStateHandle()
 
     private fun viewModel() = ReelsViewModel(
@@ -53,13 +54,41 @@ class ReelsViewModelTest {
         resolveContentLanguage = ResolveContentLanguageUseCase(),
         observeIsShowSaved = ObserveIsShowSavedUseCase(savedRepository),
         setShowSaved = SetShowSavedUseCase(savedRepository),
-        userPreferencesRepository = FakeUserPreferencesRepository(),
+        userPreferencesRepository = preferences,
         playerFactory = { player },
     )
 
     private fun ReelsViewModel.visible() {
         processIntent(ReelsIntent.ScreenStarted)
         processIntent(ReelsIntent.TabVisible(true))
+    }
+
+    @Test
+    fun `changing content language reloads clips in the new language`() = runTest {
+        val bilingual = FakeCatalogRepository(
+            Result.success(testCatalog),
+            episodes = testCatalog.shows.associate { show ->
+                show.id to ShowEpisodes(
+                    show.id,
+                    listOf(episode(index = 0, sources = mapOf("en" to mapOf("720p" to "en/${show.id}"), "id" to mapOf("720p" to "id/${show.id}")))),
+                )
+            },
+        )
+        val vm = ReelsViewModel(
+            savedStateHandle = savedState,
+            getCatalog = GetCatalogUseCase(bilingual),
+            getReelsFeed = GetReelsFeedUseCase(),
+            getReelClip = GetReelClipUseCase(GetShowEpisodesUseCase(bilingual), PickVideoSourceUseCase()),
+            resolveContentLanguage = ResolveContentLanguageUseCase(),
+            observeIsShowSaved = ObserveIsShowSavedUseCase(savedRepository),
+            setShowSaved = SetShowSavedUseCase(savedRepository),
+            userPreferencesRepository = preferences,
+            playerFactory = { player },
+        )
+        assertEquals("en/c", player.items.first().url)
+        preferences.setContentLanguage("id")
+        assertEquals("id/c", player.items.first().url)
+        assertEquals(ClipStatus.Ready, vm.viewState.value.pages.first().status)
     }
 
     @Test

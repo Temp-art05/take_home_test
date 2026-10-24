@@ -22,6 +22,8 @@ interface UserPreferencesLocalDataSource {
     val data: Flow<Preferences>
 
     suspend fun <T> set(key: Preferences.Key<T>, value: T)
+
+    suspend fun <T> remove(key: Preferences.Key<T>)
 }
 
 class UserPreferencesLocalDataSourceImpl(
@@ -33,6 +35,10 @@ class UserPreferencesLocalDataSourceImpl(
 
     override suspend fun <T> set(key: Preferences.Key<T>, value: T) {
         dataStore.edit { it[key] = value }
+    }
+
+    override suspend fun <T> remove(key: Preferences.Key<T>) {
+        dataStore.edit { it.remove(key) }
     }
 }
 

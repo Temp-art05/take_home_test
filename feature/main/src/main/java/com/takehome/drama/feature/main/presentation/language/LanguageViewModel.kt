@@ -1,14 +1,22 @@
 package com.takehome.drama.feature.main.presentation.language
 
+import androidx.lifecycle.viewModelScope
 import com.takehome.drama.core.ui.foundation.locale.AppLocale
 import com.takehome.drama.core.ui.foundation.vm.BaseViewModel
+import com.takehome.drama.domain.usecase.onboarding.SetContentLanguageUseCase
+import kotlinx.coroutines.launch
 
 /**
  * SCR-0502. VM quyết no-op / chống bấm lặp; Screen gọi `AppLocale.apply` (cần Activity AppCompat).
  * Cờ [LanguageViewState.applying] được gỡ ở `DisplayedLocaleChanged` (Activity không dựng lại, chỉ nhận config
  * change), hoặc ở `ApplyFinished` khi ngôn ngữ hiển thị không đổi (không có config change nào).
+ *
+ * Như onboarding (SCR-0002), ngôn ngữ chọn ở đây áp cho cả **nội dung** (title, bản video theo `sources`) —
+ * đổi UI sang Indonesia mà video vẫn tiếng Anh là lệch. "Theo máy" → nội dung cũng theo máy.
  */
-class LanguageViewModel : BaseViewModel<LanguageIntent, LanguageViewState, LanguageSingleEvent>() {
+class LanguageViewModel(
+    private val setContentLanguage: SetContentLanguageUseCase,
+) : BaseViewModel<LanguageIntent, LanguageViewState, LanguageSingleEvent>() {
 
     override fun initState() = LanguageViewState(selected = AppLocale.current())
 
@@ -27,6 +35,7 @@ class LanguageViewModel : BaseViewModel<LanguageIntent, LanguageViewState, Langu
         if (locale == state.selected || state.applying) return
         // ✓ đổi ngay; hệ thống dựng lại Activity với locale mới.
         updateState { copy(selected = locale, applying = true) }
+        viewModelScope.launch { setContentLanguage(locale.tag) }
         sendEvent(LanguageSingleEvent.ApplyLocale(locale))
     }
 }

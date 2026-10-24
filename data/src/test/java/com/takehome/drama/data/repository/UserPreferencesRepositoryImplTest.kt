@@ -30,6 +30,11 @@ class UserPreferencesRepositoryImplTest {
             writeError?.let { throw it }
             written[key] = value
         }
+
+        override suspend fun <T> remove(key: Preferences.Key<T>) {
+            writeError?.let { throw it }
+            written.remove(key)
+        }
     }
 
     @Test

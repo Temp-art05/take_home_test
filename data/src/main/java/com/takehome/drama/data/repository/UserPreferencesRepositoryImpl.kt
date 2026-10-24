@@ -27,7 +27,12 @@ class UserPreferencesRepositoryImpl(
         }
         .map { it.toDomain() }
 
-    override suspend fun setContentLanguage(language: String) = write(UserPreferencesKeys.CONTENT_LANGUAGE, language)
+    override suspend fun setContentLanguage(language: String?) =
+        if (language == null) {
+            withLocalCatching { local.remove(UserPreferencesKeys.CONTENT_LANGUAGE) }
+        } else {
+            write(UserPreferencesKeys.CONTENT_LANGUAGE, language)
+        }
 
     override suspend fun setTasteTagIds(tagIds: Set<String>) = write(UserPreferencesKeys.TASTE_TAG_IDS, tagIds)
 

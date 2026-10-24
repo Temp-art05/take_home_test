@@ -7,7 +7,8 @@ import kotlinx.coroutines.flow.Flow
 interface UserPreferencesRepository {
     val preferences: Flow<UserPreferences>
 
-    suspend fun setContentLanguage(language: String): Result<Unit>
+    /** `null` = theo ngôn ngữ máy (xoá lựa chọn). */
+    suspend fun setContentLanguage(language: String?): Result<Unit>
 
     suspend fun setTasteTagIds(tagIds: Set<String>): Result<Unit>
 
