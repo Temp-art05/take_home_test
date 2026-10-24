@@ -6,11 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -55,10 +55,10 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.takehome.drama.core.designsystem.component.AppToastHost
 import com.takehome.drama.core.designsystem.component.ChoiceChip
-import com.takehome.drama.core.designsystem.component.SkeletonBlock
-import com.takehome.drama.core.designsystem.component.SkeletonHost
 import com.takehome.drama.core.designsystem.component.GradientButton
 import com.takehome.drama.core.designsystem.component.KeyArt
+import com.takehome.drama.core.designsystem.component.SkeletonBlock
+import com.takehome.drama.core.designsystem.component.SkeletonHost
 import com.takehome.drama.core.designsystem.component.rememberToastState
 import com.takehome.drama.core.designsystem.icon.AppIcons
 import com.takehome.drama.core.designsystem.theme.AppTheme
@@ -68,12 +68,13 @@ import com.takehome.drama.core.media.VideoSurface
 import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.navigation.destination.WatchRoutes
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
+import com.takehome.drama.core.ui.foundation.format.bidiIsolated
 import com.takehome.drama.core.utils.extension.findActivity
 import com.takehome.drama.domain.model.ShowStatus
 import com.takehome.drama.feature.main.R
-import com.takehome.drama.feature.main.presentation.common.UiErrorState
 import com.takehome.drama.feature.main.navigation.SearchScreenProvider
 import com.takehome.drama.feature.main.presentation.common.ShowCard
+import com.takehome.drama.feature.main.presentation.common.UiErrorState
 import com.takehome.drama.feature.main.presentation.common.label
 import org.koin.androidx.compose.koinViewModel
 
@@ -253,7 +254,7 @@ private fun PreviewDock(viewState: BrowseViewState, slot: VideoSlot?, modifier: 
                 val episodes = pluralStringResource(R.plurals.common_episode_count, episodeCount, episodeCount)
                 Text(
                     // "97% match" của mockup bỏ: không có dữ liệu để tính.
-                    text = listOfNotNull(preview.genre, episodes, preview.status.label()).joinToString(" · "),
+                    text = listOfNotNull(preview.genre?.bidiIsolated(), episodes, preview.status.label()).joinToString(" · "),
                     style = AppTypography.caption.copy(fontWeight = FontWeight.SemiBold),
                     color = AppTheme.colors.media.textSecondary,
                     maxLines = 1,

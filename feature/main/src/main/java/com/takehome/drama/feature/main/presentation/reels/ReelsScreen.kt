@@ -6,8 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
@@ -35,13 +35,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
@@ -49,19 +49,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -83,6 +83,7 @@ import com.takehome.drama.core.media.VideoSurface
 import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.navigation.destination.WatchRoutes
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
+import com.takehome.drama.core.ui.foundation.format.bidiIsolated
 import com.takehome.drama.core.ui.foundation.format.formatCompactCount
 import com.takehome.drama.core.utils.extension.findActivity
 import com.takehome.drama.feature.main.R
@@ -277,7 +278,7 @@ private fun BoxScope.ReelOverlay(
         Row(verticalAlignment = Alignment.Bottom) {
             Column(Modifier.weight(1f).padding(end = AppTheme.dimensions.s4)) {
                 Text(
-                    text = page.episodeNumber?.let { stringResource(R.string.reels_title_episode, page.title, it) } ?: page.title,
+                    text = page.episodeNumber?.let { stringResource(R.string.reels_title_episode, page.title.bidiIsolated(), it) } ?: page.title,
                     style = shadowed(AppTypography.titleSmall.copy(fontSize = 16.sp)),
                     color = media.text,
                     maxLines = 2,

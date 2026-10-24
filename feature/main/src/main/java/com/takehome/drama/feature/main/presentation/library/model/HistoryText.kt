@@ -5,6 +5,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import com.takehome.drama.core.ui.foundation.format.bidiIsolated
 import com.takehome.drama.domain.model.ShowStatus
 import com.takehome.drama.domain.usecase.history.HistoryRecency
 import com.takehome.drama.feature.main.R
@@ -33,7 +34,7 @@ internal fun HistoryRecency.label(): String = when (this) {
 @Composable
 @ReadOnlyComposable
 internal fun SavedRow.meta(): String = listOfNotNull(
-    genre,
+    genre?.bidiIsolated(),
     pluralStringResource(R.plurals.common_episode_count, episodeCount, episodeCount),
     when (status) {
         ShowStatus.Ongoing -> stringResource(R.string.saved_filter_airing)

@@ -24,6 +24,15 @@ fun Catalog.genres(): List<Tag> =
     tags.sortedTags(isCategory = true).filter { tag -> shows.any { tag.id in it.tagIds } }
 
 /** [tagId] null = chip "All". */
+/**
+ * Chip "New" của Browse (mockup: "chip nguồn All/genre/New") = tag rail `newest`. Không show nào gắn (fixtures) thì không có chip —
+ * chip mở ra lưới rỗng là hứa một nhóm không tồn tại.
+ */
+fun Catalog.newestTag(): Tag? =
+    tags.firstOrNull { !it.isCategory && it.id == NEWEST_TAG_ID }?.takeIf { tag -> shows.any { tag.id in it.tagIds } }
+
+private const val NEWEST_TAG_ID = "newest"
+
 fun Catalog.showsInGenre(tagId: String?): List<Show> =
     if (tagId == null) shows else shows.filter { tagId in it.tagIds }
 

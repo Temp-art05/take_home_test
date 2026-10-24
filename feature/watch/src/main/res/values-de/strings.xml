@@ -18,6 +18,7 @@
     <string name="watch_saved_to_library">In deiner Mediathek gespeichert</string>
     <string name="watch_removed_from_library">Aus deiner Mediathek entfernt</string>
     <string name="watch_range">%1$d–%2$d</string>
+    <string name="watch_range_pick_cd">Folgenbereich wählen</string>
     <string name="watch_episodes_error">Folgen konnten nicht geladen werden.</string>
     <string name="watch_player_episode_of">Folge %1$d / %2$d</string>
     <string name="watch_like_cd">Gefällt mir</string>

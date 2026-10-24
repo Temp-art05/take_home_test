@@ -27,8 +27,10 @@ data class ShowDetailViewState(
     @StringRes val episodesErrorRes: Int? = null,
     val cells: List<EpisodeCell> = emptyList(),
     val ranges: List<EpisodeRange> = emptyList(),
-    /** Tab khoảng 20 tập đang xem; lưới chỉ hiện các tập của tab này. Mặc định tab chứa tập Continue. */
+    /** Dải ~20 tập đang xem ("1–20 ⌄"); lưới chỉ hiện các tập của dải này. Mặc định dải chứa tập Continue. */
     val selectedRange: EpisodeRange? = null,
+    /** Sheet chọn dải (bấm "1–20 ⌄") — sheet custom, không dùng dropdown Material. */
+    val rangeSheetVisible: Boolean = false,
     /** Số tập đã xem (cho "44 eps · 7 watched"). */
     val watchedCount: Int = 0,
     val continueCta: ContinueCta? = null,
@@ -66,6 +68,8 @@ sealed interface ShowDetailIntent : ViewIntent {
     data object ContinueClick : ShowDetailIntent
     data class EpisodeClick(val index: Int) : ShowDetailIntent
     data class RangeSelect(val range: EpisodeRange) : ShowDetailIntent
+    data object RangeSheetOpen : ShowDetailIntent
+    data object RangeSheetDismiss : ShowDetailIntent
     data object SaveClick : ShowDetailIntent
 
     /** Nút "Watch ad" trong sheet mở tập — hành động user bấm duy nhất dẫn tới rewarded. */

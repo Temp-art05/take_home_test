@@ -57,8 +57,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.takehome.drama.core.designsystem.component.ChoiceChip
 import com.takehome.drama.core.designsystem.component.BlankState
+import com.takehome.drama.core.designsystem.component.ChoiceChip
 import com.takehome.drama.core.designsystem.component.KeyArt
 import com.takehome.drama.core.designsystem.icon.AppIcons
 import com.takehome.drama.core.designsystem.theme.AppTheme
@@ -66,10 +66,11 @@ import com.takehome.drama.core.designsystem.theme.AppTypography
 import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.navigation.destination.WatchRoutes
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
+import com.takehome.drama.core.ui.foundation.format.bidiIsolated
 import com.takehome.drama.domain.model.ShowStatus
 import com.takehome.drama.feature.main.R
-import com.takehome.drama.feature.main.presentation.common.UiErrorState
 import com.takehome.drama.feature.main.presentation.common.ShowCard
+import com.takehome.drama.feature.main.presentation.common.UiErrorState
 
 @Composable
 fun SearchScreen(
@@ -324,7 +325,7 @@ private fun ShowRow(show: ShowCard, onClick: () -> Unit) {
             Text(show.title, style = AppTypography.bodySemibold, color = colors.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis)
             val episodes = pluralStringResource(R.plurals.common_episode_count, show.episodeCount, show.episodeCount)
             Text(
-                text = listOfNotNull(show.genre, episodes).joinToString(" · "),
+                text = listOfNotNull(show.genre?.bidiIsolated(), episodes).joinToString(" · "),
                 style = AppTypography.caption,
                 color = AppTheme.colors.text3,
                 maxLines = 1,

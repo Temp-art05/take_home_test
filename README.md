@@ -39,10 +39,10 @@ là khung rỗng — nhưng độ sâu khác nhau:
 |---|---|---|
 | 0302 | Player | Pager dọc kiểu TikTok, pool 3 ExoPlayer + preload tập kế, nhớ vị trí (Room) mỗi ~5 s + khi pause/thoát — mở lại hay vuốt lại tập xem dở đều xem tiếp đúng chỗ (xem hết thì từ đầu), tự sang tập kế, tốc độ, chất lượng/ngôn ngữ từ `sources`, mất mạng → Try again phát tiếp đúng chỗ |
 | 0303 / 0304 | Sheet chọn tập / cài đặt phát | Tab 1–20…, tốc độ 0.5–3×, quality lấy từ dữ liệu (không bịa 1080p), autoplay |
-| 0604 | Buffering | Overlay "Loading…", báo khi Auto tự hạ quality |
-| 0301 | Chi tiết phim | Lưới tập 4 trạng thái (đã xem / đang xem / chưa xem / khoá), mở khoá bằng rewarded. Chọn dải tập bằng chip (1–20, 21–40…) thay cho "1–68 ▾" của mockup — không dùng popup/dropdown |
+| 0604 | Buffering | Như mockup: chỉ còn top bar + "Loading…" + track mờ (mô tả, rail, pill ẩn), báo khi Auto tự hạ quality |
+| 0301 | Chi tiết phim | Lưới tập 4 trạng thái (đã xem / đang xem / chưa xem / khoá), mở khoá bằng rewarded. Nút dải "1–20 ⌄" như mockup mở sheet custom chọn dải (không dùng dropdown Material) |
 | 0101 | Home Day Cycle | Theo giờ máy (sáng / trưa / tối), hero = `heroShowId`, "Pick up your flow" từ Room, ô native |
-| 0202 | Browse Preview Dock | Preview câm phía trên, chip genre đổi lưới không reset preview. Chưa có chip "New" của mockup |
+| 0202 | Browse Preview Dock | Preview câm phía trên, chip All / genre / New đổi lưới không reset preview (New = tag `newest`, chỉ hiện khi có show gắn — fixtures không có) |
 | 0203 | Reels | Pager dọc nhiều show, nút "Watch all N episodes" |
 | 0001 | Splash | Chờ catalogue + Remote Config (RC tối đa 3 s, cả lượt tối đa 8 s, hiện ít nhất 1 s) — không bao giờ treo |
 
@@ -186,9 +186,8 @@ adb shell am start -S -n com.takehome.drama/.MainActivity --es debug_screen SCR-
 - Không có UI test tự động; UI kiểm bằng ảnh chụp emulator đặt cạnh mockup (`tools/ui-check/`).
 - Tiến độ xem và tập đã mở khoá gắn với **vị trí tập trong mảng** (đề nói thứ tự = thứ tự mảng); server chèn/đổi thứ tự tập
   thì tiến độ cũ có thể gắn nhầm tập.
-- Một tập free mà không có nguồn phát dùng được → Player báo lỗi toàn màn thay vì chỉ đánh dấu riêng trang đó.
-- UI và nội dung khác hướng chữ (vd. UI tiếng Pháp + nội dung tiếng Ả Rập) thì dòng meta trộn hai thứ tiếng có thể đảo thứ tự
-  (chưa cô lập bidi từng phần).
+- Tập free không có nguồn phát dùng được: báo ngay trên trang tập đó, pager vẫn vuốt được — chỉ có unit test, dữ liệu thật
+  không có tập như vậy để thử tay.
 
 ## Nếu có thêm thời gian
 

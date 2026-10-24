@@ -43,9 +43,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.takehome.drama.core.ads.nativead.NativeAdManager
+import com.takehome.drama.core.designsystem.component.KeyArt
 import com.takehome.drama.core.designsystem.component.SkeletonBlock
 import com.takehome.drama.core.designsystem.component.SkeletonHost
-import com.takehome.drama.core.designsystem.component.KeyArt
 import com.takehome.drama.core.designsystem.component.Wordmark
 import com.takehome.drama.core.designsystem.icon.AppIcons
 import com.takehome.drama.core.designsystem.theme.AppTheme
@@ -53,6 +53,7 @@ import com.takehome.drama.core.designsystem.theme.AppTypography
 import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.navigation.destination.WatchRoutes
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
+import com.takehome.drama.core.ui.foundation.format.bidiIsolated
 import com.takehome.drama.core.ui.foundation.format.format
 import com.takehome.drama.core.ui.foundation.format.rememberTimeFormat
 import com.takehome.drama.domain.model.ShowStatus
@@ -60,9 +61,9 @@ import com.takehome.drama.domain.usecase.discovery.ClockTime
 import com.takehome.drama.domain.usecase.discovery.Daypart
 import com.takehome.drama.domain.usecase.discovery.opensAt
 import com.takehome.drama.feature.main.R
-import com.takehome.drama.feature.main.presentation.common.UiErrorState
 import com.takehome.drama.feature.main.navigation.SearchScreenProvider
 import com.takehome.drama.feature.main.presentation.common.ShowCard
+import com.takehome.drama.feature.main.presentation.common.UiErrorState
 import com.takehome.drama.feature.main.presentation.common.alsoFlowingRes
 import com.takehome.drama.feature.main.presentation.common.label
 import com.takehome.drama.feature.main.presentation.common.moodRes
@@ -266,7 +267,7 @@ private fun heroMeta(hero: ShowCard): String {
             add(episodes)
             hero.status.label()?.let(::add)
         }
-        hero.genre?.let(::add)
+        hero.genre?.let { add(it.bidiIsolated()) }
     }
     return parts.joinToString(" · ")
 }

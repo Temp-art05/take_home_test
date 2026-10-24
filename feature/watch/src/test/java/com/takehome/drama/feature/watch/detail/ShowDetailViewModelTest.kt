@@ -257,6 +257,32 @@ class ShowDetailViewModelTest {
     }
 
     @Test
+    fun `range button opens the range sheet, picking a range closes it`() = runTest(mainRule.dispatcher) {
+        catalogRepository.episodes = mapOf(SHOW_ID to Result.success(testEpisodes(count = 50, free = 50)))
+        val viewModel = viewModel()
+        val ranges = viewModel.viewState.value.ranges
+
+        viewModel.processIntent(ShowDetailIntent.RangeSheetOpen)
+        assertTrue(viewModel.viewState.value.rangeSheetVisible)
+        viewModel.processIntent(ShowDetailIntent.RangeSelect(ranges[1]))
+        assertEquals(ranges[1], viewModel.viewState.value.selectedRange)
+        assertFalse(viewModel.viewState.value.rangeSheetVisible)
+
+        viewModel.processIntent(ShowDetailIntent.RangeSheetOpen)
+        viewModel.processIntent(ShowDetailIntent.RangeSheetDismiss)
+        assertFalse(viewModel.viewState.value.rangeSheetVisible)
+        assertEquals(ranges[1], viewModel.viewState.value.selectedRange)
+    }
+
+    @Test
+    fun `a single range has no sheet to open`() = runTest(mainRule.dispatcher) {
+        catalogRepository.episodes = mapOf(SHOW_ID to Result.success(testEpisodes(count = 12, free = 12)))
+        val viewModel = viewModel()
+        viewModel.processIntent(ShowDetailIntent.RangeSheetOpen)
+        assertFalse(viewModel.viewState.value.rangeSheetVisible)
+    }
+
+    @Test
     fun `default tab is the one holding the continue episode, a tab the user picked is kept`() = runTest(mainRule.dispatcher) {
         catalogRepository.episodes = mapOf(SHOW_ID to Result.success(testEpisodes(count = 50, free = 50)))
         progressRepository.save(progress(index = 25, positionMs = 30_000))

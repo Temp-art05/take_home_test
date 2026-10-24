@@ -20,6 +20,7 @@
     <string name="watch_saved_to_library">உங்கள் நூலகத்தில் சேமிக்கப்பட்டது</string>
     <string name="watch_removed_from_library">உங்கள் நூலகத்திலிருந்து நீக்கப்பட்டது</string>
     <string name="watch_range">%1$d–%2$d</string>
+    <string name="watch_range_pick_cd">எபிசோட் வரம்பைத் தேர்ந்தெடு</string>
     <string name="watch_episodes_error">எபிசோடுகளை ஏற்ற முடியவில்லை.</string>
 
     <!-- SCR-0302 Player -->

@@ -3,12 +3,13 @@ package com.takehome.drama.feature.watch.presentation.player
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,8 +38,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
@@ -88,9 +89,9 @@ import com.takehome.drama.feature.watch.presentation.player.component.PlayerTopB
 import com.takehome.drama.feature.watch.presentation.player.component.PlayerTrack
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerPage
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerSheet
+import kotlin.math.abs
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import kotlin.math.abs
 
 /** Overlay mờ hết khi trang lệch ~60% chiều cao. */
 private const val OVERLAY_FADE = 1.6f
@@ -360,6 +361,11 @@ private fun EpisodePage(
                     )
                 }
                 !active -> Unit
+                viewState.sourceUnavailable -> CenterMessage(
+                    title = stringResource(R.string.watch_error_no_source),
+                    actionLabel = stringResource(R.string.watch_episodes),
+                    onAction = { onIntent(PlayerIntent.EpisodesClick) },
+                )
                 viewState.hasPlaybackError -> CenterMessage(
                     title = stringResource(R.string.watch_error_playback),
                     actionLabel = stringResource(R.string.watch_retry),
@@ -398,6 +404,9 @@ private fun BoxScope.BottomControls(
     onIntent: (PlayerIntent) -> Unit,
 ) {
     val gutter = AppTheme.dimensions.screenGutter
+    // SCR-0604: đang buffering chỉ còn top bar + spinner + track mờ. Mờ dần thay vì gỡ khỏi layout: track không nhảy chỗ,
+    // lần buffer ngắn (tua) không làm cả cụm chớp.
+    val chromeAlpha by animateFloatAsState(if (buffering) 0f else 1f, label = "bufferingChrome")
     Column(
         modifier = Modifier
             .align(Alignment.BottomCenter)
@@ -406,12 +415,12 @@ private fun BoxScope.BottomControls(
             .padding(horizontal = gutter)
             .padding(bottom = 14.dp),
     ) {
-        Row(verticalAlignment = Alignment.Bottom) {
+        Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.graphicsLayer { alpha = chromeAlpha }) {
             PlayerInfo(
                 episodeNumber = page.episodeNumber,
                 description = viewState.description,
                 expanded = expanded,
-                onToggle = { if (isCurrent) onIntent(PlayerIntent.ToggleDescription) },
+                onToggle = { if (isCurrent && !buffering) onIntent(PlayerIntent.ToggleDescription) },
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = AppTheme.dimensions.s4),
@@ -421,10 +430,10 @@ private fun BoxScope.BottomControls(
                     likeCount = formatCompactCount(page.likeCount, Locale.current.platformLocale),
                     isLiked = page.isLiked,
                     speed = viewState.speed,
-                    onLike = { if (isCurrent) onIntent(PlayerIntent.LikeClick) },
-                    onSpeedClick = { if (isCurrent) onIntent(PlayerIntent.SpeedClick) },
-                    onSpeedLongPress = { if (isCurrent) onIntent(PlayerIntent.SpeedLongPress) },
-                    onEpisodes = { onIntent(PlayerIntent.EpisodesClick) },
+                    onLike = { if (isCurrent && !buffering) onIntent(PlayerIntent.LikeClick) },
+                    onSpeedClick = { if (isCurrent && !buffering) onIntent(PlayerIntent.SpeedClick) },
+                    onSpeedLongPress = { if (isCurrent && !buffering) onIntent(PlayerIntent.SpeedLongPress) },
+                    onEpisodes = { if (!buffering) onIntent(PlayerIntent.EpisodesClick) },
                     modifier = Modifier.padding(bottom = AppTheme.dimensions.s6),
                 )
             }
@@ -440,8 +449,10 @@ private fun BoxScope.BottomControls(
             )
         }
         EpisodesPill(
-            onClick = { onIntent(PlayerIntent.EpisodesClick) },
-            modifier = Modifier.padding(top = AppTheme.dimensions.s2),
+            onClick = { if (!buffering) onIntent(PlayerIntent.EpisodesClick) },
+            modifier = Modifier
+                .padding(top = AppTheme.dimensions.s2)
+                .graphicsLayer { alpha = chromeAlpha },
         )
     }
 }
