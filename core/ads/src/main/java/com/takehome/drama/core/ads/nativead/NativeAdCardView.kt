@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Outline
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.InsetDrawable
 import android.text.TextUtils
 import android.util.TypedValue
 import android.view.Gravity
@@ -21,23 +22,25 @@ import com.takehome.drama.core.ads.R
 
 private const val MATCH = ViewGroup.LayoutParams.MATCH_PARENT
 private const val WRAP = ViewGroup.LayoutParams.WRAP_CONTENT
-private const val ICON_DP = 40
+private const val ICON_DP = 44
 private const val TOUCH_TARGET_DP = 48
+private const val CTA_VISUAL_DP = 36
 private const val RADIUS_CARD_DP = 16
-private const val RADIUS_MEDIA_DP = 12
-private const val RADIUS_BUTTON_DP = 12
-private const val RADIUS_ICON_DP = 8
-private const val RADIUS_BADGE_DP = 6
+private const val RADIUS_ICON_DP = 10
+private const val GAP_DP = 12
+private const val BADGE_MARGIN_DP = 10
 
 /** Màu (ARGB) + cỡ chữ (sp) lấy từ token design-system ở phía Compose. */
 internal data class NativeAdStyle(
     val surface: Int,
-    val button: Int,
-    val badge: Int,
-    val border: Int,
+    /** Nút CTA: pill sáng chữ tối — nổi nhưng không lẫn với gradient của nút chính app. */
+    val ctaBackground: Int,
+    val ctaText: Int,
+    /** Badge "Ad" đè lên media: nền scrim tối để đọc được trên mọi ảnh. */
+    val badgeBackground: Int,
+    val badgeText: Int,
     val text1: Int,
     val text2: Int,
-    val text3: Int,
     val headlineSp: Float,
     val bodySp: Float,
     val badgeSp: Float,
@@ -45,75 +48,77 @@ internal data class NativeAdStyle(
 )
 
 /**
- * Card native kiểu Sunset Flow, dựng bằng code (đề cấm XML layout): nền `surface` bo 16dp, icon 40dp +
- * headline + badge "Ad", body 2 dòng, media 16:9, CTA nền `surface2` viền `border` — **không** gradient,
- * gradient để dành cho nút chính của app. AdChoices do SDK tự đặt góc trên.
+ * Card native kiểu "sponsored" của feed, dựng bằng code (đề cấm XML layout): media 16:9 tràn viền trên,
+ * badge "Ad" đè góc đầu media, dưới là icon + headline + body 2 dòng và CTA dạng pill ở cuối hàng. Card nền
+ * `surface` bo 16dp như thẻ nội dung của app. AdChoices do SDK tự đặt góc trên-cuối.
  */
 internal class NativeAdCard(private val context: Context, private val style: NativeAdStyle) {
 
     /** `NativeAdView` là class final nên card bọc nó thay vì kế thừa. */
     val view = NativeAdView(context).also { it.tag = this }
 
+    private val media = MediaView(context)
+    private val badge = text(style.badgeSp, style.badgeText, bold = true).apply {
+        setText(R.string.ads_native_badge)
+        background = rounded(style.badgeBackground, dp(RADIUS_ICON_DP).toFloat())
+        setPadding(dp(8), dp(2), dp(8), dp(2))
+    }
     private val icon = ImageView(context).apply {
         scaleType = ImageView.ScaleType.CENTER_CROP
         clipToOutline = true
         outlineProvider = roundedOutline(dp(RADIUS_ICON_DP))
     }
     private val headline = text(style.headlineSp, style.text1, bold = true).apply { maxLines = 1 }
-    private val badge = text(style.badgeSp, style.text2, bold = true).apply {
-        setText(R.string.ads_native_badge)
-        background = rounded(style.badge, dp(RADIUS_BADGE_DP))
-        setPadding(dp(6), dp(1), dp(6), dp(1))
-    }
-    private val advertiser = text(style.bodySp, style.text3, bold = false).apply { maxLines = 1 }
     private val body = text(style.bodySp, style.text2, bold = false).apply { maxLines = 2 }
-    private val media = MediaView(context)
-    private val cta = text(style.buttonSp, style.text1, bold = true).apply {
-        gravity = Gravity.CENTER
+    private val cta = text(style.buttonSp, style.ctaText, bold = true).apply {
         maxLines = 1
+        gravity = Gravity.CENTER
+        textAlignment = View.TEXT_ALIGNMENT_CENTER
         minHeight = dp(TOUCH_TARGET_DP)
-        background = rounded(style.button, dp(RADIUS_BUTTON_DP)).apply { setStroke(dp(1), style.border) }
+        // Vùng chạm 48dp, phần nhìn thấy là pill 36dp ở giữa. Padding đặt SAU background: InsetDrawable mang
+        // padding riêng, gán background sẽ đè padding đã đặt trước đó (chữ dính sát mép pill).
+        val inset = (dp(TOUCH_TARGET_DP) - dp(CTA_VISUAL_DP)) / 2
+        background = InsetDrawable(rounded(style.ctaBackground, dp(CTA_VISUAL_DP) / 2f), 0, inset, 0, inset)
+        setPadding(dp(18), 0, dp(18), 0)
     }
 
     init {
         view.layoutDirection = View.LAYOUT_DIRECTION_LOCALE
-        val titleRow = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            addView(badge, LinearLayout.LayoutParams(WRAP, WRAP).apply { marginEnd = dp(6) })
-            addView(headline, LinearLayout.LayoutParams(0, WRAP, 1f))
-        }
-        val titles = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            addView(titleRow, LinearLayout.LayoutParams(MATCH, WRAP))
-            addView(advertiser, LinearLayout.LayoutParams(MATCH, WRAP))
-        }
-        val header = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            addView(icon, LinearLayout.LayoutParams(dp(ICON_DP), dp(ICON_DP)).apply { marginEnd = dp(12) })
-            // Chừa góc trên-cuối cho nút AdChoices của SDK.
-            addView(titles, LinearLayout.LayoutParams(0, WRAP, 1f).apply { marginEnd = dp(20) })
-        }
         val mediaFrame = AspectRatioFrame(context).apply {
-            clipToOutline = true
-            outlineProvider = roundedOutline(dp(RADIUS_MEDIA_DP))
             addView(media, FrameLayout.LayoutParams(MATCH, MATCH))
+            addView(
+                badge,
+                FrameLayout.LayoutParams(WRAP, WRAP, Gravity.TOP or Gravity.START).apply {
+                    marginStart = dp(BADGE_MARGIN_DP)
+                    topMargin = dp(BADGE_MARGIN_DP)
+                },
+            )
+        }
+        val texts = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(headline, LinearLayout.LayoutParams(MATCH, WRAP))
+            addView(body, LinearLayout.LayoutParams(MATCH, WRAP).apply { topMargin = dp(2) })
+        }
+        val info = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(GAP_DP), dp(GAP_DP), dp(GAP_DP), dp(GAP_DP))
+            addView(icon, LinearLayout.LayoutParams(dp(ICON_DP), dp(ICON_DP)).apply { marginEnd = dp(GAP_DP) })
+            addView(texts, LinearLayout.LayoutParams(0, WRAP, 1f).apply { marginEnd = dp(GAP_DP) })
+            addView(cta, LinearLayout.LayoutParams(WRAP, WRAP))
         }
         val card = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            background = rounded(style.surface, dp(RADIUS_CARD_DP))
-            setPadding(dp(12), dp(12), dp(12), dp(12))
-            addView(header, LinearLayout.LayoutParams(MATCH, WRAP))
-            addView(body, LinearLayout.LayoutParams(MATCH, WRAP).apply { topMargin = dp(8) })
-            addView(mediaFrame, LinearLayout.LayoutParams(MATCH, WRAP).apply { topMargin = dp(10) })
-            addView(cta, LinearLayout.LayoutParams(MATCH, WRAP).apply { topMargin = dp(10) })
+            background = rounded(style.surface, dp(RADIUS_CARD_DP).toFloat())
+            clipToOutline = true
+            outlineProvider = roundedOutline(dp(RADIUS_CARD_DP))
+            addView(mediaFrame, LinearLayout.LayoutParams(MATCH, WRAP))
+            addView(info, LinearLayout.LayoutParams(MATCH, WRAP))
         }
         view.addView(card, FrameLayout.LayoutParams(MATCH, WRAP))
 
         view.headlineView = headline
         view.bodyView = body
-        view.advertiserView = advertiser
         view.iconView = icon
         view.mediaView = media
         view.callToActionView = cta
@@ -121,8 +126,8 @@ internal class NativeAdCard(private val context: Context, private val style: Nat
 
     fun bind(ad: NativeAd) {
         headline.text = ad.headline.orEmpty()
-        body.showText(ad.body)
-        advertiser.showText(ad.advertiser)
+        // Không có body thì dòng phụ là tên nhà quảng cáo (vẫn là asset của ad, không tự bịa chữ).
+        body.showText(ad.body ?: ad.advertiser)
         cta.showText(ad.callToAction)
         val drawable = ad.icon?.drawable
         icon.setImageDrawable(drawable)
@@ -149,9 +154,9 @@ internal class NativeAdCard(private val context: Context, private val style: Nat
         if (bold) setTypeface(typeface, Typeface.BOLD)
     }
 
-    private fun rounded(color: Int, radius: Int) = GradientDrawable().apply {
+    private fun rounded(color: Int, radius: Float) = GradientDrawable().apply {
         setColor(color)
-        cornerRadius = radius.toFloat()
+        cornerRadius = radius
     }
 
     private fun roundedOutline(radius: Int) = object : ViewOutlineProvider() {

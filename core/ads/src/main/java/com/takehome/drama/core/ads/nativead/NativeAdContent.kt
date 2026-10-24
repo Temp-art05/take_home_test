@@ -13,10 +13,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.github.dinhn.ads.core.AdsSdk
 import com.github.dinhn.ads.core.NativeAdPool
 import com.google.android.gms.ads.nativead.NativeAd
-import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
 import com.takehome.drama.domain.model.ads.AdPlacement
 import kotlinx.coroutines.flow.Flow
+
+private const val BADGE_SCRIM_ALPHA = 0.6f
 
 /**
  * Ô native: chỉ vẽ khi placement bật **và** pool đã có ad. Đang load / lỗi / offline → không vẽ gì,
@@ -46,12 +47,12 @@ internal fun NativeAdContent(
 
     val style = NativeAdStyle(
         surface = MaterialTheme.colorScheme.surface.toArgb(),
-        button = MaterialTheme.colorScheme.surfaceVariant.toArgb(),
-        badge = MaterialTheme.colorScheme.primaryContainer.toArgb(),
-        border = MaterialTheme.colorScheme.outline.toArgb(),
+        ctaBackground = MaterialTheme.colorScheme.onSurface.toArgb(),
+        ctaText = MaterialTheme.colorScheme.background.toArgb(),
+        badgeBackground = MaterialTheme.colorScheme.scrim.copy(alpha = BADGE_SCRIM_ALPHA).toArgb(),
+        badgeText = MaterialTheme.colorScheme.onSurface.toArgb(),
         text1 = MaterialTheme.colorScheme.onSurface.toArgb(),
         text2 = MaterialTheme.colorScheme.onSurfaceVariant.toArgb(),
-        text3 = AppTheme.colors.text3.toArgb(),
         headlineSp = AppTypography.bodySemibold.fontSize.value,
         bodySp = AppTypography.caption.fontSize.value,
         badgeSp = AppTypography.micro.fontSize.value,
