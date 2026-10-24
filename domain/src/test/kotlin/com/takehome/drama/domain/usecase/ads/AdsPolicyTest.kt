@@ -85,7 +85,7 @@ class AdsPolicyTest {
     @Test
     fun `placement ids are the ones documented for the console`() {
         assertEquals(
-            listOf("interstitial_onboarding", "native_home", "rewarded_bonus"),
+            listOf("interstitial_onboarding", "native_home", "rewarded_bonus", "app_open_resume"),
             AdPlacement.entries.map { it.id },
         )
     }

@@ -81,9 +81,16 @@ thiếu thì APK unsigned.
 
 `FlowDramaApp.onCreate()` gọi `startKoin` với `configModule`, `appModule` (`AppScope` — coroutine scope
 theo process), `analyticsModule(isDebug)`, `remoteConfigModule`, `dataModule`, `adsModule`, và một module cho mỗi
-feature (`mainModule`). Sau đó `AdsInitializer.start()` (MobileAds init nền, áp `ads_config`). Feature tự khai DI của mình; ViewModel inject qua `koinViewModel()`.
+feature (`mainModule`). Sau đó `AdsInitializer.start()` (MobileAds init nền nhờ `OPTIMIZE_INITIALIZATION`, áp `ads_config`, app-open khi resume). Feature tự khai DI của mình; ViewModel inject qua `koinViewModel()`.
 
 SDK analytics bên thứ ba thêm ở `:app` bằng `single { ExtraAnalyticsPlugins(listOf(...)) }`.
+
+## Lib ads
+
+Lib của tác giả `com.github.dinhn:ads-core|ads-admob|ads-firebase` kéo từ GitHub Packages (`lurdsoft/lib-ads-android`),
+cred `gpr.user`/`gpr.key` trong `gradle.properties` — PAT `read:packages` **commit có chủ đích** (tác giả lib cho phép),
+đừng gỡ. `ads-admob` kéo theo adapter mediation → cần repo Pangle + Mintegral trong `settings.gradle.kts`. Chỉ `:core:ads`
+phụ thuộc lib; native dựng `NativeAdView` bằng code (đề cấm XML layout), không dùng `AdsNative(layoutId)`.
 
 ## Firebase
 

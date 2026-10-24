@@ -31,8 +31,15 @@ object RemoteKeys {
         serializer = JsonElement.serializer(),
     )
 
+    /**
+     * Cho phép tap logo Splash 7 lần để bật/tắt log ads (`FOR_TEST_ADS`) trên bản release. Bản debug
+     * luôn cho phép. Như HomeMorph.
+     */
+    val ENABLE_LOG_ADS = BooleanKey(key = "enable_log_ads", default = false)
+
     val ALL_KEYS: List<RemoteConfigKey<*>> = listOf(
         ADS_CONFIG,
+        ENABLE_LOG_ADS,
     )
 
     private val defaultsJson = Json { encodeDefaults = true }
@@ -51,10 +58,11 @@ object RemoteKeys {
         put("enable", true)
         putJsonArray("disabled_versions") {}
         putJsonObject("placements") {
-            listOf("interstitial_onboarding", "native_home", "rewarded_bonus").forEach { id ->
+            listOf("interstitial_onboarding", "native_home", "rewarded_bonus", "app_open_resume").forEach { id ->
                 putJsonObject(id) { put("enable", true) }
             }
         }
+        put("interval_between_interstitial", 20)
     }
 
     private fun <T> JsonKey<T>.encodeDefault(json: Json): String = json.encodeToString(serializer, default)

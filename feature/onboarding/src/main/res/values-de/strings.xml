@@ -4,6 +4,8 @@
     <string name="onboarding_continue">Weiter</string>
     <string name="onboarding_skip">Überspringen</string>
     <string name="onboarding_splash_tag">Kurze Drama-Serien</string>
+    <string name="onboarding_splash_ad_logs_on">Werbe-Logs an</string>
+    <string name="onboarding_splash_ad_logs_off">Werbe-Logs aus</string>
     <string name="onboarding_language_title">Deine Sprache</string>
     <string name="onboarding_language_body">Passend zu deinem Handy gewählt. Jederzeit in den Einstellungen änderbar.</string>
     <string name="onboarding_value_prop_title">Jede Folge frei.\nDie Story fließt einfach.</string>

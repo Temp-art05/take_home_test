@@ -19,9 +19,15 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":core:analytics"))
     implementation(project(":core:design-system"))
-    implementation(project(":lib-ads:admob"))
+    implementation(libs.ads.core)
+    implementation(libs.ads.admob)
+    implementation(libs.ads.firebase)
+    // NativeAdView dựng bằng code (NativeAdCardView) — không dùng layout XML của lib.
+    implementation(libs.play.services.ads)
 
     implementation(libs.androidx.core.ktx)
+    // App-open khi quay lại app: ProcessLifecycleOwner.
+    implementation(libs.androidx.lifecycle.process)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.koin.android)

@@ -3,6 +3,7 @@ package com.takehome.drama.core.ads
 import android.app.Activity
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.takehome.drama.core.ads.nativead.NativeAdContent
@@ -37,6 +38,13 @@ interface AdsPresenter {
     /** Ô native; policy tắt hoặc chưa có ad → không vẽ gì (không giữ chỗ trống). */
     @Composable
     fun NativeAdSlot(placement: AdPlacement, modifier: Modifier)
+
+    /** Gọi ngay trước khi chủ động rời app (xin quyền…) — lần quay lại kế tiếp không hiện app-open. */
+    fun suppressNextResumeAd()
+
+    /** Đặt trong màn có video: không hiện app-open khi user quay lại app lúc đang ở màn này. */
+    @Composable
+    fun BlockResumeAds()
 }
 
 class AdsPresenterImpl(
@@ -44,6 +52,7 @@ class AdsPresenterImpl(
     private val sdk: AdsSdkFacade,
     private val isEnabled: IsAdPlacementEnabledUseCase,
     private val observeEnabled: ObserveAdPlacementUseCase,
+    private val appOpen: AppOpenAdController,
 ) : AdsPresenter {
 
     private val appContext: Context = context.applicationContext ?: context
@@ -103,6 +112,16 @@ class AdsPresenterImpl(
             request = { safely("native ${placement.id}") { sdk.requestNative(appContext, placement.id) } },
             modifier = modifier,
         )
+    }
+
+    override fun suppressNextResumeAd() = appOpen.suppressNextResume()
+
+    @Composable
+    override fun BlockResumeAds() {
+        DisposableEffect(Unit) {
+            val release = appOpen.block()
+            onDispose { release() }
+        }
     }
 
     private fun safelyReady(placement: AdPlacement): Boolean =

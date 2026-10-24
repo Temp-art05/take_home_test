@@ -5,6 +5,8 @@
 
     <!-- SCR-0001 Splash -->
     <string name="onboarding_splash_tag">शॉर्ट ड्रामा सीरीज़</string>
+    <string name="onboarding_splash_ad_logs_on">विज्ञापन लॉग चालू</string>
+    <string name="onboarding_splash_ad_logs_off">विज्ञापन लॉग बंद</string>
 
     <!-- SCR-0002 Language -->
     <string name="onboarding_language_title">आपकी भाषा</string>

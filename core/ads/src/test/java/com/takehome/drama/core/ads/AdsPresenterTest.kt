@@ -1,9 +1,8 @@
 package com.takehome.drama.core.ads
 
 import android.app.Activity
-import android.content.Context
+import android.app.Application
 import android.content.ContextWrapper
-import com.takehome.drama.core.ads.sdk.AdsSdkFacade
 import com.takehome.drama.domain.config.AppConfig
 import com.takehome.drama.domain.fake.FakeAdsConfigRepository
 import com.takehome.drama.domain.model.ads.AdPlacement
@@ -21,51 +20,15 @@ import org.junit.Test
 
 class AdsPresenterTest {
 
-    private class FakeSdk : AdsSdkFacade {
-        val ready = mutableSetOf<String>()
-        var throwOnShow = false
-        var throwOnPreload = false
-        val shown = mutableListOf<String>()
-        val preloads = mutableListOf<String>()
-        /** Callback lần preload gần nhất — test tự gọi để giả lập load xong/lỗi. */
-        var pendingLoaded: (() -> Unit)? = null
-        var pendingFailed: (() -> Unit)? = null
-        /** Kết quả giả của rewarded khi đóng: earned hay không. */
-        var rewardEarned = true
-        var dismissInterstitial: (() -> Unit)? = null
-
-        override fun isFullScreenReady(name: String) = name in ready
-
-        override fun preloadFullScreen(context: Context, name: String, onLoaded: () -> Unit, onFailed: () -> Unit) {
-            if (throwOnPreload) error("sdk not initialised")
-            preloads += name
-            pendingLoaded = { ready += name; onLoaded() }
-            pendingFailed = onFailed
-        }
-
-        override fun showInterstitial(activity: Activity, name: String, onDone: () -> Unit) {
-            if (throwOnShow) error("boom")
-            shown += name
-            dismissInterstitial = onDone
-        }
-
-        override fun showRewarded(activity: Activity, name: String, onResult: (Boolean) -> Unit) {
-            if (throwOnShow) error("boom")
-            shown += name
-            onResult(rewardEarned)
-        }
-
-        override fun requestNative(context: Context, name: String) = Unit
-    }
-
     private val appConfig = AppConfig("", isDebug = true, isDevFlavor = true, useFixtures = true, versionCode = 1, versionName = "1.0.0")
     private val repo = FakeAdsConfigRepository()
-    private val sdk = FakeSdk()
+    private val sdk = FakeAdsSdk()
     private val presenter = AdsPresenterImpl(
         context = ContextWrapper(null),
         sdk = sdk,
         isEnabled = IsAdPlacementEnabledUseCase(repo, appConfig),
         observeEnabled = ObserveAdPlacementUseCase(repo, appConfig),
+        appOpen = AppOpenAdController(Application(), sdk, IsAdPlacementEnabledUseCase(repo, appConfig)),
     )
     private val activity = Activity()
     private val interstitial = AdPlacement.InterstitialOnboarding.id

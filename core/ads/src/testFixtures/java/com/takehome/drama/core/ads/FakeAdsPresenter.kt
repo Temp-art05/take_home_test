@@ -33,4 +33,14 @@ class FakeAdsPresenter : AdsPresenter {
 
     @Composable
     override fun NativeAdSlot(placement: AdPlacement, modifier: Modifier) = Unit
+
+    var resumeAdSuppressions = 0
+        private set
+
+    override fun suppressNextResumeAd() {
+        resumeAdSuppressions++
+    }
+
+    @Composable
+    override fun BlockResumeAds() = Unit
 }

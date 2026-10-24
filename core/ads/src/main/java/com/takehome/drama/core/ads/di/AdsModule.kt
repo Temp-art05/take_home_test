@@ -1,8 +1,11 @@
 package com.takehome.drama.core.ads.di
 
 import com.takehome.drama.core.ads.AdsInitializer
+import com.takehome.drama.core.ads.AdsLogToggle
 import com.takehome.drama.core.ads.AdsPresenter
 import com.takehome.drama.core.ads.AdsPresenterImpl
+import com.takehome.drama.core.ads.AppOpenAdController
+import com.takehome.drama.core.ads.LibAdsLogToggle
 import com.takehome.drama.core.ads.config.AdsConfigRepositoryImpl
 import com.takehome.drama.core.ads.config.AdsDebugOverride
 import com.takehome.drama.core.ads.sdk.AdsSdkFacade
@@ -21,6 +24,8 @@ val adsModule = module {
     factory { ObserveAdPlacementUseCase(get(), get()) }
     factory { IsAdPlacementEnabledUseCase(get(), get()) }
     single<AdsSdkFacade> { LibAdsSdkFacade() }
-    single<AdsPresenter> { AdsPresenterImpl(androidContext(), get(), get(), get()) }
-    single { AdsInitializer(androidApplication(), get(), get(), get()) }
+    single { AppOpenAdController(androidApplication(), get(), get()) }
+    single<AdsPresenter> { AdsPresenterImpl(androidContext(), get(), get(), get(), get()) }
+    single<AdsLogToggle> { LibAdsLogToggle(get(), get()) }
+    single { AdsInitializer(androidApplication(), get(), get(), get(), get()) }
 }

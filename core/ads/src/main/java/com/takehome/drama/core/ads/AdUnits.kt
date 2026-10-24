@@ -10,10 +10,12 @@ internal object AdUnits {
     private const val INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712"
     private const val NATIVE = "ca-app-pub-3940256099942544/2247696110"
     private const val REWARDED = "ca-app-pub-3940256099942544/5224354917"
+    private const val APP_OPEN = "ca-app-pub-3940256099942544/9257395921"
 
     fun of(placement: AdPlacement): String = when (placement) {
         AdPlacement.InterstitialOnboarding -> INTERSTITIAL
         AdPlacement.NativeHome -> NATIVE
         AdPlacement.RewardedBonus -> REWARDED
+        AdPlacement.AppOpenResume -> APP_OPEN
     }
 }

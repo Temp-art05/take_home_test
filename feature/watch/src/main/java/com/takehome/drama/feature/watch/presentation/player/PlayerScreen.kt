@@ -113,6 +113,8 @@ fun PlayerScreen(
     val context = LocalContext.current
     val resources = LocalResources.current
     val activity = LocalActivity.current
+    // Đang xem video: quay lại app không bật app-open ad (luật "không ads khi video đang phát").
+    adsPresenter.BlockResumeAds()
 
     viewModel.singleEvent.CollectAsEffect { event ->
         when (event) {

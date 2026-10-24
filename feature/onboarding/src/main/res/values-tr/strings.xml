@@ -4,6 +4,8 @@
     <string name="onboarding_continue">Devam</string>
     <string name="onboarding_skip">Geç</string>
     <string name="onboarding_splash_tag">Kısa Drama Dizileri</string>
+    <string name="onboarding_splash_ad_logs_on">Reklam günlükleri açık</string>
+    <string name="onboarding_splash_ad_logs_off">Reklam günlükleri kapalı</string>
     <string name="onboarding_language_title">Dilin</string>
     <string name="onboarding_language_body">Telefonuna göre ayarladık. İstediğin zaman Ayarlar\'dan değiştir.</string>
     <string name="onboarding_value_prop_title">Her bölüm açık.\nHikâye akıp gidiyor.</string>

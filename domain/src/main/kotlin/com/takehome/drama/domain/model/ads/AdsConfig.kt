@@ -10,8 +10,13 @@ data class AdsConfig(
     val disabledVersions: List<String> = emptyList(),
     /** Khoá = [AdPlacement.id]. Placement không khai → [AdPlacement.defaultEnabled]. */
     val placements: Map<String, PlacementConfig> = emptyMap(),
+    /** Khoảng cách tối thiểu giữa hai lần hiện interstitial cùng placement (giây). */
+    val intervalBetweenInterstitialSec: Long = DEFAULT_INTERSTITIAL_INTERVAL_SEC,
 ) {
     companion object {
+        /** Như HomeMorph: 20 s. */
+        const val DEFAULT_INTERSTITIAL_INTERVAL_SEC = 20L
+
         /** Giống JSON mẫu của README để Console và code cùng một điểm xuất phát. */
         val DEFAULT = AdsConfig(
             enable = true,
@@ -28,4 +33,7 @@ enum class AdPlacement(val id: String, val defaultEnabled: Boolean) {
     InterstitialOnboarding("interstitial_onboarding", defaultEnabled = true),
     NativeHome("native_home", defaultEnabled = true),
     RewardedBonus("rewarded_bonus", defaultEnabled = true),
+
+    /** App-open khi user quay lại app từ nền (không phải lần mở đầu, không ở màn đang có video). */
+    AppOpenResume("app_open_resume", defaultEnabled = true),
 }

@@ -1,10 +1,12 @@
 package com.takehome.drama.core.ads
 
 import android.app.Application
+import androidx.compose.ui.graphics.toArgb
 import com.github.dinhn.ads.core.AdsSdk
 import com.takehome.drama.core.ads.config.AdsConfigParser
 import com.takehome.drama.core.analytics.remoteconfig.DEFAULT_AWAIT_MS
 import com.takehome.drama.core.analytics.remoteconfig.RemoteConfigSource
+import com.takehome.drama.core.designsystem.theme.AppColors
 import com.takehome.drama.domain.config.AppConfig
 import com.takehome.drama.domain.model.ads.AdPlacement
 import com.takehome.drama.domain.model.ads.AdsConfig
@@ -21,8 +23,9 @@ import timber.log.Timber
 import com.github.dinhn.ads.core.AdsConfig as LibAdsConfig
 
 /**
- * Khởi động lib ads ở `Application.onCreate`: init (MobileAds chạy nền, không chặn Splash), đăng ký 3
- * placement, rồi đẩy policy Remote Config vào toggle của lib.
+ * Khởi động lib ads ở `Application.onCreate` theo cách của HomeMorph: init (MobileAds khởi tạo nền nhờ
+ * meta-data `OPTIMIZE_INITIALIZATION`), log sự kiện, đăng ký placement, rồi đẩy policy Remote Config vào
+ * toggle của lib.
  *
  * Lib bật `requireRemoteConfigBeforeRequest`: không request ad nào cho tới khi config lần đầu được áp —
  * tức chờ fetch xong hoặc hết [DEFAULT_AWAIT_MS] (cùng ngưỡng Splash), để placement đã tắt trên Console
@@ -33,9 +36,11 @@ class AdsInitializer(
     private val appConfig: AppConfig,
     private val remoteConfig: RemoteConfigSource,
     private val adsConfigRepository: AdsConfigRepository,
+    private val appOpen: AppOpenAdController,
 ) {
     // Lib dùng HashMap + Compose state, chỉ an toàn trên main thread.
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var interstitialIntervalSec = AdsConfig.DEFAULT_INTERSTITIAL_INTERVAL_SEC
 
     fun start() {
         val started = runCatching {
@@ -43,10 +48,19 @@ class AdsInitializer(
                 app,
                 LibAdsConfig(
                     isShowLogAds = appConfig.isDebug,
+                    // Tap logo Splash 7 lần (AdsLogToggle) — release còn cần RC `enable_log_ads`.
+                    logToggleAllowed = true,
+                    remoteToggles = AdPlacement.entries.associate { it.id to it.defaultEnabled },
                     requireRemoteConfigBeforeRequest = true,
+                    // Lib tự bắn ad_impression / paid_ad_impression[_tier] / revenue milestone sang Firebase.
+                    trackWithFirebase = true,
+                    autoGeoTier = true,
                 ),
             )
+            AdsSdk.setOnAdEvent(AdEventLog::onEvent)
+            AdsSdk.setOnPaidEvent(AdEventLog::onRevenue)
             AdPlacement.entries.forEach(::register)
+            appOpen.start()
         }.onFailure { Timber.tag(AdsConfigParser.TAG).e(it, "Ads init failed - running without ads") }
         if (started.isFailure) return
 
@@ -54,20 +68,34 @@ class AdsInitializer(
             adsConfigRepository.config.collect { config ->
                 val toggles = remoteToggles(config, appConfig.versionName)
                 Timber.tag(AdsConfigParser.TAG).d("toggles %s (version %s)", toggles, appConfig.versionName)
-                runCatching { AdsSdk.setRemoteToggles(toggles) }
+                runCatching {
+                    AdsSdk.setRemoteToggles(toggles)
+                    applyInterstitialInterval(config.intervalBetweenInterstitialSec)
+                }
             }
         }
         scope.launch {
             withTimeoutOrNull(DEFAULT_AWAIT_MS) { remoteConfig.isReady.first { it } }
             // Toggle đã được collector trên đẩy từ giá trị phiên trước / default trước lúc này.
             runCatching { AdsSdk.setRemoteConfigReady() }
+            appOpen.onRemoteConfigReady()
         }
+    }
+
+    /**
+     * Lib chép min-interval vào placement lúc đăng ký, nên đổi default thôi không đủ (lỗi của HomeMorph:
+     * `interval_between_interstitial` không có tác dụng) — đăng ký lại interstitial với giá trị mới.
+     */
+    private fun applyInterstitialInterval(seconds: Long) {
+        if (seconds == interstitialIntervalSec) return
+        interstitialIntervalSec = seconds
+        AdsSdk.setDefaultInterstitialMinIntervalMs(seconds * 1_000)
+        register(AdPlacement.InterstitialOnboarding)
     }
 
     /**
      * Cả hai toggle key = placement id: key lạ mặc định `true` trong lib, nên tách key sẽ làm placement không
      * tắt được. High floor để trống (lib lọc id rỗng) — bài test chỉ có một test id mỗi format.
-     * `showLoading = false`: không dùng overlay đen của lib (D6) — app chỉ show ad đã preload sẵn.
      */
     private fun register(placement: AdPlacement) {
         val id = AdUnits.of(placement)
@@ -75,14 +103,19 @@ class AdsInitializer(
         when (placement) {
             AdPlacement.InterstitialOnboarding -> AdsSdk.registerInterstitial(
                 name = key, highFloorId = "", normalId = id, enableHighFloorKey = key, enableNormalKey = key,
-                minLoadingMs = 0L, maxPerSession = 1, showLoading = false,
+                minLoadingMs = 0L, minIntervalMs = interstitialIntervalSec * 1_000, maxPerSession = 1,
             )
             AdPlacement.RewardedBonus -> AdsSdk.registerRewarded(
                 name = key, highFloorId = "", normalId = id, enableHighFloorKey = key, enableNormalKey = key,
-                minLoadingMs = 0L, showLoading = false,
+                minLoadingMs = 0L,
             )
             AdPlacement.NativeHome -> AdsSdk.registerNative(
                 name = key, highFloorId = "", normalId = id, enableHighFloorKey = key, enableNormalKey = key,
+            )
+            // Nền che sau ad lúc resume = nền app (lib mặc định trắng, nháy trên theme tối).
+            AdPlacement.AppOpenResume -> AdsSdk.registerAppOpen(
+                name = key, highFloorId = "", normalId = id, enableHighFloorKey = key, enableNormalKey = key,
+                screenGuardColor = AppColors.Dark.bg.toArgb(),
             )
         }
     }

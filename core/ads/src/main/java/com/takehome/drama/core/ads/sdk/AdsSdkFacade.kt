@@ -16,7 +16,16 @@ interface AdsSdkFacade {
     /** [onResult]: `true` khi user nhận thưởng trước lúc đóng. */
     fun showRewarded(activity: Activity, name: String, onResult: (earned: Boolean) -> Unit)
 
+    /** Không có ad sẵn thì lib load tại chỗ (không overlay); xong tự preload lại. */
+    fun showAppOpen(activity: Activity, name: String)
+
     fun requestNative(context: Context, name: String)
+
+    /** Đang có interstitial / rewarded / app-open trên màn hình. */
+    fun isFullScreenAdShowing(): Boolean
+
+    /** `Long.MAX_VALUE` khi chưa từng hiện full-screen nào. */
+    fun millisSinceLastFullScreenShown(): Long
 }
 
 internal class LibAdsSdkFacade : AdsSdkFacade {
@@ -31,5 +40,11 @@ internal class LibAdsSdkFacade : AdsSdkFacade {
     override fun showRewarded(activity: Activity, name: String, onResult: (Boolean) -> Unit) =
         AdsSdk.showRewarded(activity, name, onNext = onResult)
 
+    override fun showAppOpen(activity: Activity, name: String) = AdsSdk.showAppOpen(activity, name)
+
     override fun requestNative(context: Context, name: String) = AdsSdk.preloadNative(context, name)
+
+    override fun isFullScreenAdShowing(): Boolean = AdsSdk.isFullScreenAdShowing
+
+    override fun millisSinceLastFullScreenShown(): Long = AdsSdk.millisSinceLastFullScreenShown()
 }

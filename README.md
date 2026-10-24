@@ -90,8 +90,11 @@ Không cần `google-services.json` — Firebase tự rơi về no-op. Sau đó 
 
 > Nháp Phase 5 — README nộp bài hoàn thiện ở Phase 7.
 
-Ads dùng lib ads nội bộ (`lib-ads-android` 1.1.1) **vendored** ở `lib-ads/` (lib phát hành qua GitHub Packages private,
-clone sạch không kéo được — chi tiết `lib-ads/README.md`). Feature chỉ thấy `AdsPresenter` của `:core:ads`.
+Ads dùng lib ads của tác giả (`com.github.dinhn:ads-core|ads-admob|ads-firebase` 1.1.1), kéo từ GitHub Packages
+`maven.pkg.github.com/lurdsoft/lib-ads-android` — tích hợp theo cách của project thật dùng lib (HomeMorph). Token đọc package
+(PAT classic, chỉ scope `read:packages`) **commit có chủ đích** trong `gradle.properties` (`gpr.user`/`gpr.key`, ghi đè được bằng
+env `GITHUB_ACTOR`/`GITHUB_TOKEN`) để clone sạch build được không bước tay. `ads-admob` kéo theo adapter mediation (AppLovin,
+Meta, Mintegral, Pangle) nên `settings.gradle.kts` có thêm repo Pangle + Mintegral. Feature chỉ thấy `AdsPresenter` của `:core:ads`.
 App id và ad unit id đều là **test ID** của Google (`AndroidManifest.xml`, `core/ads/.../AdUnits.kt`).
 
 ### Placement
@@ -100,15 +103,28 @@ App id và ad unit id đều là **test ID** của Google (`AndroidManifest.xml`
 |---|---|---|---|
 | `interstitial_onboarding` | Interstitial | Hết onboarding, trước Home | Ranh giới luồng tự nhiên, user chưa xem dở gì. Load từ lúc mở onboarding; lúc kết thúc **chỉ hiện nếu đã sẵn**, chưa sẵn thì vào Home ngay — không bắt chờ. Tối đa 1 lần/phiên. |
 | `native_home` | Native | Home, sau "Pick up your flow", trước các rail | Hoà vào feed, không có video phát ở Home. Ô chỉ xuất hiện khi ad đã load — tắt / lỗi / offline thì **không có ô nào** (không khung trống). Card dựng bằng code theo token Sunset Flow, badge "Ad", CTA không gradient. |
+| `app_open_resume` | App open | Quay lại app từ nền (không phải lần mở đầu) | Như HomeMorph: chỉ khi Remote Config đã áp, không có full-screen khác đang hiện, cách full-screen trước ≥ 15 s; bỏ qua một lần sau khi app chủ động rời (xin quyền thông báo). **Không hiện khi đang ở Player / tab Reels** (đang xem video). Nền che phía sau = nền app. |
 | `rewarded_bonus` | Rewarded | Mở một tập khoá (chạm ô khoá ở Detail → sheet "Watch ad"; trang khoá trong Player → nút "Watch an ad to unlock") | Opt-in rõ: chỉ hiện khi user bấm nút. Design tự đề xuất "rewarded ads to open locked episodes". Xem hết → tập mở vĩnh viễn (DataStore), đóng sớm → vẫn khoá. Tắt placement → chạm tập khoá ra toast như cũ. |
 
 Không ad nào khi video đang phát: Home/Detail không phát video, trang khoá của Player đã dừng và VM `pause()` lần nữa
-trước khi show. Mọi lời gọi SDK bọc try/catch — lỗi = "không có ad", app đi tiếp. Không làm UMP/consent và app-open ad
-(ngoài phạm vi bài test).
+trước khi show; app-open bị chặn khi Player / Reels đang mở. Mọi lời gọi SDK bọc try/catch — lỗi = "không có ad", app
+đi tiếp. Interstitial / rewarded dùng overlay loading của lib (chỉ show ad đã sẵn nên overlay chỉ nháy). Không làm UMP/consent.
+
+Tracking: lib tự bắn sang Firebase (`trackWithFirebase`) — `ad_impression`, `paid_ad_impression`, `paid_ad_impression_value`,
+`paid_ad_impression_<tier>` (tier theo quốc gia, `autoGeoTier`), `track_ad_request`, `track_ad_matched_request`,
+`event_user_click_ads` và các mốc doanh thu. Bản debug log thêm mọi sự kiện qua Timber tag `AppAdsEvents`.
+
+### Log ads (tap logo Splash 7 lần)
+
+Như HomeMorph: chạm logo ở Splash **7 lần**, mỗi lần cách nhau ≤ 3 s → bật/tắt log của lib (Logcat tag `FOR_TEST_ADS`:
+`[PRE-LOAD]`, `[LOADED]`, `[FAILED]`, `[SHOWED]`, `[PAID]`…), toast "Ad logs on/off". Bản debug luôn cho phép (và log
+bật sẵn); bản release chỉ khi Remote Config `enable_log_ads = true`. Không lưu bền — mở lại app về mặc định.
 
 ### Kill switch `ads_config`
 
-Tham số Remote Config kiểu JSON, đúng hình dạng đề (`enable`, `disabled_versions`, `placements.<id>.enable`).
+Tham số Remote Config kiểu JSON, đúng hình dạng đề (`enable`, `disabled_versions`, `placements.<id>.enable`), thêm
+`interval_between_interstitial` (giây giữa hai lần interstitial, default 20 — như HomeMorph, nhưng áp thật bằng cách đăng ký
+lại placement; HomeMorph chỉ đổi default nên giá trị trên Console không có tác dụng).
 Thứ tự (`AdsPolicy`, có unit test):
 
 1. `enable == false` → tắt hết

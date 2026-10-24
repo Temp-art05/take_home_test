@@ -83,6 +83,27 @@ class AdsConfigParserTest {
     }
 
     @Test
+    fun `interval between interstitial reads seconds, number or numeric string`() {
+        assertEquals(45L, parse("""{"interval_between_interstitial": 45}""").intervalBetweenInterstitialSec)
+        assertEquals(30L, parse("""{"interval_between_interstitial": "30"}""").intervalBetweenInterstitialSec)
+        assertEquals(0L, parse("""{"interval_between_interstitial": 0}""").intervalBetweenInterstitialSec)
+    }
+
+    @Test
+    fun `missing, negative or mistyped interval falls back to the default`() {
+        val default = AdsConfig().intervalBetweenInterstitialSec
+        assertEquals(default, parse("""{}""").intervalBetweenInterstitialSec)
+        assertEquals(default, parse("""{"interval_between_interstitial": -5}""").intervalBetweenInterstitialSec)
+        assertEquals(default, parse("""{"interval_between_interstitial": "soon"}""").intervalBetweenInterstitialSec)
+        assertEquals(default, parse("""{"interval_between_interstitial": 1.5}""").intervalBetweenInterstitialSec)
+    }
+
+    @Test
+    fun `app open placement can be switched off like the others`() {
+        assertEquals(PlacementConfig(false), parse("""{"placements": {"app_open_resume": {"enable": false}}}""").placements["app_open_resume"])
+    }
+
+    @Test
     fun `null or non object falls back to the embedded default`() {
         assertEquals(AdsConfig.DEFAULT, AdsConfigParser.parse(null))
         assertEquals(AdsConfig.DEFAULT, AdsConfigParser.parse(JsonNull))

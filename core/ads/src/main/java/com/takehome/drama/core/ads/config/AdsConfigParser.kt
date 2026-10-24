@@ -38,8 +38,14 @@ object AdsConfigParser {
                 }
                 ?.toMap()
                 .orEmpty(),
+            intervalBetweenInterstitialSec = root["interval_between_interstitial"].asNonNegativeLongOrNull()
+                ?: AdsConfig.DEFAULT_INTERSTITIAL_INTERVAL_SEC,
         )
     }
+
+    /** Số nguyên ≥ 0, hoặc chuỗi số (Console hay gõ thành chuỗi). Số thực / âm / chữ → null. */
+    private fun JsonElement?.asNonNegativeLongOrNull(): Long? =
+        (this as? JsonPrimitive)?.contentOrNull?.toLongOrNull()?.takeIf { it >= 0 }
 
     /** `true`/`false` hoặc chuỗi `"true"`/`"false"` (Console hay gõ thành chuỗi). Còn lại → null. */
     private fun JsonElement?.asBooleanOrNull(): Boolean? {
