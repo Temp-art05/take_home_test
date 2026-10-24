@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -292,9 +294,11 @@ private fun EpisodePage(
         AppAsyncImage(model = viewState.posterUrl, contentDescription = null, modifier = Modifier.fillMaxSize())
     }
 
-    Box(Modifier.fillMaxSize()) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        // Video dọc trên khung ngang (xoay máy): vừa khung, viền đen hai bên — crop thì chỉ còn một dải giữa hình.
+        val videoScale = if (maxWidth > maxHeight) ContentScale.Fit else ContentScale.Crop
         if (slot != null && !page.isLocked) {
-            VideoSurface(slot = slot, modifier = Modifier.fillMaxSize(), shutter = poster)
+            VideoSurface(slot = slot, modifier = Modifier.fillMaxSize(), contentScale = videoScale, shutter = poster)
         } else {
             poster()
         }

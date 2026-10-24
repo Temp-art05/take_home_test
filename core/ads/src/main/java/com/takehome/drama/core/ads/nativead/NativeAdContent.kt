@@ -13,6 +13,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.github.dinhn.ads.core.AdsSdk
 import com.github.dinhn.ads.core.NativeAdPool
 import com.google.android.gms.ads.nativead.NativeAd
+import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
 import com.takehome.drama.domain.model.ads.AdPlacement
 import kotlinx.coroutines.flow.Flow
@@ -57,7 +58,7 @@ internal fun NativeAdContent(
         ctaBackground = MaterialTheme.colorScheme.onSurface.toArgb(),
         ctaText = MaterialTheme.colorScheme.background.toArgb(),
         badgeBackground = MaterialTheme.colorScheme.scrim.copy(alpha = BADGE_SCRIM_ALPHA).toArgb(),
-        badgeText = MaterialTheme.colorScheme.onSurface.toArgb(),
+        badgeText = AppTheme.colors.media.text.toArgb(),
         text1 = MaterialTheme.colorScheme.onSurface.toArgb(),
         text2 = MaterialTheme.colorScheme.onSurfaceVariant.toArgb(),
         headlineSp = AppTypography.bodySemibold.fontSize.value,

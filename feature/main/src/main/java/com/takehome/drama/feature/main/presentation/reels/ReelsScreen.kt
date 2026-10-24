@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -212,8 +214,10 @@ private fun ReelPageView(
     val art: @Composable () -> Unit = {
         KeyArt(posterUrl = page.posterUrl, seed = page.showId, modifier = Modifier.fillMaxSize())
     }
-    Box(Modifier.fillMaxSize()) {
-        if (slot != null) VideoSurface(slot = slot, modifier = Modifier.fillMaxSize(), shutter = art) else art()
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        // Video dọc trên khung ngang (xoay máy): vừa khung, viền đen hai bên — crop thì chỉ còn một dải giữa hình.
+        val videoScale = if (maxWidth > maxHeight) ContentScale.Fit else ContentScale.Crop
+        if (slot != null) VideoSurface(slot = slot, modifier = Modifier.fillMaxSize(), contentScale = videoScale, shutter = art) else art()
         Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().fillMaxHeight(0.46f).background(AppTheme.colors.scrimBottom))
         val ready = page.status == ClipStatus.Ready
         if (playback != null && ready) {

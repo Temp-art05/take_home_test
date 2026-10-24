@@ -2,6 +2,7 @@ package com.takehome.drama.feature.onboarding.presentation.taste
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.takehome.drama.core.ui.foundation.error.toUiError
 import com.takehome.drama.core.ui.foundation.vm.BaseViewModel
 import com.takehome.drama.domain.model.Tag
 import com.takehome.drama.domain.repository.UserPreferencesRepository
@@ -55,14 +56,17 @@ class TastePickerViewModel(
             is TastePickerIntent.ToggleMood -> toggleMood(intent.mood)
             is TastePickerIntent.ToggleTag -> update(selection.toggleTag(intent.tagId, options))
             TastePickerIntent.ExpandChips -> expand()
+            TastePickerIntent.Retry -> if (!currentState.isLoading) load()
             is TastePickerIntent.Continue -> finish(selection.tagIds(options), intent.sdkInt, intent.notificationsGranted)
             is TastePickerIntent.Skip -> finish(emptySet(), intent.sdkInt, intent.notificationsGranted)
         }
     }
 
     private fun load() {
+        updateState { copy(isLoading = true, error = null) }
         viewModelScope.launch {
-            val catalog = getCatalog().getOrNull()
+            val result = getCatalog()
+            val catalog = result.getOrNull()
             if (catalog != null) {
                 val saved = userPreferencesRepository.preferences.first().contentLanguage
                 language = resolveContentLanguage(saved, Locale.getDefault().language, catalog)
@@ -73,6 +77,7 @@ class TastePickerViewModel(
             updateState {
                 copy(
                     isLoading = false,
+                    error = result.exceptionOrNull()?.toUiError(),
                     moods = options.map { option ->
                         MoodItem(option.mood, option.tags.take(SUBTITLE_TAGS).map { it.label() })
                     },

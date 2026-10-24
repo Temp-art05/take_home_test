@@ -464,8 +464,9 @@ private fun EpisodesHeader(
             )
             if (episodeCount > 0) {
                 Text(
-                    text = stringResource(
-                        R.string.watch_episodes_summary,
+                    text = pluralStringResource(
+                        R.plurals.watch_episodes_summary,
+                        watchedCount,
                         pluralStringResource(R.plurals.watch_episode_count, episodeCount, episodeCount),
                         watchedCount,
                     ),

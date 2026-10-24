@@ -52,7 +52,11 @@
         <item quantity="many">%1$d eps.</item>
         <item quantity="other">%1$d eps.</item>
     </plurals>
-    <string name="watch_episodes_summary">%1$s · %2$d assistidos</string>
+    <plurals name="watch_episodes_summary">
+        <item quantity="one">%1$s · %2$d assistido</item>
+        <item quantity="many">%1$s · %2$d assistidos</item>
+        <item quantity="other">%1$s · %2$d assistidos</item>
+    </plurals>
 
     <!-- SCR-0304 Playback options -->
     <string name="watch_playback_options">Opções de reprodução</string>

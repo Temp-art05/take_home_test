@@ -54,7 +54,6 @@ Xem `README.md` cho cấu trúc, `docs/rules/` cho quy ước code.
 - [ ] Xoá luồng mẫu post feed theo mục "Xoá khi làm project thật" trong `docs/guides/sample-flow.md`
 - [ ] `:feature:main` → Home / Feature / Profile là màn mẫu, thay bằng màn thật
       (giữ `MainScreen` + `MainBottomNavBar`, sửa enum `MainTab`)
-- [ ] `:core:utils/res/values/colors.xml` → màu Toasty theo brand
 
 ## 8. Nên làm sớm
 

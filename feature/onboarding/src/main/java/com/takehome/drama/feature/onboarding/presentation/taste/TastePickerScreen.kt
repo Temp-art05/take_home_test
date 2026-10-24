@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.MaterialTheme
@@ -36,9 +37,14 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.takehome.drama.core.designsystem.component.InlineErrorState
 import com.takehome.drama.core.designsystem.ext.clickableNoRipple
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
+import com.takehome.drama.core.ui.foundation.error.ErrorKind
+import com.takehome.drama.core.ui.foundation.error.body
+import com.takehome.drama.core.ui.foundation.error.retryLabel
+import com.takehome.drama.core.ui.foundation.error.title
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.domain.usecase.onboarding.Mood
 import com.takehome.drama.feature.onboarding.R
@@ -88,6 +94,17 @@ private fun TastePickerContent(
         secondaryLabel = stringResource(R.string.onboarding_skip),
         onSecondary = onSkip,
     ) {
+        viewState.error?.let { error ->
+            InlineErrorState(
+                title = error.title(),
+                body = error.body(),
+                retryLabel = retryLabel(),
+                onRetry = { onIntent(TastePickerIntent.Retry) },
+                offline = error.kind == ErrorKind.Offline,
+                modifier = Modifier.fillMaxWidth().padding(top = 48.dp),
+            )
+            return@OnboardingScaffold
+        }
         Column {
             // Lưới 2×2 thẻ mood.
             viewState.moods.chunked(2).forEachIndexed { row, pair ->

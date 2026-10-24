@@ -42,42 +42,58 @@ fun BlankState(
     onAction: (() -> Unit)? = null,
 ) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(
+        BlankStateColumn(
+            glyph = glyph,
+            title = title,
+            body = body,
+            actionLabel = actionLabel,
+            onAction = onAction,
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
                 .padding(start = 40.dp, end = 40.dp, bottom = 80.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        )
+    }
+}
+
+@Composable
+private fun BlankStateColumn(
+    glyph: ImageVector,
+    title: String,
+    body: String,
+    actionLabel: String?,
+    onAction: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .background(MaterialTheme.colorScheme.surface, AppTheme.shapes.full)
+                .border(1.dp, MaterialTheme.colorScheme.outline, AppTheme.shapes.full),
+            contentAlignment = Alignment.Center,
         ) {
-            Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .background(MaterialTheme.colorScheme.surface, AppTheme.shapes.full)
-                    .border(1.dp, MaterialTheme.colorScheme.outline, AppTheme.shapes.full),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(glyph, contentDescription = null, tint = AppTheme.colors.text3, modifier = Modifier.size(30.dp))
-            }
-            Text(
-                text = title,
-                style = AppTypography.blankTitle,
-                color = MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Center,
+            Icon(glyph, contentDescription = null, tint = AppTheme.colors.text3, modifier = Modifier.size(30.dp))
+        }
+        Text(
+            text = title,
+            style = AppTypography.blankTitle,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = AppTheme.dimensions.s5),
+        )
+        Text(
+            text = body,
+            style = AppTypography.blankBody,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 9.dp),
+        )
+        if (actionLabel != null && onAction != null) {
+            GradientButton(
+                text = actionLabel,
+                onClick = onAction,
                 modifier = Modifier.padding(top = AppTheme.dimensions.s5),
             )
-            Text(
-                text = body,
-                style = AppTypography.blankBody,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 9.dp),
-            )
-            if (actionLabel != null && onAction != null) {
-                GradientButton(
-                    text = actionLabel,
-                    onClick = onAction,
-                    modifier = Modifier.padding(top = AppTheme.dimensions.s5),
-                )
-            }
         }
     }
 }
@@ -93,6 +109,29 @@ fun ErrorBlankState(
     modifier: Modifier = Modifier,
 ) {
     BlankState(
+        glyph = if (offline) AppIcons.WifiOff else AppIcons.Alert,
+        title = title,
+        body = body,
+        actionLabel = retryLabel,
+        onAction = onRetry,
+        modifier = modifier,
+    )
+}
+
+/**
+ * Như [ErrorBlankState] nhưng không chiếm cả màn, không tự cuộn — đặt trong vùng đã cuộn sẵn (vd. một bước
+ * onboarding: lồng `verticalScroll` vào nhau sẽ crash).
+ */
+@Composable
+fun InlineErrorState(
+    title: String,
+    body: String,
+    retryLabel: String,
+    onRetry: () -> Unit,
+    offline: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    BlankStateColumn(
         glyph = if (offline) AppIcons.WifiOff else AppIcons.Alert,
         title = title,
         body = body,

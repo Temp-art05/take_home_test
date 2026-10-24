@@ -22,13 +22,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // Lib ads của tác giả (lib-ads-android) phát hành qua GitHub Packages — token đọc ở gradle.properties.
+        // Lib ads của tác giả (lib-ads-android 1.1.1): bản build AAR + POM vendor vào repo. GitHub Packages luôn cần token,
+        // token để trong repo public bị GitHub thu hồi → clone sạch không build được. Nâng lib = chép bản mới vào đây.
         maven {
-            url = uri("https://maven.pkg.github.com/lurdsoft/lib-ads-android")
-            credentials {
-                username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
-                password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
-            }
+            url = uri(settingsDir.resolve("third_party/maven"))
             content { includeGroup("com.github.dinhn") }
         }
         // ads-admob kéo theo mediation adapter Pangle + Mintegral (như HomeMorph) — SDK của họ chỉ có ở repo riêng.

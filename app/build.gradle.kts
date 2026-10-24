@@ -20,7 +20,7 @@ android {
     defaultConfig {
         applicationId = "com.takehome.drama"
         versionCode = 1
-        versionName = "1.0.1"
+        versionName = "1.0.0"
     }
 
     androidResources {
@@ -60,6 +60,8 @@ android {
 
         create("prod") {
             dimension = "environment"
+            // Mở project rồi Run trong Studio là ra prodDebug: gọi đúng API của đề, poster thật (fixtures dev trỏ ảnh 404).
+            isDefault = true
             buildConfigField("boolean", "IS_DEV_FLAVOR", "false")
             buildConfigField("boolean", "USE_FIXTURES", "false")
             stringBuildConfig("BASE_URL", "https://flowdrama.luonluon.com/flowdrama/api/")

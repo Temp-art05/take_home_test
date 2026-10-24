@@ -62,11 +62,12 @@ internal fun EpisodePickerSheet(
             modifier = Modifier.weight(1f),
         )
         Text(
-            text = stringResource(
-                R.string.watch_episodes_summary,
-                pluralStringResource(R.plurals.watch_episode_count, cells.size, cells.size),
-                watchedCount,
-            ),
+            text = pluralStringResource(
+                        R.plurals.watch_episodes_summary,
+                        watchedCount,
+                        pluralStringResource(R.plurals.watch_episode_count, cells.size, cells.size),
+                        watchedCount,
+                    ),
             style = AppTypography.label,
             color = AppTheme.colors.text3,
         )

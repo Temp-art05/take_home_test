@@ -16,10 +16,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlowDrama">
 
-        <!-- AdMob: app id **test** của Google (README §2.3). Ad unit id nằm ở :core:ads/AdUnits.kt. -->
+        <!-- AdMob: app id **test** của Google (README §2.3). Ad unit id (test) nằm trong enum AdType của từng manager ở :core:ads (Interstitial/Native/RewardAdManager). -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544~3347511713" />
+        <!-- Ad unit test bật "native ad validator" của AdMob: popup nổi theo ô native và đè lên màn khác. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.flag.NATIVE_AD_DEBUGGER_ENABLED"
+            android:value="false" />
         <!-- SDK tự init/load ở thread nền thay vì main thread lúc app khởi động. -->
         <meta-data
             android:name="com.google.android.gms.ads.flag.OPTIMIZE_INITIALIZATION"

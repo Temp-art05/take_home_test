@@ -184,7 +184,9 @@ class ExoEpisodeFeedPlayer(
         }
 
         fun ensurePrepared() {
-            if (prepared || position == null) return
+            if (position == null) return
+            // Lỗi (vd. mất mạng giữa chừng) đưa player về IDLE: retry phải prepare() lại, không thì kẹt màn lỗi.
+            if (prepared && built?.playerError == null) return
             prepared = true
             exoPlayer.prepare()
         }

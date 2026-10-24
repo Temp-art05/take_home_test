@@ -178,7 +178,8 @@ class ShowDetailViewModel(
                             title = show.title.resolve(language, catalog.defaultLanguage),
                             tags = catalog.tagsOf(show)
                                 .filter { it.isCategory }
-                                .map { it.name.resolve(language, catalog.defaultLanguage) },
+                                // Cùng cách hiển thị tên tag như Home/Browse ("SweetRomance", "رومانسية_حلوة" → có dấu cách).
+                                .map { it.name.resolveTagLabel(language, catalog.defaultLanguage) },
                             synopsis = show.synopsis.resolve(language, catalog.defaultLanguage),
                         )
                     }

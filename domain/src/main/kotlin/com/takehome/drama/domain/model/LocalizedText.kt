@@ -40,5 +40,7 @@ value class LocalizedText(val values: Map<String, String>) {
 
 /** `en-US` / `en_US` → `en`. */
 fun String.languageSubtag(): String = substringBefore('-').substringBefore('_').lowercase()
+    // Java/Android trả mã cũ `in` cho tiếng Indonesia (`Locale.getLanguage()`), catalogue dùng `id`.
+    .let { if (it == "in") "id" else it }
 
 private val CAMEL_BOUNDARY = Regex("(?<=[a-z])(?=[A-Z])")

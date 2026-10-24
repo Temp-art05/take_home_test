@@ -34,12 +34,17 @@ class FakeFeedPlayer : EpisodeFeedPlayer {
     var released = false
     var position = 0L
 
+    private var current = -1
+
     override fun setPlaylist(items: List<FeedItem>) {
+        // Như player thật: URL của tập đang phát đổi → bản đã nạp bị giải phóng, vị trí về 0.
+        if (current >= 0 && items.getOrNull(current)?.url != this.items.getOrNull(current)?.url) position = 0
         this.items = items
     }
 
     override fun setCurrent(position: Int, startPositionMs: Long, playWhenReady: Boolean) {
         currents += position
+        current = position
         val url = items[position].url
         if (url == null) {
             _state.value = PlaybackState()

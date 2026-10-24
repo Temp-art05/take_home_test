@@ -26,8 +26,8 @@ Những gì luồng này minh hoạ:
 - **Phân trang** `Page<T>(items, hasMore)` — ViewModel không tự so `size >= PAGE_SIZE`.
 - **Remote + local cùng phục vụ một màn**: list từ API, trạng thái bookmark stream từ Room.
 - **Lỗi**: mất mạng → `DomainException.Network` → `R.string.error_network` → `ErrorState` (load lần đầu)
-  hoặc `Toasty.error` (load thêm / bookmark lỗi).
-- **Event một lần**: bookmark xong → `HomeSingleEvent.BookmarkToggled` → `Toasty.success`.
+  hoặc toast `AppToastHost` (load thêm / bookmark lỗi).
+- **Event một lần**: bookmark xong → `HomeSingleEvent.BookmarkToggled` → toast `AppToastHost`.
 - **Không reload khi đổi tab**: load ở `init` của ViewModel, ViewModel scope theo Main.
 
 ## Xoá khi làm project thật

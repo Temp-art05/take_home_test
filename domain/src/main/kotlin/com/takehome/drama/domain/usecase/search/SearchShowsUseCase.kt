@@ -38,7 +38,7 @@ class SearchShowsUseCase {
         // Chỉ gợi ý tag có show trong kết quả: tag merchandising rỗng (`newest`) hứa một nhóm không tồn tại.
         val usedTagIds = ranked.flatMapTo(HashSet()) { it.tagIds }
         val suggestions = (
-            matchingTags.filter { it.id in usedTagIds }.sortedBy { it.orderPriority }.map { it.name.resolve(language, catalog.defaultLanguage) } +
+            matchingTags.filter { it.id in usedTagIds }.sortedBy { it.orderPriority }.map { it.name.resolveTagLabel(language, catalog.defaultLanguage) } +
                 ranked.map { it.title.resolve(language, catalog.defaultLanguage) }
             )
             .filter { it.isNotBlank() }

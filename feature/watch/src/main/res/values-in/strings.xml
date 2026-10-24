@@ -42,7 +42,9 @@
     <plurals name="watch_episode_count">
         <item quantity="other">%1$d ep</item>
     </plurals>
-    <string name="watch_episodes_summary">%1$s · %2$d ditonton</string>
+    <plurals name="watch_episodes_summary">
+        <item quantity="other">%1$s · %2$d ditonton</item>
+    </plurals>
     <string name="watch_playback_options">Opsi pemutaran</string>
     <string name="watch_quality">Kualitas</string>
     <string name="watch_quality_auto">Otomatis</string>
