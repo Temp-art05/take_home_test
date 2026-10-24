@@ -14,6 +14,7 @@ import com.takehome.drama.core.navigation.core.applyDestination
 import com.takehome.drama.core.navigation.destination.Destination
 import com.takehome.drama.feature.main.navigation.HistoryScreenProvider
 import com.takehome.drama.feature.main.navigation.LanguageScreenProvider
+import com.takehome.drama.feature.main.navigation.LicensesScreenProvider
 import com.takehome.drama.feature.main.navigation.MainScreenProvider
 import com.takehome.drama.feature.main.navigation.SavedScreenProvider
 import com.takehome.drama.feature.main.navigation.SearchScreenProvider
@@ -76,6 +77,7 @@ fun AppNavGraph(
             applyDestination(HistoryScreenProvider(watchRoutes = AppWatchRoutes))
             applyDestination(SavedScreenProvider(watchRoutes = AppWatchRoutes))
             applyDestination(LanguageScreenProvider())
+            applyDestination(LicensesScreenProvider())
 
             // Xem phim — SCR-0301…0304
             applyDestination(ShowDetailScreenProvider())

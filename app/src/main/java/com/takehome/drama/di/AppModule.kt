@@ -16,4 +16,5 @@ val appModule = module {
     single(AppScope) { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
     // Một network callback cho cả process (rule "autoplay preview Wi-Fi only" của Browse).
     single<ConnectivityMonitor> { AndroidConnectivityMonitor(androidContext()) }
+    single { ThemeHolder(get(), get(AppScope)) }
 }

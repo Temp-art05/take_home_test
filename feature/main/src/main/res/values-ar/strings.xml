@@ -91,12 +91,68 @@
     <string name="library_history">سجل المشاهدة</string>
     <string name="library_saved">المحفوظات</string>
 
-    <string name="skeleton_open_show">فتح المسلسل %1$s</string>
-    <string name="skeleton_play_show">تشغيل المسلسل %1$s</string>
-    <string name="skeleton_open_history">سجل المشاهدة</string>
-    <string name="skeleton_open_saved">المحفوظات</string>
-    <string name="skeleton_open_language">لغة التطبيق</string>
-
     <string name="language_title">اللغة</string>
     <string name="language_system">مطابقة لغة الجهاز</string>
+
+    <!-- Phase 6: Library, History, Saved, Settings, Language -->
+    <string name="search_no_results_body">جرّب اسم مسلسل أو نوعًا - والتيار يحمل الباقي.</string>
+    <string name="library_watched">تمت مشاهدتها</string>
+    <string name="library_history_row">السجل</string>
+    <string name="library_recent">الأخيرة</string>
+    <string name="library_see_all">عرض الكل</string>
+    <string name="history_tab_watching">قيد المشاهدة</string>
+    <string name="history_tab_finished">مكتملة</string>
+    <string name="common_edit">تعديل</string>
+    <string name="common_done">تم</string>
+    <string name="history_meta">الحلقة %1$d / %2$d · %3$s</string>
+    <string name="history_today">اليوم</string>
+    <string name="history_yesterday">أمس</string>
+    <string name="history_last_week">الأسبوع الماضي</string>
+    <string name="common_more_cd">خيارات أخرى لـ%1$s</string>
+    <string name="common_remove_cd">إزالة %1$s</string>
+    <string name="history_sheet_details">تفاصيل المسلسل</string>
+    <string name="history_sheet_remove">إزالة من السجل</string>
+    <string name="history_removed">تمت الإزالة من السجل</string>
+    <string name="history_empty_watching_title">لا شيء في التدفق بعد</string>
+    <string name="history_empty_watching_body">ابدأ حلقة وستنتظرك هنا عندما تعود.</string>
+    <string name="history_empty_finished_title">لا توجد مسلسلات مكتملة بعد</string>
+    <string name="history_empty_finished_body">المسلسلات التي تشاهدها حتى الحلقة الأخيرة تظهر هنا.</string>
+    <string name="common_find_next">اعثر على تدفقك التالي</string>
+    <string name="saved_filter_all">الكل · %1$d</string>
+    <string name="saved_filter_airing">قيد العرض</string>
+    <string name="saved_filter_complete">مكتمل</string>
+    <string name="saved_sheet_remove">إزالة من المحفوظات</string>
+    <string name="saved_empty_title">قائمة المشاهدة فارغة</string>
+    <string name="saved_empty_body">وجدت شيئًا تريد العودة إليه؟ اضغط ＋ وسينتظرك هنا، بعيدًا عن التيار.</string>
+    <string name="saved_filter_empty_airing">لا توجد مسلسلات قيد العرض محفوظة</string>
+    <string name="saved_filter_empty_complete">لا توجد مسلسلات مكتملة محفوظة</string>
+    <string name="settings_group_language">اللغة</string>
+    <string name="settings_app_language">لغة التطبيق</string>
+    <string name="settings_group_appearance">المظهر</string>
+    <string name="settings_theme_dark">داكن</string>
+    <string name="settings_theme_light">فاتح</string>
+    <string name="settings_group_policies">السياسات</string>
+    <string name="settings_terms">شروط الاستخدام</string>
+    <string name="settings_privacy">سياسة الخصوصية</string>
+    <string name="settings_licenses">تراخيص المصادر المفتوحة</string>
+    <string name="settings_policy_unavailable">متاح عند الإطلاق</string>
+    <string name="language_description">تُطبَّق على واجهة التطبيق بالكامل. تسري التغييرات فورًا - دون الحاجة لإعادة التشغيل.</string>
+    <string name="language_current">حاليًا %1$s</string>
+    <string name="language_choose_manually">اختيار يدوي</string>
+    <plurals name="history_min_left">
+        <item quantity="zero">متبقٍ %1$d دقيقة</item>
+        <item quantity="one">متبقٍ دقيقة واحدة</item>
+        <item quantity="two">متبقٍ دقيقتان</item>
+        <item quantity="few">متبقٍ %1$d دقائق</item>
+        <item quantity="many">متبقٍ %1$d دقيقة</item>
+        <item quantity="other">متبقٍ %1$d دقيقة</item>
+    </plurals>
+    <plurals name="history_days_ago">
+        <item quantity="zero">منذ %1$d يوم</item>
+        <item quantity="one">منذ يوم واحد</item>
+        <item quantity="two">منذ يومين</item>
+        <item quantity="few">منذ %1$d أيام</item>
+        <item quantity="many">منذ %1$d يومًا</item>
+        <item quantity="other">منذ %1$d يوم</item>
+    </plurals>
 </resources>

@@ -44,3 +44,7 @@ fun testEpisodes(showId: String) = ShowEpisodes(
 )
 
 fun clipUrl(showId: String) = "https://e/$showId/1.mp4"
+
+class FakeEpochClock(var millis: Long = 1_800_000_000_000L) : com.takehome.drama.domain.usecase.history.EpochClock {
+    override fun nowMillis(): Long = millis
+}

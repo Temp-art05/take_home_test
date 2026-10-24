@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -68,10 +69,11 @@ import com.takehome.drama.core.designsystem.component.AppAsyncImage
 import com.takehome.drama.core.designsystem.component.AppBottomSheet
 import com.takehome.drama.core.designsystem.component.AppToastHost
 import com.takehome.drama.core.designsystem.component.ChoiceChip
-import com.takehome.drama.core.designsystem.component.ErrorState
+import com.takehome.drama.core.designsystem.component.ErrorBlankState
+import com.takehome.drama.core.designsystem.component.SkeletonBlock
+import com.takehome.drama.core.designsystem.component.SkeletonHost
 import com.takehome.drama.core.designsystem.component.GhostIconButton
 import com.takehome.drama.core.designsystem.component.GradientButton
-import com.takehome.drama.core.designsystem.component.LoadingState
 import com.takehome.drama.core.designsystem.component.OutlinePillButton
 import com.takehome.drama.core.designsystem.component.rememberToastState
 import com.takehome.drama.core.designsystem.ext.applyIf
@@ -80,9 +82,14 @@ import com.takehome.drama.core.designsystem.theme.AppTypography
 import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.core.ui.foundation.format.formatCompactCount
+import com.takehome.drama.core.ui.foundation.format.formatCount
 import com.takehome.drama.domain.usecase.watch.EpisodeCell
 import com.takehome.drama.domain.usecase.watch.EpisodeCellState
 import com.takehome.drama.domain.usecase.watch.EpisodeRange
+import com.takehome.drama.core.ui.foundation.error.ErrorKind
+import com.takehome.drama.core.ui.foundation.error.body
+import com.takehome.drama.core.ui.foundation.error.retryLabel
+import com.takehome.drama.core.ui.foundation.error.title
 import com.takehome.drama.feature.watch.R
 import com.takehome.drama.feature.watch.navigation.PlayerScreenProvider
 import com.takehome.drama.feature.watch.presentation.common.EpisodeGridCell
@@ -170,14 +177,17 @@ private fun ShowDetailContent(
     onIntent: (ShowDetailIntent) -> Unit,
 ) {
     when {
-        viewState.isLoading -> LoadingState()
-        viewState.errorRes != null -> Column(Modifier.fillMaxSize()) {
+        viewState.isLoading -> DetailSkeleton(onBack = { onIntent(ShowDetailIntent.BackClick) })
+        viewState.error != null -> Column(Modifier.fillMaxSize()) {
             BackButton(onClick = { onIntent(ShowDetailIntent.BackClick) }, modifier = Modifier.statusBarsPadding())
-            val notFound = viewState.errorRes == R.string.watch_show_not_found
-            ErrorState(
-                message = stringResource(viewState.errorRes),
-                retryLabel = stringResource(if (notFound) R.string.watch_back else R.string.watch_retry),
+            // Show không còn: thử lại vô ích — nút đưa về màn trước.
+            val notFound = viewState.error.kind == ErrorKind.NotFound
+            ErrorBlankState(
+                title = viewState.error.title(),
+                body = viewState.error.body(),
+                retryLabel = if (notFound) stringResource(R.string.watch_back) else retryLabel(),
                 onRetry = { onIntent(if (notFound) ShowDetailIntent.BackClick else ShowDetailIntent.RetryClick) },
+                offline = viewState.error.kind == ErrorKind.Offline,
             )
         }
         else -> DetailGrid(viewState, gridState, onIntent)
@@ -239,7 +249,7 @@ private fun DetailGrid(
                 }
             }
         } else if (viewState.isEpisodesLoading) {
-            fullSpan { LoadingState(Modifier.height(120.dp)) }
+            fullSpan { SkeletonHost { EpisodesSkeleton() } }
         } else {
             items(viewState.visibleCells, key = { it.index }) { cell ->
                 EpisodeGridCell(cell = cell, onClick = { onIntent(ShowDetailIntent.EpisodeClick(it)) })
@@ -342,7 +352,7 @@ private fun Stats(viewState: ShowDetailViewState) {
         modifier = Modifier.padding(top = 14.dp),
         horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.s6),
     ) {
-        Stat(value = viewState.episodeTotal.toString(), label = stringResource(R.string.watch_stat_episodes))
+        Stat(value = formatCount(viewState.episodeTotal.toLong(), locale), label = stringResource(R.string.watch_stat_episodes))
         Stat(value = formatCompactCount(viewState.viewCount, locale), label = stringResource(R.string.watch_stat_views))
     }
 }
@@ -506,6 +516,39 @@ private fun ShowDetailContentPreview() {
                 gridState = rememberLazyGridState(),
                 onIntent = {},
             )
+        }
+    }
+}
+
+/** SCR-0601 của Detail: key art, tiêu đề, meta, CTA, lưới tập — đúng chỗ dữ liệu sắp hiện. */
+@Composable
+private fun DetailSkeleton(onBack: () -> Unit) {
+    val dimensions = AppTheme.dimensions
+    SkeletonHost {
+        Box(Modifier.fillMaxSize()) {
+            Column {
+                SkeletonBlock(Modifier.fillMaxWidth().height(300.dp), RectangleShape)
+                Column(Modifier.padding(horizontal = dimensions.screenGutter)) {
+                    SkeletonBlock(Modifier.padding(top = dimensions.s4).fillMaxWidth(0.7f).height(22.dp))
+                    SkeletonBlock(Modifier.padding(top = 10.dp).fillMaxWidth(0.45f).height(12.dp))
+                    SkeletonBlock(Modifier.padding(top = dimensions.s4).fillMaxWidth().height(36.dp))
+                    SkeletonBlock(Modifier.padding(top = dimensions.s4).fillMaxWidth().height(dimensions.buttonHeight), AppTheme.shapes.full)
+                    EpisodesSkeleton(Modifier.padding(top = dimensions.s5))
+                }
+            }
+            BackButton(onClick = onBack, modifier = Modifier.statusBarsPadding())
+        }
+    }
+}
+
+/** Không tự bọc [SkeletonHost] — nằm trong host của chỗ gọi để cùng pha shimmer với khối xung quanh. */
+@Composable
+private fun EpisodesSkeleton(modifier: Modifier = Modifier) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(CellGap)) {
+        repeat(2) {
+            Row(horizontalArrangement = Arrangement.spacedBy(CellGap)) {
+                repeat(GRID_COLUMNS) { SkeletonBlock(Modifier.weight(1f).height(AppTheme.dimensions.episodeCell)) }
+            }
         }
     }
 }

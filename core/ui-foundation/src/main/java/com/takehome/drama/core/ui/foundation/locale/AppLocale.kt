@@ -59,6 +59,18 @@ enum class AppLocale(val tag: String?) {
             if (needsApply(target, current(), displayed)) apply(target)
         }
 
+        /**
+         * Áp [target] có đổi **ngôn ngữ** đang hiển thị không ([System] → ngôn ngữ máy [device]). Không đổi thì hệ
+         * thống có thể không dựng lại Activity (vd máy `en`, đang chọn tay English → "Match device language"), nên
+         * màn 0502 không được chờ lần dựng lại đó mới mở khoá tap.
+         */
+        fun changesDisplayedLanguage(target: AppLocale, displayed: Locale, device: Locale): Boolean {
+            val after = target.tag?.let(Locale::forLanguageTag) ?: device
+            return after.normalizedLanguage != displayed.normalizedLanguage
+        }
+
+        private val Locale.normalizedLanguage: String get() = language.let { if (it == "in") "id" else it }
+
         fun apply(locale: AppLocale) {
             AppCompatDelegate.setApplicationLocales(
                 if (locale.tag == null) {

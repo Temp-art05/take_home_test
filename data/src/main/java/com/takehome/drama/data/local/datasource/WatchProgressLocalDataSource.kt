@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.Flow
 interface WatchProgressLocalDataSource {
     suspend fun upsert(entity: WatchProgressEntity)
 
+    suspend fun deleteForShow(showId: String)
+
     suspend fun get(showId: String, episodeIndex: Int): WatchProgressEntity?
 
     suspend fun latestForShow(showId: String): WatchProgressEntity?
@@ -20,6 +22,8 @@ class WatchProgressLocalDataSourceImpl(
     private val dao: WatchProgressDao,
 ) : WatchProgressLocalDataSource {
     override suspend fun upsert(entity: WatchProgressEntity) = dao.upsert(entity)
+
+    override suspend fun deleteForShow(showId: String) = dao.deleteForShow(showId)
 
     override suspend fun get(showId: String, episodeIndex: Int) = dao.get(showId, episodeIndex)
 

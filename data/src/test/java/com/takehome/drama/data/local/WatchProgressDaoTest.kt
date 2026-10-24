@@ -68,4 +68,28 @@ class WatchProgressDaoTest {
             assertEquals(listOf(1, 3), awaitItem().map { it.episodeIndex })
         }
     }
+
+    @Test
+    fun `delete for show removes every episode of that show only`() = runTest {
+        dao.upsert(row("a", 0, 1, updatedAt = 1))
+        dao.upsert(row("a", 4, 1, updatedAt = 2))
+        dao.upsert(row("b", 0, 1, updatedAt = 3))
+
+        dao.deleteForShow("a")
+
+        assertEquals(null, dao.latestForShow("a"))
+        assertEquals(0, dao.get("b", 0)?.episodeIndex)
+    }
+
+    @Test
+    fun `history stream re-emits after a show is removed`() = runTest {
+        dao.upsert(row("a", 0, 1, updatedAt = 1))
+        dao.upsert(row("b", 0, 1, updatedAt = 2))
+
+        dao.observeLatestPerShow().test {
+            assertEquals(listOf("b", "a"), awaitItem().map { it.showId })
+            dao.deleteForShow("b")
+            assertEquals(listOf("a"), awaitItem().map { it.showId })
+        }
+    }
 }

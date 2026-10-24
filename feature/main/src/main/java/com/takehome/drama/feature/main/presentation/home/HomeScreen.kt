@@ -43,7 +43,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.takehome.drama.core.ads.nativead.NativeAdManager
-import com.takehome.drama.core.designsystem.component.ErrorState
+import com.takehome.drama.core.designsystem.component.SkeletonBlock
+import com.takehome.drama.core.designsystem.component.SkeletonHost
 import com.takehome.drama.core.designsystem.component.KeyArt
 import com.takehome.drama.core.designsystem.component.Wordmark
 import com.takehome.drama.core.designsystem.icon.AppIcons
@@ -59,6 +60,7 @@ import com.takehome.drama.domain.usecase.discovery.ClockTime
 import com.takehome.drama.domain.usecase.discovery.Daypart
 import com.takehome.drama.domain.usecase.discovery.opensAt
 import com.takehome.drama.feature.main.R
+import com.takehome.drama.feature.main.presentation.common.UiErrorState
 import com.takehome.drama.feature.main.navigation.SearchScreenProvider
 import com.takehome.drama.feature.main.presentation.common.ShowCard
 import com.takehome.drama.feature.main.presentation.common.alsoFlowingRes
@@ -112,11 +114,7 @@ private fun HomeContent(
     ) {
         HomeAppBar(onSearch = { onIntent(HomeIntent.OpenSearch) }, onBell = { onIntent(HomeIntent.OpenBell) })
         when {
-            viewState.errorRes != null -> ErrorState(
-                message = stringResource(viewState.errorRes),
-                retryLabel = stringResource(R.string.common_retry),
-                onRetry = { onIntent(HomeIntent.Retry) },
-            )
+            viewState.error != null -> UiErrorState(error = viewState.error, onRetry = { onIntent(HomeIntent.Retry) })
             else -> HomeFeedList(viewState, onIntent, nativeAd)
         }
     }
@@ -407,18 +405,28 @@ private fun ContinueCardView(card: ContinueCard, onClick: () -> Unit) {
     }
 }
 
-/** Khung tải theo đúng bố cục (0601 làm kỹ ở Phase 6). */
+/**
+ * SCR-0601: khung giữ đúng bố cục Home sắp hiện (hero, 2 thẻ khung giờ, tiêu đề rail, 3 poster) nên dữ liệu
+ * về không làm gì nhảy. Shimmer chung pha, tắt khi Reduce Motion ([SkeletonHost]).
+ */
 @Composable
 private fun HomeSkeleton() {
-    val surface = MaterialTheme.colorScheme.surface
-    Column(Modifier.padding(horizontal = AppTheme.dimensions.s4)) {
-        Box(Modifier.padding(top = AppTheme.dimensions.s3).fillMaxWidth().height(AppTheme.dimensions.homeHero).background(surface, AppTheme.shapes.hero))
-        Row(Modifier.padding(top = AppTheme.dimensions.s3), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-            repeat(2) { Box(Modifier.weight(1f).height(64.dp).background(surface, AppTheme.shapes.card)) }
-        }
-        Row(Modifier.padding(top = 42.dp), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-            repeat(3) {
-                Box(Modifier.width(AppTheme.dimensions.railPosterWidth).height(AppTheme.dimensions.railPosterHeight).background(surface, AppTheme.shapes.posterRail))
+    val dimensions = AppTheme.dimensions
+    SkeletonHost {
+        Column(Modifier.padding(horizontal = dimensions.s4)) {
+            SkeletonBlock(Modifier.padding(top = dimensions.s3).fillMaxWidth().height(dimensions.homeHero), AppTheme.shapes.hero)
+            Row(Modifier.padding(top = dimensions.s3), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                repeat(2) { SkeletonBlock(Modifier.weight(1f).height(64.dp), AppTheme.shapes.card) }
+            }
+            SkeletonBlock(Modifier.padding(top = dimensions.s5).width(120.dp).height(19.dp))
+            Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                repeat(3) {
+                    Column(Modifier.width(dimensions.railPosterWidth)) {
+                        SkeletonBlock(Modifier.fillMaxWidth().height(dimensions.railPosterHeight), AppTheme.shapes.posterRail)
+                        SkeletonBlock(Modifier.padding(top = 9.dp).fillMaxWidth(0.8f).height(12.dp))
+                        SkeletonBlock(Modifier.padding(top = 6.dp).fillMaxWidth(0.55f).height(10.dp))
+                    }
+                }
             }
         }
     }

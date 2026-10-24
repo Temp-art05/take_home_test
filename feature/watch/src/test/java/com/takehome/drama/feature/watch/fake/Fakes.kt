@@ -51,6 +51,11 @@ class FakeWatchProgressRepository : WatchProgressRepository {
         return Result.success(Unit)
     }
 
+    override suspend fun removeShow(showId: String): Result<Unit> {
+        rows.update { list -> list.filterNot { it.showId == showId } }
+        return Result.success(Unit)
+    }
+
     override suspend fun get(showId: String, episodeIndex: Int): WatchProgress? {
         getGates[episodeIndex]?.await()
         return rows.value.firstOrNull { it.showId == showId && it.episodeIndex == episodeIndex }

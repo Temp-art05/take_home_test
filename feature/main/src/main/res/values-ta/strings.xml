@@ -83,12 +83,60 @@
     <string name="library_history">பார்த்த வரலாறு</string>
     <string name="library_saved">சேமித்தவை</string>
 
-    <string name="skeleton_open_show">%1$s ஷோவைத் திற</string>
-    <string name="skeleton_play_show">%1$s ஷோவை இயக்கு</string>
-    <string name="skeleton_open_history">பார்த்த வரலாறு</string>
-    <string name="skeleton_open_saved">சேமித்தவை</string>
-    <string name="skeleton_open_language">ஆப் மொழி</string>
-
     <string name="language_title">மொழி</string>
     <string name="language_system">சாதன மொழியைப் பின்பற்று</string>
+
+    <!-- Phase 6: Library, History, Saved, Settings, Language -->
+    <string name="search_no_results_body">ஒரு தொடரின் பெயர் அல்லது வகையை முயலுங்கள் - மீதியை ஓட்டம் பார்த்துக்கொள்ளும்.</string>
+    <string name="library_watched">பார்த்தவை</string>
+    <string name="library_history_row">வரலாறு</string>
+    <string name="library_recent">சமீபத்தியவை</string>
+    <string name="library_see_all">அனைத்தும்</string>
+    <string name="history_tab_watching">பார்த்துக்கொண்டிருப்பவை</string>
+    <string name="history_tab_finished">முடிந்தவை</string>
+    <string name="common_edit">திருத்து</string>
+    <string name="common_done">முடிந்தது</string>
+    <string name="history_meta">எபி. %1$d / %2$d · %3$s</string>
+    <string name="history_today">இன்று</string>
+    <string name="history_yesterday">நேற்று</string>
+    <string name="history_last_week">கடந்த வாரம்</string>
+    <string name="common_more_cd">%1$s க்கான மேலும் விருப்பங்கள்</string>
+    <string name="common_remove_cd">%1$s ஐ நீக்கு</string>
+    <string name="history_sheet_details">தொடர் விவரங்கள்</string>
+    <string name="history_sheet_remove">வரலாற்றிலிருந்து நீக்கு</string>
+    <string name="history_removed">வரலாற்றிலிருந்து நீக்கப்பட்டது</string>
+    <string name="history_empty_watching_title">ஓட்டத்தில் இன்னும் எதுவும் இல்லை</string>
+    <string name="history_empty_watching_body">ஒரு எபிசோடைத் தொடங்குங்கள் - நீங்கள் திரும்பும்போது அது இங்கேயே காத்திருக்கும்.</string>
+    <string name="history_empty_finished_title">இன்னும் முடிந்த தொடர்கள் இல்லை</string>
+    <string name="history_empty_finished_body">கடைசி எபிசோடு வரை பார்த்த தொடர்கள் இங்கே வரும்.</string>
+    <string name="common_find_next">உங்கள் அடுத்த ஓட்டத்தைக் கண்டறியுங்கள்</string>
+    <string name="saved_filter_all">அனைத்தும் · %1$d</string>
+    <string name="saved_filter_airing">ஒளிபரப்பில்</string>
+    <string name="saved_filter_complete">முடிந்தவை</string>
+    <string name="saved_sheet_remove">சேமித்தவற்றிலிருந்து நீக்கு</string>
+    <string name="saved_empty_title">உங்கள் பார்வைப் பட்டியல் காலியாக உள்ளது</string>
+    <string name="saved_empty_body">மீண்டும் பார்க்க விரும்பும் ஒன்றைக் கண்டீர்களா? ＋ ஐத் தட்டுங்கள், அது ஓட்டத்திற்கு வெளியே இங்கேயே காத்திருக்கும்.</string>
+    <string name="saved_filter_empty_airing">ஒளிபரப்பில் உள்ள தொடர் எதுவும் சேமிக்கப்படவில்லை</string>
+    <string name="saved_filter_empty_complete">முடிந்த தொடர் எதுவும் சேமிக்கப்படவில்லை</string>
+    <string name="settings_group_language">மொழி</string>
+    <string name="settings_app_language">ஆப் மொழி</string>
+    <string name="settings_group_appearance">தோற்றம்</string>
+    <string name="settings_theme_dark">டார்க்</string>
+    <string name="settings_theme_light">லைட்</string>
+    <string name="settings_group_policies">கொள்கைகள்</string>
+    <string name="settings_terms">பயன்பாட்டு விதிமுறைகள்</string>
+    <string name="settings_privacy">தனியுரிமைக் கொள்கை</string>
+    <string name="settings_licenses">ஓப்பன் சோர்ஸ் உரிமங்கள்</string>
+    <string name="settings_policy_unavailable">வெளியீட்டின்போது கிடைக்கும்</string>
+    <string name="language_description">முழு ஆப் இடைமுகத்துக்கும் பொருந்தும். மாற்றங்கள் உடனே அமலுக்கு வரும் - மறுதொடக்கம் தேவையில்லை.</string>
+    <string name="language_current">தற்போது %1$s</string>
+    <string name="language_choose_manually">நீங்களே தேர்வுசெய்யுங்கள்</string>
+    <plurals name="history_min_left">
+        <item quantity="one">%1$d நிமிடம் மீதம்</item>
+        <item quantity="other">%1$d நிமிடங்கள் மீதம்</item>
+    </plurals>
+    <plurals name="history_days_ago">
+        <item quantity="one">%1$d நாள் முன்பு</item>
+        <item quantity="other">%1$d நாட்களுக்கு முன்பு</item>
+    </plurals>
 </resources>

@@ -31,7 +31,7 @@ fi
 mkdir -p "$(dirname "$OUT")"
 "$ADB" logcat -c
 "$ADB" shell am start -S -W -n "$PKG/.MainActivity" \
-  --es debug_screen "$SCR" --es show_id "$SHOW_ID" --ei episode_index "$EP_INDEX" >/dev/null
+  --es debug_screen "$SCR" --es show_id "$SHOW_ID" --ei episode_index "$EP_INDEX" ${EXTRA_ARGS:-} >/dev/null
 sleep "$WAIT_SEC"
 
 # Tìm node theo text/content-desc trong uiautomator dump → in "x y" của tâm bounds.

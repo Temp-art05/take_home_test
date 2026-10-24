@@ -52,6 +52,7 @@
     <string name="search_genres">Genres</string>
     <string name="search_popular">Popular now</string>
     <string name="search_no_results">Nothing in the flow for “%1$s”</string>
+    <string name="search_no_results_body">Try a show title or a genre - the current carries the rest.</string>
 
     <!-- SCR-0202 Browse -->
     <string name="browse_chip_all">All</string>
@@ -80,17 +81,69 @@
     <string name="reels_error_playback">Can\'t play — check your connection.</string>
     <string name="reels_unavailable">This show has no free episode to preview.</string>
 
-    <string name="library_history">Watch history</string>
-    <string name="library_saved">Saved</string>
+    <!-- SCR-0401 Library -->
+    <string name="library_watched">Watched</string>
+    <string name="library_history_row">History</string>
+    <string name="library_recent">Recent</string>
+    <string name="library_see_all">See all</string>
 
-    <string name="skeleton_open_show">Open show %1$s</string>
-    <string name="skeleton_play_show">Play show %1$s</string>
-    <string name="skeleton_open_history">Watch history</string>
-    <string name="skeleton_open_saved">Saved</string>
-    <string name="skeleton_open_language">App language</string>
+    <!-- SCR-0402 Watch history -->
+    <string name="library_history">Watch history</string>
+    <string name="history_tab_watching">Watching</string>
+    <string name="history_tab_finished">Finished</string>
+    <string name="common_edit">Edit</string>
+    <string name="common_done">Done</string>
+    <string name="history_meta">Ep. %1$d / %2$d · %3$s</string>
+    <plurals name="history_min_left">
+        <item quantity="one">%1$d min left</item>
+        <item quantity="other">%1$d min left</item>
+    </plurals>
+    <string name="history_today">today</string>
+    <string name="history_yesterday">yesterday</string>
+    <plurals name="history_days_ago">
+        <item quantity="one">%1$d day ago</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
+    <string name="history_last_week">last week</string>
+    <string name="common_more_cd">More options for %1$s</string>
+    <string name="common_remove_cd">Remove %1$s</string>
+    <string name="history_sheet_details">Show details</string>
+    <string name="history_sheet_remove">Remove from history</string>
+    <string name="history_removed">Removed from history</string>
+    <string name="history_empty_watching_title">Nothing in the flow yet</string>
+    <string name="history_empty_watching_body">Start an episode and it\'ll be waiting right here when you drift back.</string>
+    <string name="history_empty_finished_title">No finished shows yet</string>
+    <string name="history_empty_finished_body">Shows you stream to the final episode land here.</string>
+    <string name="common_find_next">Find your next flow</string>
+
+    <!-- SCR-0403 Saved + SCR-0602 -->
+    <string name="library_saved">Saved</string>
+    <string name="saved_filter_all">All · %1$d</string>
+    <string name="saved_filter_airing">Airing</string>
+    <string name="saved_filter_complete">Complete</string>
+    <string name="saved_sheet_remove">Remove from Saved</string>
+    <string name="saved_empty_title">Your watchlist is empty</string>
+    <string name="saved_empty_body">Found something you\'ll want back? Tap ＋ and it\'ll wait right here, out of the current.</string>
+    <string name="saved_filter_empty_airing">No airing shows saved</string>
+    <string name="saved_filter_empty_complete">No complete shows saved</string>
+
+    <!-- SCR-0501 Settings -->
+    <string name="settings_group_language">Language</string>
+    <string name="settings_app_language">App language</string>
+    <string name="settings_group_appearance">Appearance</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_group_policies">Policies</string>
+    <string name="settings_terms">Terms of Use</string>
+    <string name="settings_privacy">Privacy Policy</string>
+    <string name="settings_licenses">Open-source licenses</string>
+    <string name="settings_policy_unavailable">Available at launch</string>
     <!-- Dòng version cuối Settings (SCR-0501): tên thương hiệu + mã, không dịch. -->
     <string name="settings_version" translatable="false">FlowDrama v%1$s (%2$d)</string>
 
     <string name="language_title">Language</string>
     <string name="language_system">Match device language</string>
+    <string name="language_description">Applies to the entire app interface. Changes take effect immediately - no restart needed.</string>
+    <string name="language_current">Currently %1$s</string>
+    <string name="language_choose_manually">Choose manually</string>
 </resources>

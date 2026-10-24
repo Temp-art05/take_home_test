@@ -83,12 +83,60 @@
     <string name="library_history">देखने का इतिहास</string>
     <string name="library_saved">सेव किए गए</string>
 
-    <string name="skeleton_open_show">शो %1$s खोलें</string>
-    <string name="skeleton_play_show">शो %1$s चलाएँ</string>
-    <string name="skeleton_open_history">देखने का इतिहास</string>
-    <string name="skeleton_open_saved">सेव किए गए</string>
-    <string name="skeleton_open_language">ऐप की भाषा</string>
-
     <string name="language_title">भाषा</string>
     <string name="language_system">डिवाइस की भाषा अपनाएँ</string>
+
+    <!-- Phase 6: Library, History, Saved, Settings, Language -->
+    <string name="search_no_results_body">कोई शो का नाम या जॉनर आज़माएँ - बाकी धारा संभाल लेगी।</string>
+    <string name="library_watched">देखे गए</string>
+    <string name="library_history_row">इतिहास</string>
+    <string name="library_recent">हाल के</string>
+    <string name="library_see_all">सभी देखें</string>
+    <string name="history_tab_watching">देख रहे हैं</string>
+    <string name="history_tab_finished">पूरे हुए</string>
+    <string name="common_edit">बदलें</string>
+    <string name="common_done">हो गया</string>
+    <string name="history_meta">एपि. %1$d / %2$d · %3$s</string>
+    <string name="history_today">आज</string>
+    <string name="history_yesterday">कल</string>
+    <string name="history_last_week">पिछले हफ़्ते</string>
+    <string name="common_more_cd">%1$s के और विकल्प</string>
+    <string name="common_remove_cd">%1$s हटाएँ</string>
+    <string name="history_sheet_details">शो का विवरण</string>
+    <string name="history_sheet_remove">इतिहास से हटाएँ</string>
+    <string name="history_removed">इतिहास से हटाया गया</string>
+    <string name="history_empty_watching_title">धारा में अभी कुछ नहीं</string>
+    <string name="history_empty_watching_body">कोई एपिसोड शुरू करें - लौटने पर वह यहीं आपका इंतज़ार करेगा।</string>
+    <string name="history_empty_finished_title">अभी कोई शो पूरा नहीं हुआ</string>
+    <string name="history_empty_finished_body">जो शो आप आख़िरी एपिसोड तक देखते हैं, वे यहाँ आते हैं।</string>
+    <string name="common_find_next">अपना अगला फ़्लो खोजें</string>
+    <string name="saved_filter_all">सभी · %1$d</string>
+    <string name="saved_filter_airing">चल रहे</string>
+    <string name="saved_filter_complete">पूरे</string>
+    <string name="saved_sheet_remove">सेव से हटाएँ</string>
+    <string name="saved_empty_title">आपकी वॉचलिस्ट खाली है</string>
+    <string name="saved_empty_body">कुछ ऐसा मिला जिसे फिर देखना चाहें? ＋ दबाएँ, वह यहीं धारा से अलग आपका इंतज़ार करेगा।</string>
+    <string name="saved_filter_empty_airing">कोई चल रहा शो सेव नहीं है</string>
+    <string name="saved_filter_empty_complete">कोई पूरा शो सेव नहीं है</string>
+    <string name="settings_group_language">भाषा</string>
+    <string name="settings_app_language">ऐप की भाषा</string>
+    <string name="settings_group_appearance">दिखावट</string>
+    <string name="settings_theme_dark">डार्क</string>
+    <string name="settings_theme_light">लाइट</string>
+    <string name="settings_group_policies">नीतियाँ</string>
+    <string name="settings_terms">उपयोग की शर्तें</string>
+    <string name="settings_privacy">गोपनीयता नीति</string>
+    <string name="settings_licenses">ओपन-सोर्स लाइसेंस</string>
+    <string name="settings_policy_unavailable">लॉन्च पर उपलब्ध होगा</string>
+    <string name="language_description">पूरे ऐप इंटरफ़ेस पर लागू होता है। बदलाव तुरंत लागू होते हैं - रीस्टार्ट की ज़रूरत नहीं।</string>
+    <string name="language_current">अभी %1$s</string>
+    <string name="language_choose_manually">खुद चुनें</string>
+    <plurals name="history_min_left">
+        <item quantity="one">%1$d मिनट बाकी</item>
+        <item quantity="other">%1$d मिनट बाकी</item>
+    </plurals>
+    <plurals name="history_days_ago">
+        <item quantity="one">%1$d दिन पहले</item>
+        <item quantity="other">%1$d दिन पहले</item>
+    </plurals>
 </resources>

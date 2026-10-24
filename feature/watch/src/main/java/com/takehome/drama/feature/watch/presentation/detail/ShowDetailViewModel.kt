@@ -4,7 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.takehome.drama.core.ads.reward.RewardAdManager
+import com.takehome.drama.core.ui.foundation.error.ErrorKind
+import com.takehome.drama.core.ui.foundation.error.UiError
 import com.takehome.drama.core.ui.foundation.error.toErrorRes
+import com.takehome.drama.core.ui.foundation.error.toUiError
 import com.takehome.drama.core.ui.foundation.vm.BaseViewModel
 import com.takehome.drama.domain.model.Catalog
 import com.takehome.drama.domain.model.Episode
@@ -92,7 +95,7 @@ class ShowDetailViewModel(
     override fun processIntent(intent: ShowDetailIntent) {
         when (intent) {
             ShowDetailIntent.BackClick -> sendEvent(ShowDetailSingleEvent.NavigateBack)
-            ShowDetailIntent.RetryClick -> load()
+            ShowDetailIntent.RetryClick -> if (!currentState.isLoading) load()
             ShowDetailIntent.RetryEpisodesClick -> retryEpisodes()
             ShowDetailIntent.ToggleSynopsis -> updateState { copy(synopsisExpanded = !synopsisExpanded) }
             ShowDetailIntent.ContinueClick -> currentState.continueCta?.let { openEpisode(it.episodeIndex) }
@@ -107,15 +110,15 @@ class ShowDetailViewModel(
 
     /** Catalogue và file tập tải song song; file tập lỗi không kéo header lỗi theo. */
     private fun load() {
-        updateState { copy(isLoading = true, errorRes = null, isEpisodesLoading = true, episodesErrorRes = null) }
+        updateState { copy(isLoading = true, error = null, isEpisodesLoading = true, episodesErrorRes = null) }
         viewModelScope.launch {
             val episodesResult = async { getShowEpisodes(showId) }
             val catalog = getCatalog().getOrElse { error ->
-                updateState { copy(isLoading = false, errorRes = error.toErrorRes()) }
+                updateState { copy(isLoading = false, error = error.toUiError()) }
                 return@launch
             }
             val show = catalog.findShow(showId) ?: run {
-                updateState { copy(isLoading = false, errorRes = R.string.watch_show_not_found) }
+                updateState { copy(isLoading = false, error = UiError(ErrorKind.NotFound, R.string.watch_show_not_found)) }
                 return@launch
             }
             this@ShowDetailViewModel.catalog = catalog

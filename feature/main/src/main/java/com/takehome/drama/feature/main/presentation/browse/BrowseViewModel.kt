@@ -6,6 +6,7 @@ import com.takehome.drama.core.media.EpisodeFeedPlayer
 import com.takehome.drama.core.media.EpisodeFeedPlayerFactory
 import com.takehome.drama.core.media.FeedItem
 import com.takehome.drama.core.ui.foundation.error.toErrorRes
+import com.takehome.drama.core.ui.foundation.error.toUiError
 import com.takehome.drama.core.ui.foundation.vm.BaseViewModel
 import com.takehome.drama.core.utils.network.ConnectivityMonitor
 import com.takehome.drama.domain.model.Catalog
@@ -91,7 +92,7 @@ class BrowseViewModel(
             BrowseIntent.PlayEpisode -> playEpisode()
             BrowseIntent.ToggleSave -> toggleSave()
             BrowseIntent.OpenSearch -> sendEvent(BrowseSingleEvent.OpenSearch)
-            BrowseIntent.Retry -> load()
+            BrowseIntent.Retry -> if (!currentState.isLoading) load()
             is BrowseIntent.TabVisible -> {
                 tabVisible = intent.visible
                 applyPlayback()
@@ -108,10 +109,10 @@ class BrowseViewModel(
     }
 
     private fun load() {
-        updateState { copy(isLoading = true, errorRes = null) }
+        updateState { copy(isLoading = true, error = null) }
         viewModelScope.launch {
             val loaded = getCatalog().getOrElse { error ->
-                updateState { copy(isLoading = false, errorRes = error.toErrorRes()) }
+                updateState { copy(isLoading = false, error = error.toUiError()) }
                 return@launch
             }
             val saved = userPreferencesRepository.preferences.first().contentLanguage

@@ -58,8 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.takehome.drama.core.designsystem.component.ChoiceChip
-import com.takehome.drama.core.designsystem.component.EmptyState
-import com.takehome.drama.core.designsystem.component.ErrorState
+import com.takehome.drama.core.designsystem.component.BlankState
 import com.takehome.drama.core.designsystem.component.KeyArt
 import com.takehome.drama.core.designsystem.icon.AppIcons
 import com.takehome.drama.core.designsystem.theme.AppTheme
@@ -69,6 +68,7 @@ import com.takehome.drama.core.navigation.destination.WatchRoutes
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.domain.model.ShowStatus
 import com.takehome.drama.feature.main.R
+import com.takehome.drama.feature.main.presentation.common.UiErrorState
 import com.takehome.drama.feature.main.presentation.common.ShowCard
 
 @Composable
@@ -121,13 +121,11 @@ private fun SearchContent(viewState: SearchViewState, onIntent: (SearchIntent) -
             onBack = { onIntent(SearchIntent.Back) },
         )
         when {
-            viewState.errorRes != null -> ErrorState(
-                message = stringResource(viewState.errorRes),
-                retryLabel = stringResource(R.string.common_retry),
-                onRetry = { onIntent(SearchIntent.Retry) },
-            )
-            viewState.phase == SearchPhase.NoResults -> EmptyState(
-                message = stringResource(R.string.search_no_results, viewState.query.trim()),
+            viewState.error != null -> UiErrorState(error = viewState.error, onRetry = { onIntent(SearchIntent.Retry) })
+            viewState.phase == SearchPhase.NoResults -> BlankState(
+                glyph = AppIcons.Search,
+                title = stringResource(R.string.search_no_results, viewState.query.trim()),
+                body = stringResource(R.string.search_no_results_body),
             )
             else -> LazyColumn(contentPadding = PaddingValues(bottom = AppTheme.dimensions.s6)) {
                 if (viewState.phase == SearchPhase.Results) {

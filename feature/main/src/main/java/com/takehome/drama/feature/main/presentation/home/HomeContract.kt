@@ -1,7 +1,7 @@
 package com.takehome.drama.feature.main.presentation.home
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
+import com.takehome.drama.core.ui.foundation.error.UiError
 import com.takehome.drama.core.ui.foundation.vm.SingleEvent
 import com.takehome.drama.core.ui.foundation.vm.ViewIntent
 import com.takehome.drama.core.ui.foundation.vm.ViewState
@@ -24,7 +24,7 @@ data class HomeRail(val title: String, val shows: List<ShowCard>)
 
 data class HomeViewState(
     val isLoading: Boolean = true,
-    @StringRes val errorRes: Int? = null,
+    val error: UiError? = null,
     val daypart: Daypart = Daypart.Night,
     val clock: ClockTime = ClockTime(0, 0),
     /** Hai khung giờ còn lại theo thứ tự sắp tới (2 thẻ nhỏ). */

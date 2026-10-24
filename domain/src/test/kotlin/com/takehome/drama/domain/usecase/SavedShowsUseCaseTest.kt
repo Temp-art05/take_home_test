@@ -41,14 +41,35 @@ class SavedShowsUseCaseTest {
     fun `filters mirror status, unknown status only shows under All`() = runTest {
         listOf("done", "airing", "odd", "removed-from-catalogue").forEach { repository.save(it) }
 
-        observeSaved(data, SavedFilter.All).test {
-            assertEquals(listOf("odd", "airing", "done"), awaitItem().map { it.id })
+        observeSaved(data).test {
+            val shelf = awaitItem()
+            assertEquals(listOf("odd", "airing", "done"), shelf.shows(SavedFilter.All).map { it.id })
+            assertEquals(listOf("airing"), shelf.shows(SavedFilter.Airing).map { it.id })
+            assertEquals(listOf("done"), shelf.shows(SavedFilter.Complete).map { it.id })
         }
-        observeSaved(data, SavedFilter.Airing).test {
-            assertEquals(listOf("airing"), awaitItem().map { it.id })
+    }
+
+    @Test
+    fun `counts per chip ignore shows gone from the catalogue`() = runTest {
+        listOf("done", "airing", "odd", "removed-from-catalogue").forEach { repository.save(it) }
+
+        observeSaved(data).test {
+            val shelf = awaitItem()
+            assertEquals(3, shelf.count(SavedFilter.All))
+            assertEquals(1, shelf.count(SavedFilter.Airing))
+            assertEquals(1, shelf.count(SavedFilter.Complete))
+            assertEquals(false, shelf.isEmpty)
         }
-        observeSaved(data, SavedFilter.Complete).test {
-            assertEquals(listOf("done"), awaitItem().map { it.id })
+    }
+
+    @Test
+    fun `nothing saved is an empty shelf, a filter with no match is not`() = runTest {
+        observeSaved(data).test {
+            assertTrue(awaitItem().isEmpty)
+            repository.save("done")
+            val shelf = awaitItem()
+            assertEquals(false, shelf.isEmpty)
+            assertTrue(shelf.shows(SavedFilter.Airing).isEmpty())
         }
     }
 }

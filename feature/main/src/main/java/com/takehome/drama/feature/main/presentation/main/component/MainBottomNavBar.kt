@@ -101,8 +101,11 @@ private fun BottomNavItem(
     Column(
         modifier = modifier
             .defaultMinSize(minHeight = AppTheme.dimensions.tabItemMinHeight)
+            // Không ripple (user chốt 24/10): tab chọn đã đổi màu icon + nhãn gradient.
             .selectable(
                 selected = isSelected,
+                interactionSource = null,
+                indication = null,
                 role = Role.Tab,
                 onClick = onClick,
             ),

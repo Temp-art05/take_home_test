@@ -72,11 +72,60 @@
     <string name="reels_unavailable">Bu dizinin önizlenecek ücretsiz bölümü yok.</string>
     <string name="library_history">İzleme geçmişi</string>
     <string name="library_saved">Kaydedilenler</string>
-    <string name="skeleton_open_show">%1$s dizisini aç</string>
-    <string name="skeleton_play_show">%1$s dizisini oynat</string>
-    <string name="skeleton_open_history">İzleme geçmişi</string>
-    <string name="skeleton_open_saved">Kaydedilenler</string>
-    <string name="skeleton_open_language">Uygulama dili</string>
     <string name="language_title">Dil</string>
     <string name="language_system">Cihaz dilini kullan</string>
+
+    <!-- Phase 6: Library, History, Saved, Settings, Language -->
+    <string name="search_no_results_body">Bir dizi adı ya da tür deneyin - gerisini akış halleder.</string>
+    <string name="library_watched">İzlenen</string>
+    <string name="library_history_row">Geçmiş</string>
+    <string name="library_recent">Son izlenenler</string>
+    <string name="library_see_all">Tümünü gör</string>
+    <string name="history_tab_watching">İzleniyor</string>
+    <string name="history_tab_finished">Bitenler</string>
+    <string name="common_edit">Düzenle</string>
+    <string name="common_done">Bitti</string>
+    <string name="history_meta">Böl. %1$d / %2$d · %3$s</string>
+    <string name="history_today">bugün</string>
+    <string name="history_yesterday">dün</string>
+    <string name="history_last_week">geçen hafta</string>
+    <string name="common_more_cd">%1$s için diğer seçenekler</string>
+    <string name="common_remove_cd">%1$s öğesini kaldır</string>
+    <string name="history_sheet_details">Dizi ayrıntıları</string>
+    <string name="history_sheet_remove">Geçmişten kaldır</string>
+    <string name="history_removed">Geçmişten kaldırıldı</string>
+    <string name="history_empty_watching_title">Akışta henüz bir şey yok</string>
+    <string name="history_empty_watching_body">Bir bölüm başlatın, döndüğünüzde sizi burada bekliyor olacak.</string>
+    <string name="history_empty_finished_title">Henüz biten dizi yok</string>
+    <string name="history_empty_finished_body">Son bölüme kadar izlediğiniz diziler burada görünür.</string>
+    <string name="common_find_next">Sıradaki akışını bul</string>
+    <string name="saved_filter_all">Tümü · %1$d</string>
+    <string name="saved_filter_airing">Yayında</string>
+    <string name="saved_filter_complete">Tamamlandı</string>
+    <string name="saved_sheet_remove">Kaydedilenlerden kaldır</string>
+    <string name="saved_empty_title">İzleme listeniz boş</string>
+    <string name="saved_empty_body">Tekrar dönmek istediğiniz bir şey mi buldunuz? ＋\'ya dokunun, akışın dışında burada bekleyecek.</string>
+    <string name="saved_filter_empty_airing">Kayıtlı yayında dizi yok</string>
+    <string name="saved_filter_empty_complete">Kayıtlı tamamlanmış dizi yok</string>
+    <string name="settings_group_language">Dil</string>
+    <string name="settings_app_language">Uygulama dili</string>
+    <string name="settings_group_appearance">Görünüm</string>
+    <string name="settings_theme_dark">Koyu</string>
+    <string name="settings_theme_light">Açık</string>
+    <string name="settings_group_policies">Politikalar</string>
+    <string name="settings_terms">Kullanım Koşulları</string>
+    <string name="settings_privacy">Gizlilik Politikası</string>
+    <string name="settings_licenses">Açık kaynak lisansları</string>
+    <string name="settings_policy_unavailable">Lansmanda kullanılabilir</string>
+    <string name="language_description">Uygulama arayüzünün tamamına uygulanır. Değişiklikler hemen geçerli olur - yeniden başlatma gerekmez.</string>
+    <string name="language_current">Şu an %1$s</string>
+    <string name="language_choose_manually">Elle seç</string>
+    <plurals name="history_min_left">
+        <item quantity="one">%1$d dk kaldı</item>
+        <item quantity="other">%1$d dk kaldı</item>
+    </plurals>
+    <plurals name="history_days_ago">
+        <item quantity="one">%1$d gün önce</item>
+        <item quantity="other">%1$d gün önce</item>
+    </plurals>
 </resources>

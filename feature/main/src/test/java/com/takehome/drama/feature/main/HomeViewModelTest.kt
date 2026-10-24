@@ -137,10 +137,10 @@ class HomeViewModelTest {
     fun `catalogue error shows retry, retry recovers`() = runTest {
         catalogRepository.catalog = Result.failure(Exception("offline"))
         val vm = viewModel()
-        assertEquals(false, vm.viewState.value.errorRes == null)
+        assertEquals(false, vm.viewState.value.error == null)
         catalogRepository.catalog = Result.success(testCatalog)
         vm.processIntent(HomeIntent.Retry)
-        assertNull(vm.viewState.value.errorRes)
+        assertNull(vm.viewState.value.error)
         assertEquals("hero", vm.viewState.value.hero?.id)
     }
 

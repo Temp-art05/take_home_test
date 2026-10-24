@@ -2,6 +2,7 @@ package com.takehome.drama.feature.main.presentation.browse
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
+import com.takehome.drama.core.ui.foundation.error.UiError
 import com.takehome.drama.core.ui.foundation.vm.SingleEvent
 import com.takehome.drama.core.ui.foundation.vm.ViewIntent
 import com.takehome.drama.core.ui.foundation.vm.ViewState
@@ -13,7 +14,7 @@ data class BrowseChip(val tagId: String?, val label: String)
 
 data class BrowseViewState(
     val isLoading: Boolean = true,
-    @StringRes val errorRes: Int? = null,
+    val error: UiError? = null,
     val chips: List<BrowseChip> = emptyList(),
     val selectedChip: String? = null,
     val grid: List<ShowCard> = emptyList(),

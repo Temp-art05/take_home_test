@@ -94,6 +94,33 @@ object AppIcons {
     /** `↖` của gợi ý tìm kiếm: điền gợi ý vào ô — tự lật khi RTL. */
     val ArrowUpStart: ImageVector by lazy { stroked("ArrowUpStart", "M17 17 7.5 7.5", "M7 15V7h8", width = 1.8f, autoMirror = true) }
 
+    /** Đồng hồ — hàng History của Library (`.r svg` mockup 4.1). */
+    val History: ImageVector by lazy { stroked("History", "M20.5 12a8.5 8.5 0 1 1-17 0a8.5 8.5 0 1 1 17 0z", "M12 7.5V12l3 2") }
+
+    /** Wifi gạch chéo — SCR-0603. */
+    val WifiOff: ImageVector by lazy {
+        stroked(
+            "WifiOff",
+            "M2 8.5A15 15 0 0 1 22 8.5",
+            "M5.5 12.5a10 10 0 0 1 13 0",
+            "M9 16.5a5 5 0 0 1 6 0",
+            "M13 20a1 1 0 1 1-2 0a1 1 0 1 1 2 0z",
+            "M3 3l18 18",
+            width = 1.5f,
+        )
+    }
+
+    /** Vòng tròn chấm than — lỗi không phải mất mạng (cùng layout SCR-0603). */
+    val Alert: ImageVector by lazy {
+        stroked("Alert", "M20.5 12a8.5 8.5 0 1 1-17 0a8.5 8.5 0 1 1 17 0z", "M12 7.5v5.5", "M12 16.4v.1", width = 1.5f)
+    }
+
+    /** Dấu ⋯ cuối hàng History/Saved. */
+    val More: ImageVector by lazy { filled("More", "M7.5 12a1.6 1.6 0 1 1-3.2 0a1.6 1.6 0 1 1 3.2 0zM13.6 12a1.6 1.6 0 1 1-3.2 0a1.6 1.6 0 1 1 3.2 0zM19.7 12a1.6 1.6 0 1 1-3.2 0a1.6 1.6 0 1 1 3.2 0z") }
+
+    /** Dấu ✓ chọn của hàng Settings/Language — nét dày hơn [Check]. */
+    val Selected: ImageVector by lazy { stroked("Selected", "M5 12.5l4.5 4.5L19 7.5", width = 2.2f) }
+
     private const val BOOKMARK = "M6.5 3.5h11v17l-5.5-4-5.5 4z"
 
     private const val HEART = "M12 20s-7-4.6-7-9.6A3.9 3.9 0 0 1 12 7.6a3.9 3.9 0 0 1 7 2.8C19 15.4 12 20 12 20z"
