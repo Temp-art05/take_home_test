@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -42,11 +43,12 @@ fun OnboardingLanguageScreen(
     onNext: () -> Unit,
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
+    val displayed = LocalConfiguration.current.locales[0]
     viewModel.singleEvent.CollectAsEffect { event ->
         when (event) {
             is OnboardingLanguageSingleEvent.Next -> {
-                // Activity khai configChanges=locale|layoutDirection: chuỗi đổi tại chỗ, không recreate giữa lúc trượt.
-                AppLocale.apply(event.locale)
+                // Đổi locale làm Activity dựng lại (nháy) → chỉ gọi khi ngôn ngữ hiển thị thật sự đổi.
+                AppLocale.applyIfChanged(event.locale, displayed)
                 onNext()
             }
         }

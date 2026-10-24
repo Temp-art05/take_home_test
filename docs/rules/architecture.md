@@ -15,7 +15,7 @@ Clean Architecture: `presentation → domain ← data`. `:domain` là tâm, khô
 | `:core:ui-foundation` | `com.takehome.drama.core.ui.foundation` | `vm/` (BaseViewModel), `ext/` (CollectAsEffect), `error/` (→ string res), `locale/` |
 | `:core:design-system` | `com.takehome.drama.core.designsystem` | `theme/`, `component/`, `ext/` |
 | `:feature:main` | `com.takehome.drama.feature.main` | Main 3 tab + Settings |
-| `:core:ads` | `com.takehome.drama.core.ads` | `AdsPresenter` (cửa duy nhất feature dùng), `AdsInitializer`, `AppOpenAdController`, `AdsLogToggle`, `config/` (parse `ads_config`, impl `AdsConfigRepository`), `nativead/`, `sdk/` (facade lib). Chỉ module này phụ thuộc lib ads (`com.github.dinhn:ads-*`, GitHub Packages) |
+| `:core:ads` | `com.takehome.drama.core.ads` | `interstitial/InterstitialAdManager`, `reward/RewardAdManager`, `nativead/NativeAdManager` (feature chỉ dùng 3 manager này, như HomeMorph), `AdsInitializer` (init + `register()`), `AdsLogToggle`, `config/` (parse `ads_config`, impl `AdsConfigRepository`), `nativead/`, `sdk/` (facade lib). Chỉ module này phụ thuộc lib ads (`com.github.dinhn:ads-*`, GitHub Packages) |
 
 ```
 app          → mọi module

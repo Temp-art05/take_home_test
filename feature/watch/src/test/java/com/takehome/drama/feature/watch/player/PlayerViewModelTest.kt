@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import app.cash.turbine.test
-import com.takehome.drama.core.ads.FakeAdsPresenter
+import com.takehome.drama.core.ads.FakeRewardAdManager
 import com.takehome.drama.domain.fake.FakeAdsConfigRepository
 import com.takehome.drama.domain.fake.FakeEpisodeUnlockRepository
 import com.takehome.drama.domain.fake.testAppConfig
@@ -14,6 +14,7 @@ import com.takehome.drama.domain.model.ads.AdPlacement
 import com.takehome.drama.domain.model.ads.AdsConfig
 import com.takehome.drama.domain.model.ads.PlacementConfig
 import com.takehome.drama.domain.usecase.ads.IsAdPlacementEnabledUseCase
+import com.takehome.drama.domain.usecase.ads.ObserveAdPlacementUseCase
 import com.takehome.drama.domain.usecase.watch.ObserveUnlockedEpisodesUseCase
 import com.takehome.drama.domain.usecase.watch.UnlockEpisodeUseCase
 import com.takehome.drama.feature.watch.presentation.common.RewardedAdState
@@ -78,7 +79,7 @@ class PlayerViewModelTest {
     private val player = FakeFeedPlayer()
     private val unlockRepository = FakeEpisodeUnlockRepository()
     private val adsConfig = FakeAdsConfigRepository()
-    private val ads = FakeAdsPresenter()
+    private val ads = FakeRewardAdManager()
 
     private fun rewardedOff() {
         adsConfig.config.value = AdsConfig(placements = mapOf(AdPlacement.RewardedBonus.id to PlacementConfig(false)))
@@ -105,7 +106,8 @@ class PlayerViewModelTest {
         observeUnlockedEpisodes = ObserveUnlockedEpisodesUseCase(unlockRepository),
         unlockEpisode = UnlockEpisodeUseCase(unlockRepository),
         isAdPlacementEnabled = IsAdPlacementEnabledUseCase(adsConfig, testAppConfig),
-        adsPresenter = ads,
+        observeAdPlacement = ObserveAdPlacementUseCase(adsConfig, testAppConfig),
+        rewardAdManager = ads,
     )
 
     private fun url(index: Int, language: String = "en", quality: String = "720p") =
@@ -579,4 +581,61 @@ class PlayerViewModelTest {
         }
 
     private data class PlayerLoad(val url: String, val startPositionMs: Long)
+
+    @Test
+    fun `show with locked episodes preloads the rewarded ad before the locked page is reached`() = runTest(mainRule.dispatcher) {
+        viewModel(episodeIndex = 0)
+        assertEquals(1, ads.preloads)
+        assertEquals(0, ads.rewardedLoads)
+    }
+
+    @Test
+    fun `after a reward the next ad is preloaded`() = runTest(mainRule.dispatcher) {
+        val viewModel = viewModel(episodeIndex = 5)
+        viewModel.processIntent(PlayerIntent.RewardResult(episodeIndex = 5, earned = true))
+        assertEquals(2, ads.preloads)
+    }
+
+    @Test
+    fun `remote config turning rewarded off while on the locked page hides the button instead of no ad`() =
+        runTest(mainRule.dispatcher) {
+            ads.rewardedGate = CompletableDeferred()
+            val viewModel = viewModel(episodeIndex = 5)
+            assertEquals(RewardedAdState.Loading, viewModel.viewState.value.unlockAd)
+            rewardedOff()
+            assertNull(viewModel.viewState.value.unlockAd)
+            // Load cũ trả về sau khi đã tắt: không hiện lại nút.
+            ads.rewardedGate!!.complete(Unit)
+            assertNull(viewModel.viewState.value.unlockAd)
+        }
+
+    @Test
+    fun `kill switch or blocked version while on the locked page hides the button too`() = runTest(mainRule.dispatcher) {
+        val viewModel = viewModel(episodeIndex = 5)
+        assertEquals(RewardedAdState.Ready, viewModel.viewState.value.unlockAd)
+        adsConfig.config.value = AdsConfig(enable = false)
+        assertNull(viewModel.viewState.value.unlockAd)
+        adsConfig.config.value = AdsConfig()
+        assertEquals(RewardedAdState.Ready, viewModel.viewState.value.unlockAd)
+        adsConfig.config.value = AdsConfig(disabledVersions = listOf(testAppConfig.versionName))
+        assertNull(viewModel.viewState.value.unlockAd)
+    }
+
+    @Test
+    fun `remote config turning rewarded on while on the locked page offers the ad`() = runTest(mainRule.dispatcher) {
+        rewardedOff()
+        val viewModel = viewModel(episodeIndex = 5)
+        assertNull(viewModel.viewState.value.unlockAd)
+        assertEquals(0, ads.preloads)
+        adsConfig.config.value = AdsConfig()
+        assertEquals(RewardedAdState.Ready, viewModel.viewState.value.unlockAd)
+        assertEquals(1, ads.preloads)
+    }
+
+    @Test
+    fun `rewarded off - nothing is preloaded`() = runTest(mainRule.dispatcher) {
+        rewardedOff()
+        viewModel(episodeIndex = 0)
+        assertEquals(0, ads.preloads)
+    }
 }

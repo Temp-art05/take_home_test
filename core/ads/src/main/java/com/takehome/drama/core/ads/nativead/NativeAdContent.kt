@@ -20,8 +20,9 @@ import kotlinx.coroutines.flow.Flow
 private const val BADGE_SCRIM_ALPHA = 0.6f
 
 /**
- * Ô native: chỉ vẽ khi placement bật **và** pool đã có ad. Đang load / lỗi / offline → không vẽ gì,
- * nên không bao giờ có khung trống. Không dùng `AdsNative(layoutId)` của lib vì nó bind layout XML.
+ * Ô native: chỉ vẽ khi placement bật. Pool đang tải lần đầu → shimmer ([NativeAdShimmer]); có ad → card;
+ * lỗi / offline / chưa request → không vẽ gì, nên không bao giờ để lại khung trống. Không dùng
+ * `AdsNative(layoutId)` của lib vì nó bind layout XML.
  */
 @Composable
 internal fun NativeAdContent(
@@ -43,10 +44,16 @@ internal fun NativeAdContent(
     }
 
     val poolState by remember(placement) { NativeAdPool.state(placement.id) }.collectAsState()
-    val ad = ((poolState as? NativeAdPool.State.Loaded)?.handle?.payload as? NativeAd) ?: return
+    val ad = when (val state = poolState) {
+        is NativeAdPool.State.Loaded -> state.handle.payload as? NativeAd
+        // Lần tải đầu: khung chờ cùng bố cục với card. Tải lại khi đã có ad thì pool giữ ad cũ (vẫn Loaded).
+        NativeAdPool.State.Loading -> return NativeAdShimmer(modifier)
+        NativeAdPool.State.Idle, NativeAdPool.State.Failed -> null
+    } ?: return
 
     val style = NativeAdStyle(
         surface = MaterialTheme.colorScheme.surface.toArgb(),
+        mediaBackground = MaterialTheme.colorScheme.scrim.toArgb(),
         ctaBackground = MaterialTheme.colorScheme.onSurface.toArgb(),
         ctaText = MaterialTheme.colorScheme.background.toArgb(),
         badgeBackground = MaterialTheme.colorScheme.scrim.copy(alpha = BADGE_SCRIM_ALPHA).toArgb(),

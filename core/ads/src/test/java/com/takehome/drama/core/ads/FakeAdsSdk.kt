@@ -39,17 +39,28 @@ class FakeAdsSdk : AdsSdkFacade {
         onResult(rewardEarned)
     }
 
-    val appOpenShown = mutableListOf<String>()
-    var fullScreenShowing = false
-    var sinceLastFullScreenMs = Long.MAX_VALUE
-
-    override fun showAppOpen(activity: Activity, name: String) {
-        appOpenShown += name
-    }
-
     override fun requestNative(context: Context, name: String) = Unit
 
-    override fun isFullScreenAdShowing() = fullScreenShowing
+    /** Mỗi lần đăng ký: name → (ad unit, min interval / load timeout). */
+    val registered = mutableListOf<Triple<String, String, Long>>()
+    var throwOnRegister = false
 
-    override fun millisSinceLastFullScreenShown() = sinceLastFullScreenMs
+    /** minLoadingMs của lần đăng ký interstitial gần nhất. */
+    var interstitialLoadingMs = -1L
+
+    override fun registerInterstitial(name: String, adUnitId: String, minLoadingMs: Long, minIntervalMs: Long, maxPerSession: Int) {
+        if (throwOnRegister) error("sdk not initialised")
+        interstitialLoadingMs = minLoadingMs
+        registered += Triple(name, adUnitId, minIntervalMs)
+    }
+
+    override fun registerRewarded(name: String, adUnitId: String, loadTimeoutMs: Long) {
+        if (throwOnRegister) error("sdk not initialised")
+        registered += Triple(name, adUnitId, loadTimeoutMs)
+    }
+
+    override fun registerNative(name: String, adUnitId: String) {
+        if (throwOnRegister) error("sdk not initialised")
+        registered += Triple(name, adUnitId, 0L)
+    }
 }

@@ -43,6 +43,22 @@ enum class AppLocale(val tag: String?) {
         fun current(): AppLocale =
             AppCompatDelegate.getApplicationLocales().takeIf { !it.isEmpty }?.get(0)?.let(::fromLocale) ?: System
 
+        /**
+         * `setApplicationLocales` luôn làm Activity dựng lại (một khung trống — "nháy"), kể cả khi chữ trên màn không
+         * đổi. Bỏ qua khi [target] trùng [current], hoặc khi đang theo hệ thống và [target] chính là ngôn ngữ đang
+         * hiển thị ([displayed]) — vd máy tiếng Anh, onboarding giữ English mặc định.
+         */
+        fun needsApply(target: AppLocale, current: AppLocale, displayed: Locale): Boolean = when {
+            target == current -> false
+            current == System && target == fromLocale(displayed) -> false
+            else -> true
+        }
+
+        /** [apply] chỉ khi [needsApply]; [displayed] = locale đang hiển thị (`LocalConfiguration`). */
+        fun applyIfChanged(target: AppLocale, displayed: Locale) {
+            if (needsApply(target, current(), displayed)) apply(target)
+        }
+
         fun apply(locale: AppLocale) {
             AppCompatDelegate.setApplicationLocales(
                 if (locale.tag == null) {

@@ -3,7 +3,7 @@ package com.takehome.drama.feature.watch.presentation.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.takehome.drama.core.ads.AdsPresenter
+import com.takehome.drama.core.ads.reward.RewardAdManager
 import com.takehome.drama.core.ui.foundation.error.toErrorRes
 import com.takehome.drama.core.ui.foundation.vm.BaseViewModel
 import com.takehome.drama.domain.model.Catalog
@@ -16,6 +16,7 @@ import com.takehome.drama.domain.model.ads.AdPlacement
 import com.takehome.drama.domain.model.tagsOf
 import com.takehome.drama.domain.repository.UserPreferencesRepository
 import com.takehome.drama.domain.usecase.ads.IsAdPlacementEnabledUseCase
+import com.takehome.drama.domain.usecase.ads.ObserveAdPlacementUseCase
 import com.takehome.drama.domain.usecase.catalog.GetCatalogUseCase
 import com.takehome.drama.domain.usecase.catalog.ResolveContentLanguageUseCase
 import com.takehome.drama.domain.usecase.history.GetContinueTargetUseCase
@@ -37,6 +38,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -55,7 +57,8 @@ class ShowDetailViewModel(
     private val observeUnlockedEpisodes: ObserveUnlockedEpisodesUseCase,
     private val unlockEpisode: UnlockEpisodeUseCase,
     private val isAdPlacementEnabled: IsAdPlacementEnabledUseCase,
-    private val adsPresenter: AdsPresenter,
+    observeAdPlacement: ObserveAdPlacementUseCase,
+    private val rewardAdManager: RewardAdManager,
 ) : BaseViewModel<ShowDetailIntent, ShowDetailViewState, ShowDetailSingleEvent>() {
 
     private val showId = savedStateHandle.toRoute<ShowDetail>().showId
@@ -73,6 +76,7 @@ class ShowDetailViewModel(
 
     /** Đã gửi [ShowDetailSingleEvent.ShowRewarded], chờ kết quả — chặn bấm "Watch ad" lặp. */
     private var rewardedShowing = false
+    private var rewardedPreloaded = false
 
     override fun initState() = ShowDetailViewState()
 
@@ -81,6 +85,8 @@ class ShowDetailViewModel(
         viewModelScope.launch {
             observeIsShowSaved(showId).collect { updateState { copy(isSaved = it) } }
         }
+        // Giá trị đầu = trạng thái lúc mở (đã xét khi load); chỉ phản ứng khi Remote Config đổi sau đó.
+        viewModelScope.launch { observeAdPlacement(AdPlacement.RewardedBonus).drop(1).collect(::onRewardedPlacementChanged) }
     }
 
     override fun processIntent(intent: ShowDetailIntent) {
@@ -184,6 +190,7 @@ class ShowDetailViewModel(
             combine(observeShowProgress(showId), observeUnlockedEpisodes(showId)) { progress, unlocked -> progress to unlocked }
                 .collect { (progress, unlocked) ->
                     this@ShowDetailViewModel.unlocked = unlocked
+                    preloadRewardedIfLocked()
                     val target = episodes.takeIf { it.isNotEmpty() }?.let { getContinueTarget(showId, it) }
                     val targetEpisode = target?.let { t -> episodes.firstOrNull { it.index == t.episodeIndex } }
                     updateState {
@@ -225,12 +232,37 @@ class ShowDetailViewModel(
         }
     }
 
+    /**
+     * Show còn tập khoá → load rewarded ngay khi mở Detail, để lúc user chạm tập khoá ad thường đã sẵn (không phải
+     * chờ spinner trong sheet). Một lần cho tới khi ad được dùng.
+     */
+    private fun preloadRewardedIfLocked() {
+        if (rewardedPreloaded || !isAdPlacementEnabled(AdPlacement.RewardedBonus) || episodes.all { it.isWatchable(unlocked) }) return
+        rewardedPreloaded = true
+        rewardAdManager.preload(RewardAdManager.AdType.UNLOCK_EPISODE)
+    }
+
+    /**
+     * Remote Config đổi khi đang ở Detail: bật → load sẵn; tắt khi sheet đang mở (chưa show ad) → đóng sheet, toast
+     * "tập bị khoá" như lúc placement tắt từ đầu — không để sheet treo "No ad available".
+     */
+    private fun onRewardedPlacementChanged(enabled: Boolean) {
+        if (enabled) {
+            preloadRewardedIfLocked()
+            return
+        }
+        val sheet = currentState.unlockSheet ?: return
+        if (rewardedShowing) return
+        closeUnlockSheet()
+        sendEvent(ShowDetailSingleEvent.ShowToast(R.string.watch_episode_locked, sheet.episodeNumber, success = false))
+    }
+
     private fun openUnlockSheet(episode: Episode) {
         rewardedShowing = false
         updateState { copy(unlockSheet = UnlockSheet(episode.index, episode.displayNumber, RewardedAdState.Loading)) }
         rewardedLoadJob?.cancel()
         rewardedLoadJob = viewModelScope.launch {
-            val available = adsPresenter.loadRewarded(AdPlacement.RewardedBonus)
+            val available = rewardAdManager.load(RewardAdManager.AdType.UNLOCK_EPISODE)
             updateState {
                 val sheet = unlockSheet?.takeIf { it.episodeIndex == episode.index } ?: return@updateState this
                 copy(unlockSheet = sheet.copy(ad = if (available) RewardedAdState.Ready else RewardedAdState.Unavailable))
@@ -253,6 +285,9 @@ class ShowDetailViewModel(
 
     private fun onRewardResult(index: Int, earned: Boolean) {
         closeUnlockSheet()
+        // Ad vừa xem đã dùng hết — load sẵn bản kế cho tập khoá tiếp theo.
+        rewardedPreloaded = false
+        preloadRewardedIfLocked()
         val episode = episodes.firstOrNull { it.index == index } ?: return
         if (!earned) {
             sendEvent(ShowDetailSingleEvent.ShowToast(R.string.watch_unlock_incomplete, formatArg = null, success = false))

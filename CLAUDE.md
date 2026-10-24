@@ -81,7 +81,7 @@ thiếu thì APK unsigned.
 
 `FlowDramaApp.onCreate()` gọi `startKoin` với `configModule`, `appModule` (`AppScope` — coroutine scope
 theo process), `analyticsModule(isDebug)`, `remoteConfigModule`, `dataModule`, `adsModule`, và một module cho mỗi
-feature (`mainModule`). Sau đó `AdsInitializer.start()` (MobileAds init nền nhờ `OPTIMIZE_INITIALIZATION`, áp `ads_config`, app-open khi resume). Feature tự khai DI của mình; ViewModel inject qua `koinViewModel()`.
+feature (`mainModule`). Sau đó `AdsInitializer.start()` (MobileAds init nền nhờ `OPTIMIZE_INITIALIZATION`, gọi `register()` của `InterstitialAdManager`/`RewardAdManager`/`NativeAdManager`, áp `ads_config`). Feature tự khai DI của mình; ViewModel inject qua `koinViewModel()`.
 
 SDK analytics bên thứ ba thêm ở `:app` bằng `single { ExtraAnalyticsPlugins(listOf(...)) }`.
 

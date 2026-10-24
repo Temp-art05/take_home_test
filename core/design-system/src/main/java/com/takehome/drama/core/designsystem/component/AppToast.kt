@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.takehome.drama.core.designsystem.icon.AppIcons
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
 import kotlinx.coroutines.delay
@@ -39,7 +41,7 @@ import kotlinx.coroutines.delay
 data class ToastMessage(val text: String, val success: Boolean, val id: Long = System.nanoTime())
 
 /**
- * Toast SCR-0605: thẻ `surface-3`, chấm xanh success (không dùng accent — accent dành cho hành
+ * Toast SCR-0605: thẻ `surface-3`, chấm xanh success có tick (không dùng accent — accent dành cho hành
  * động), tự tắt sau [ToastDurationMs]. Màn giữ [ToastState] và đặt host ở đáy.
  */
 class ToastState {
@@ -100,7 +102,13 @@ fun AppToast(text: String, success: Boolean, modifier: Modifier = Modifier) {
             modifier = Modifier
                 .size(19.dp)
                 .background(if (success) AppTheme.colors.success else AppTheme.colors.lock, CircleShape),
-        )
+            contentAlignment = Alignment.Center,
+        ) {
+            // Mockup 0605 chỉ có chấm xanh trơn — thêm tick để toast thành công đọc ra ngay "đã xong".
+            if (success) {
+                Icon(AppIcons.Check, contentDescription = null, tint = MaterialTheme.colorScheme.background, modifier = Modifier.size(13.dp))
+            }
+        }
         Text(text = text, style = AppTypography.labelSemibold, color = MaterialTheme.colorScheme.onSurface)
     }
 }

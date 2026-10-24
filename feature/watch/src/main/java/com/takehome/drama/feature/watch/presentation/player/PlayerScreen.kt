@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.takehome.drama.core.ads.AdsPresenter
+import com.takehome.drama.core.ads.reward.RewardAdManager
 import com.takehome.drama.core.designsystem.component.AppAsyncImage
 import com.takehome.drama.core.designsystem.component.AppBottomSheet
 import com.takehome.drama.core.designsystem.component.AppToastHost
@@ -72,7 +72,6 @@ import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.core.ui.foundation.format.formatCompactCount
 import com.takehome.drama.core.utils.extension.findActivity
-import com.takehome.drama.domain.model.ads.AdPlacement
 import com.takehome.drama.domain.usecase.watch.EndAction
 import com.takehome.drama.feature.watch.R
 import com.takehome.drama.feature.watch.presentation.common.RewardedAdState
@@ -101,7 +100,7 @@ private const val AUTO_SCROLL_MS = 650
 fun PlayerScreen(
     viewModel: PlayerViewModel,
     onNavigate: (NavigationRequest) -> Unit,
-    adsPresenter: AdsPresenter = koinInject(),
+    rewardAdManager: RewardAdManager = koinInject(),
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     // Không `by`: chỉ thanh track đọc `.value` → tick 500ms không recompose cả màn.
@@ -113,8 +112,6 @@ fun PlayerScreen(
     val context = LocalContext.current
     val resources = LocalResources.current
     val activity = LocalActivity.current
-    // Đang xem video: quay lại app không bật app-open ad (luật "không ads khi video đang phát").
-    adsPresenter.BlockResumeAds()
 
     viewModel.singleEvent.CollectAsEffect { event ->
         when (event) {
@@ -126,7 +123,7 @@ fun PlayerScreen(
             is PlayerSingleEvent.ShowRewarded -> {
                 // VM đã pause player trước khi phát event này — không ad nào chạy đè video đang phát.
                 val onResult = { earned: Boolean -> viewModel.processIntent(PlayerIntent.RewardResult(event.episodeIndex, earned)) }
-                if (activity != null) adsPresenter.showRewarded(activity, AdPlacement.RewardedBonus, onResult) else onResult(false)
+                if (activity != null) rewardAdManager.show(activity, RewardAdManager.AdType.UNLOCK_EPISODE, onResult) else onResult(false)
             }
             is PlayerSingleEvent.ScrollToEpisode -> {
                 val page = viewState.pages.indexOfFirst { it.episodeIndex == event.index }

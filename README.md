@@ -94,7 +94,7 @@ Ads dùng lib ads của tác giả (`com.github.dinhn:ads-core|ads-admob|ads-fir
 `maven.pkg.github.com/lurdsoft/lib-ads-android` — tích hợp theo cách của project thật dùng lib (HomeMorph). Token đọc package
 (PAT classic, chỉ scope `read:packages`) **commit có chủ đích** trong `gradle.properties` (`gpr.user`/`gpr.key`, ghi đè được bằng
 env `GITHUB_ACTOR`/`GITHUB_TOKEN`) để clone sạch build được không bước tay. `ads-admob` kéo theo adapter mediation (AppLovin,
-Meta, Mintegral, Pangle) nên `settings.gradle.kts` có thêm repo Pangle + Mintegral. Feature chỉ thấy `AdsPresenter` của `:core:ads`.
+Meta, Mintegral, Pangle) nên `settings.gradle.kts` có thêm repo Pangle + Mintegral. Cấu trúc như HomeMorph: mỗi format một manager ở `:core:ads` — `InterstitialAdManager`, `RewardAdManager`, `NativeAdManager` — với `enum AdType` (vị trí + ad unit id), `register()`, `isEnabled`, `isReady`, `preload`, `show…`; `AdsInitializer` (≈ `AppAds`) init lib và gọi `register()`. Feature chỉ dùng các manager này.
 App id và ad unit id đều là **test ID** của Google (`AndroidManifest.xml`, `core/ads/.../AdUnits.kt`).
 
 ### Placement
@@ -103,11 +103,10 @@ App id và ad unit id đều là **test ID** của Google (`AndroidManifest.xml`
 |---|---|---|---|
 | `interstitial_onboarding` | Interstitial | Hết onboarding, trước Home | Ranh giới luồng tự nhiên, user chưa xem dở gì. Load từ lúc mở onboarding; lúc kết thúc **chỉ hiện nếu đã sẵn**, chưa sẵn thì vào Home ngay — không bắt chờ. Tối đa 1 lần/phiên. |
 | `native_home` | Native | Home, sau "Pick up your flow", trước các rail | Hoà vào feed, không có video phát ở Home. Ô chỉ xuất hiện khi ad đã load — tắt / lỗi / offline thì **không có ô nào** (không khung trống). Card dựng bằng code theo token Sunset Flow, badge "Ad", CTA không gradient. |
-| `app_open_resume` | App open | Quay lại app từ nền (không phải lần mở đầu) | Như HomeMorph: chỉ khi Remote Config đã áp, không có full-screen khác đang hiện, cách full-screen trước ≥ 15 s; bỏ qua một lần sau khi app chủ động rời (xin quyền thông báo). **Không hiện khi đang ở Player / tab Reels** (đang xem video). Nền che phía sau = nền app. |
 | `rewarded_bonus` | Rewarded | Mở một tập khoá (chạm ô khoá ở Detail → sheet "Watch ad"; trang khoá trong Player → nút "Watch an ad to unlock") | Opt-in rõ: chỉ hiện khi user bấm nút. Design tự đề xuất "rewarded ads to open locked episodes". Xem hết → tập mở vĩnh viễn (DataStore), đóng sớm → vẫn khoá. Tắt placement → chạm tập khoá ra toast như cũ. |
 
 Không ad nào khi video đang phát: Home/Detail không phát video, trang khoá của Player đã dừng và VM `pause()` lần nữa
-trước khi show; app-open bị chặn khi Player / Reels đang mở. Mọi lời gọi SDK bọc try/catch — lỗi = "không có ad", app
+trước khi show. Không làm app-open (đề không yêu cầu, dễ làm phiền khi user ra vào app). Mọi lời gọi SDK bọc try/catch — lỗi = "không có ad", app
 đi tiếp. Interstitial / rewarded dùng overlay loading của lib (chỉ show ad đã sẵn nên overlay chỉ nháy). Không làm UMP/consent.
 
 Tracking: lib tự bắn sang Firebase (`trackWithFirebase`) — `ad_impression`, `paid_ad_impression`, `paid_ad_impression_value`,
@@ -137,7 +136,10 @@ JSON parse **khoan dung theo field** — gõ sai kiểu một placement không l
 Chưa từng fetch / offline → default nhúng sẵn (mọi placement bật; load lỗi thì như không có ad).
 
 Áp config: request ad đầu tiên chờ Remote Config áp xong (fetch xong hoặc hết 3 s — cùng ngưỡng Splash), sau đó vẫn
-quan sát nên fetch về muộn cũng có hiệu lực ngay; trước mỗi lần load/show policy được kiểm lại.
+quan sát nên fetch về muộn cũng có hiệu lực ngay; trước mỗi lần load/show policy được kiểm lại. Màn đang mở cũng đổi theo:
+native biến mất / hiện ra; Player ẩn hoặc hiện nút "Watch an ad to unlock" (tắt → không bao giờ báo "No ad available");
+Detail đang mở sheet mà rewarded bị tắt → đóng sheet, toast "Episode N is locked"; onboarding được bật muộn → load
+interstitial lúc đó.
 
 **Test nhanh**: `versionName` hiện ở cuối Settings (`FlowDrama v1.0.0 (1)`). Console → `ads_config` →
 `{"enable":true,"disabled_versions":["1.0.0"],"placements":{"native_home":{"enable":true}}}` → Publish → vuốt kill app,

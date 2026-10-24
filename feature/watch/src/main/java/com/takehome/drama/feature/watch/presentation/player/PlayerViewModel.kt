@@ -3,7 +3,7 @@ package com.takehome.drama.feature.watch.presentation.player
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.takehome.drama.core.ads.AdsPresenter
+import com.takehome.drama.core.ads.reward.RewardAdManager
 import com.takehome.drama.core.media.EpisodeFeedPlayer
 import com.takehome.drama.core.media.EpisodeFeedPlayerFactory
 import com.takehome.drama.core.media.FeedItem
@@ -21,6 +21,7 @@ import com.takehome.drama.domain.model.ads.AdPlacement
 import com.takehome.drama.domain.model.findShow
 import com.takehome.drama.domain.repository.UserPreferencesRepository
 import com.takehome.drama.domain.usecase.ads.IsAdPlacementEnabledUseCase
+import com.takehome.drama.domain.usecase.ads.ObserveAdPlacementUseCase
 import com.takehome.drama.domain.usecase.catalog.GetCatalogUseCase
 import com.takehome.drama.domain.usecase.catalog.ResolveContentLanguageUseCase
 import com.takehome.drama.domain.usecase.history.GetResumePositionUseCase
@@ -48,6 +49,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -79,7 +81,8 @@ class PlayerViewModel(
     private val observeUnlockedEpisodes: ObserveUnlockedEpisodesUseCase,
     private val unlockEpisode: UnlockEpisodeUseCase,
     private val isAdPlacementEnabled: IsAdPlacementEnabledUseCase,
-    private val adsPresenter: AdsPresenter,
+    observeAdPlacement: ObserveAdPlacementUseCase,
+    private val rewardAdManager: RewardAdManager,
 ) : BaseViewModel<PlayerIntent, PlayerViewState, PlayerSingleEvent>() {
 
     private val route = savedStateHandle.toRoute<Player>()
@@ -138,6 +141,8 @@ class PlayerViewModel(
     init {
         player.setSpeed(currentState.speed)
         viewModelScope.launch { player.state.collect(::onPlayback) }
+        // Giá trị đầu = trạng thái lúc mở (load() tự xét); chỉ phản ứng khi Remote Config đổi sau đó.
+        viewModelScope.launch { observeAdPlacement(AdPlacement.RewardedBonus).drop(1).collect(::onRewardedPlacementChanged) }
         load()
     }
 
@@ -183,6 +188,7 @@ class PlayerViewModel(
             catalog = loadedCatalog
             show = loadedShow
             episodes = loaded.episodes
+            preloadRewardedIfLocked()
             contentLanguage = resolveContentLanguage(
                 saved = preferences.contentLanguage,
                 deviceLanguage = Locale.getDefault().language,
@@ -552,6 +558,27 @@ class PlayerViewModel(
 
     private fun Episode.isWatchable(): Boolean = isWatchable(unlocked)
 
+    /**
+     * Remote Config đổi khi đang ở Player (fetch về muộn, Console bật/tắt): tắt → ẩn nút "Watch an ad" (trang khoá
+     * chỉ còn thông báo khoá), không báo "No ad available"; bật → load sẵn và mời xem nếu đang ở trang khoá.
+     */
+    private fun onRewardedPlacementChanged(enabled: Boolean) {
+        if (episodes.isEmpty()) return
+        if (enabled) {
+            preloadRewardedIfLocked()
+            if (currentState.isLocked && currentState.unlockAd == null) offerRewardedUnlock(currentState.episodeIndex)
+        } else if (!rewardedShowing) {
+            rewardedLoadJob?.cancel()
+            updateState { copy(unlockAd = null) }
+        }
+    }
+
+    /** Show còn tập khoá → load rewarded sẵn từ lúc mở Player, tới trang khoá ad thường đã sẵn. */
+    private fun preloadRewardedIfLocked() {
+        if (!isAdPlacementEnabled(AdPlacement.RewardedBonus) || episodes.all { it.isWatchable() }) return
+        rewardAdManager.preload(RewardAdManager.AdType.UNLOCK_EPISODE)
+    }
+
     /** Trang khoá + `rewarded_bonus` bật → nút mở bằng ad; ad load ngay để lúc bấm khỏi chờ. */
     private fun offerRewardedUnlock(index: Int) {
         rewardedLoadJob?.cancel()
@@ -559,9 +586,18 @@ class PlayerViewModel(
         if (!isAdPlacementEnabled(AdPlacement.RewardedBonus)) return
         updateState { copy(unlockAd = RewardedAdState.Loading) }
         rewardedLoadJob = viewModelScope.launch {
-            val available = adsPresenter.loadRewarded(AdPlacement.RewardedBonus)
+            val available = rewardAdManager.load(RewardAdManager.AdType.UNLOCK_EPISODE)
             if (currentState.episodeIndex != index || !currentState.isLocked) return@launch
-            updateState { copy(unlockAd = if (available) RewardedAdState.Ready else RewardedAdState.Unavailable) }
+            updateState {
+                copy(
+                    unlockAd = when {
+                        // Bị tắt trong lúc load: ẩn nút, không báo "No ad available".
+                        !isAdPlacementEnabled(AdPlacement.RewardedBonus) -> null
+                        available -> RewardedAdState.Ready
+                        else -> RewardedAdState.Unavailable
+                    },
+                )
+            }
         }
     }
 
@@ -576,6 +612,8 @@ class PlayerViewModel(
     /** Xem hết → mở tập và phát ngay tại trang này (không rời Player); đóng sớm → giữ khoá, cho xem lại. */
     private fun onRewardResult(index: Int, earned: Boolean) {
         rewardedShowing = false
+        // Ad vừa xem đã dùng hết — load sẵn bản kế cho tập khoá tiếp theo.
+        preloadRewardedIfLocked()
         val episode = episodes.firstOrNull { it.index == index } ?: return
         if (!earned) {
             sendEvent(PlayerSingleEvent.ShowToast(R.string.watch_unlock_incomplete, formatArg = null, success = false))

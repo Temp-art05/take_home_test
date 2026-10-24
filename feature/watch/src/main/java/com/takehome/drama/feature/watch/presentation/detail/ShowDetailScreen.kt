@@ -63,7 +63,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.takehome.drama.core.ads.AdsPresenter
+import com.takehome.drama.core.ads.reward.RewardAdManager
 import com.takehome.drama.core.designsystem.component.AppAsyncImage
 import com.takehome.drama.core.designsystem.component.AppBottomSheet
 import com.takehome.drama.core.designsystem.component.AppToastHost
@@ -80,7 +80,6 @@ import com.takehome.drama.core.designsystem.theme.AppTypography
 import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.core.ui.foundation.format.formatCompactCount
-import com.takehome.drama.domain.model.ads.AdPlacement
 import com.takehome.drama.domain.usecase.watch.EpisodeCell
 import com.takehome.drama.domain.usecase.watch.EpisodeCellState
 import com.takehome.drama.domain.usecase.watch.EpisodeRange
@@ -100,7 +99,7 @@ private val CellGap = 9.dp
 fun ShowDetailScreen(
     viewModel: ShowDetailViewModel,
     onNavigate: (NavigationRequest) -> Unit,
-    adsPresenter: AdsPresenter = koinInject(),
+    rewardAdManager: RewardAdManager = koinInject(),
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     val gridState = rememberLazyGridState()
@@ -123,7 +122,7 @@ fun ShowDetailScreen(
                 val onResult = { earned: Boolean ->
                     viewModel.processIntent(ShowDetailIntent.RewardResult(event.episodeIndex, earned))
                 }
-                if (activity != null) adsPresenter.showRewarded(activity, AdPlacement.RewardedBonus, onResult) else onResult(false)
+                if (activity != null) rewardAdManager.show(activity, RewardAdManager.AdType.UNLOCK_EPISODE, onResult) else onResult(false)
             }
         }
     }

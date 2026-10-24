@@ -2,12 +2,15 @@ package com.takehome.drama.core.ads.di
 
 import com.takehome.drama.core.ads.AdsInitializer
 import com.takehome.drama.core.ads.AdsLogToggle
-import com.takehome.drama.core.ads.AdsPresenter
-import com.takehome.drama.core.ads.AdsPresenterImpl
-import com.takehome.drama.core.ads.AppOpenAdController
 import com.takehome.drama.core.ads.LibAdsLogToggle
 import com.takehome.drama.core.ads.config.AdsConfigRepositoryImpl
 import com.takehome.drama.core.ads.config.AdsDebugOverride
+import com.takehome.drama.core.ads.interstitial.InterstitialAdManager
+import com.takehome.drama.core.ads.interstitial.InterstitialAdManagerImpl
+import com.takehome.drama.core.ads.nativead.NativeAdManager
+import com.takehome.drama.core.ads.nativead.NativeAdManagerImpl
+import com.takehome.drama.core.ads.reward.RewardAdManager
+import com.takehome.drama.core.ads.reward.RewardAdManagerImpl
 import com.takehome.drama.core.ads.sdk.AdsSdkFacade
 import com.takehome.drama.core.ads.sdk.LibAdsSdkFacade
 import com.takehome.drama.domain.repository.AdsConfigRepository
@@ -24,8 +27,9 @@ val adsModule = module {
     factory { ObserveAdPlacementUseCase(get(), get()) }
     factory { IsAdPlacementEnabledUseCase(get(), get()) }
     single<AdsSdkFacade> { LibAdsSdkFacade() }
-    single { AppOpenAdController(androidApplication(), get(), get()) }
-    single<AdsPresenter> { AdsPresenterImpl(androidContext(), get(), get(), get(), get()) }
+    single<InterstitialAdManager> { InterstitialAdManagerImpl(androidContext(), get(), get()) }
+    single<RewardAdManager> { RewardAdManagerImpl(androidContext(), get(), get()) }
+    single<NativeAdManager> { NativeAdManagerImpl(androidContext(), get(), get(), get()) }
     single<AdsLogToggle> { LibAdsLogToggle(get(), get()) }
-    single { AdsInitializer(androidApplication(), get(), get(), get(), get()) }
+    single { AdsInitializer(androidApplication(), get(), get(), get(), get(), get(), get()) }
 }

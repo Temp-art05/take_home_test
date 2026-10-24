@@ -60,6 +60,18 @@ class SplashViewModelTest {
     }
 
     @Test
+    fun `splash stays at least one second even when everything is instant - time for the 7 tap log toggle`() =
+        runTest(mainRule.dispatcher) {
+            remoteConfig.gate.complete(true)
+            viewModel().singleEvent.test {
+                advanceTimeBy(SplashViewModel.MIN_SHOW_MS - 1)
+                expectNoEvents()
+                advanceTimeBy(2)
+                assertEquals(SplashSingleEvent.GoOnboarding, awaitItem())
+            }
+        }
+
+    @Test
     fun `finished onboarding goes straight home`() = runTest(mainRule.dispatcher) {
         preferences.state.value = UserPreferences(onboardingDone = true)
         remoteConfig.gate.complete(true)

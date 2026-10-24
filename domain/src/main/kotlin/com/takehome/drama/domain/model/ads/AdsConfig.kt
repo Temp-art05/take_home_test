@@ -33,7 +33,4 @@ enum class AdPlacement(val id: String, val defaultEnabled: Boolean) {
     InterstitialOnboarding("interstitial_onboarding", defaultEnabled = true),
     NativeHome("native_home", defaultEnabled = true),
     RewardedBonus("rewarded_bonus", defaultEnabled = true),
-
-    /** App-open khi user quay lại app từ nền (không phải lần mở đầu, không ở màn đang có video). */
-    AppOpenResume("app_open_resume", defaultEnabled = true),
 }

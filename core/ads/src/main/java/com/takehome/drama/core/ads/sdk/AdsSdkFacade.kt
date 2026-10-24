@@ -4,8 +4,19 @@ import android.app.Activity
 import android.content.Context
 import com.github.dinhn.ads.core.AdsSdk
 
-/** Phần lib ads mà [com.takehome.drama.core.ads.AdsPresenterImpl] dùng — interface để test bằng fake. */
+/** Phần lib ads mà các `*AdManager` dùng — interface để test bằng fake. */
 interface AdsSdkFacade {
+    /**
+     * Một ad unit mỗi placement (không waterfall high floor — bài test chỉ có một test id mỗi format). Toggle key = id
+     * placement: key lạ mặc định `true` trong lib, nên tách key sẽ làm placement không tắt được.
+     */
+    /** [minLoadingMs]: overlay loading của lib hiện ít nhất chừng này trước khi ad lên (không chớp giật). */
+    fun registerInterstitial(name: String, adUnitId: String, minLoadingMs: Long, minIntervalMs: Long, maxPerSession: Int)
+
+    fun registerRewarded(name: String, adUnitId: String, loadTimeoutMs: Long)
+
+    fun registerNative(name: String, adUnitId: String)
+
     fun isFullScreenReady(name: String): Boolean
 
     fun preloadFullScreen(context: Context, name: String, onLoaded: () -> Unit, onFailed: () -> Unit)
@@ -16,19 +27,25 @@ interface AdsSdkFacade {
     /** [onResult]: `true` khi user nhận thưởng trước lúc đóng. */
     fun showRewarded(activity: Activity, name: String, onResult: (earned: Boolean) -> Unit)
 
-    /** Không có ad sẵn thì lib load tại chỗ (không overlay); xong tự preload lại. */
-    fun showAppOpen(activity: Activity, name: String)
-
     fun requestNative(context: Context, name: String)
-
-    /** Đang có interstitial / rewarded / app-open trên màn hình. */
-    fun isFullScreenAdShowing(): Boolean
-
-    /** `Long.MAX_VALUE` khi chưa từng hiện full-screen nào. */
-    fun millisSinceLastFullScreenShown(): Long
 }
 
 internal class LibAdsSdkFacade : AdsSdkFacade {
+    override fun registerInterstitial(name: String, adUnitId: String, minLoadingMs: Long, minIntervalMs: Long, maxPerSession: Int) =
+        AdsSdk.registerInterstitial(
+            name = name, highFloorId = "", normalId = adUnitId, enableHighFloorKey = name, enableNormalKey = name,
+            minLoadingMs = minLoadingMs, minIntervalMs = minIntervalMs, maxPerSession = maxPerSession,
+        )
+
+    override fun registerRewarded(name: String, adUnitId: String, loadTimeoutMs: Long) =
+        AdsSdk.registerRewarded(
+            name = name, highFloorId = "", normalId = adUnitId, enableHighFloorKey = name, enableNormalKey = name,
+            minLoadingMs = 0L, loadTimeoutMillis = loadTimeoutMs,
+        )
+
+    override fun registerNative(name: String, adUnitId: String) =
+        AdsSdk.registerNative(name = name, highFloorId = "", normalId = adUnitId, enableHighFloorKey = name, enableNormalKey = name)
+
     override fun isFullScreenReady(name: String): Boolean = AdsSdk.isFullScreenReady(name)
 
     override fun preloadFullScreen(context: Context, name: String, onLoaded: () -> Unit, onFailed: () -> Unit) =
@@ -40,11 +57,5 @@ internal class LibAdsSdkFacade : AdsSdkFacade {
     override fun showRewarded(activity: Activity, name: String, onResult: (Boolean) -> Unit) =
         AdsSdk.showRewarded(activity, name, onNext = onResult)
 
-    override fun showAppOpen(activity: Activity, name: String) = AdsSdk.showAppOpen(activity, name)
-
     override fun requestNative(context: Context, name: String) = AdsSdk.preloadNative(context, name)
-
-    override fun isFullScreenAdShowing(): Boolean = AdsSdk.isFullScreenAdShowing
-
-    override fun millisSinceLastFullScreenShown(): Long = AdsSdk.millisSinceLastFullScreenShown()
 }

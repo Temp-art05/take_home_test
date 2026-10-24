@@ -99,11 +99,6 @@ class AdsConfigParserTest {
     }
 
     @Test
-    fun `app open placement can be switched off like the others`() {
-        assertEquals(PlacementConfig(false), parse("""{"placements": {"app_open_resume": {"enable": false}}}""").placements["app_open_resume"])
-    }
-
-    @Test
     fun `null or non object falls back to the embedded default`() {
         assertEquals(AdsConfig.DEFAULT, AdsConfigParser.parse(null))
         assertEquals(AdsConfig.DEFAULT, AdsConfigParser.parse(JsonNull))

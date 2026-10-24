@@ -9,7 +9,7 @@ android {
     // Test presenter dựng `Activity()`/`ContextWrapper` làm tham số giả — không gọi method nào của chúng.
     testOptions.unitTests.isReturnDefaultValues = true
 
-    // FakeAdsPresenter dùng chung cho test ViewModel của các feature.
+    // FakeInterstitialAdManager / FakeRewardAdManager / FakeAdsLogToggle dùng chung cho test ViewModel của các feature.
     testFixtures {
         enable = true
     }
@@ -26,8 +26,6 @@ dependencies {
     implementation(libs.play.services.ads)
 
     implementation(libs.androidx.core.ktx)
-    // App-open khi quay lại app: ProcessLifecycleOwner.
-    implementation(libs.androidx.lifecycle.process)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.koin.android)

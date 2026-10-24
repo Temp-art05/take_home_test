@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.takehome.drama.core.ads.AdsPresenter
+import com.takehome.drama.core.ads.nativead.NativeAdManager
 import com.takehome.drama.core.designsystem.component.ErrorState
 import com.takehome.drama.core.designsystem.component.KeyArt
 import com.takehome.drama.core.designsystem.component.Wordmark
@@ -55,7 +55,6 @@ import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.core.ui.foundation.format.format
 import com.takehome.drama.core.ui.foundation.format.rememberTimeFormat
 import com.takehome.drama.domain.model.ShowStatus
-import com.takehome.drama.domain.model.ads.AdPlacement
 import com.takehome.drama.domain.usecase.discovery.ClockTime
 import com.takehome.drama.domain.usecase.discovery.Daypart
 import com.takehome.drama.domain.usecase.discovery.opensAt
@@ -78,7 +77,7 @@ internal fun HomeScreen(
     onNavigate: (NavigationRequest) -> Unit,
     onSwitchTab: (MainTab) -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
-    adsPresenter: AdsPresenter = koinInject(),
+    nativeAdManager: NativeAdManager = koinInject(),
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     viewModel.singleEvent.CollectAsEffect { event ->
@@ -95,7 +94,7 @@ internal fun HomeScreen(
     HomeContent(
         viewState = viewState,
         onIntent = viewModel::processIntent,
-        nativeAd = { modifier -> adsPresenter.NativeAdSlot(AdPlacement.NativeHome, modifier) },
+        nativeAd = { modifier -> nativeAdManager.Slot(NativeAdManager.AdType.HOME, modifier) },
     )
 }
 

@@ -2,7 +2,7 @@ package com.takehome.drama.feature.watch.detail
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
-import com.takehome.drama.core.ads.FakeAdsPresenter
+import com.takehome.drama.core.ads.FakeRewardAdManager
 import com.takehome.drama.domain.fake.FakeAdsConfigRepository
 import com.takehome.drama.domain.fake.FakeEpisodeUnlockRepository
 import com.takehome.drama.domain.fake.testAppConfig
@@ -10,6 +10,7 @@ import com.takehome.drama.domain.model.ads.AdPlacement
 import com.takehome.drama.domain.model.ads.AdsConfig
 import com.takehome.drama.domain.model.ads.PlacementConfig
 import com.takehome.drama.domain.usecase.ads.IsAdPlacementEnabledUseCase
+import com.takehome.drama.domain.usecase.ads.ObserveAdPlacementUseCase
 import com.takehome.drama.domain.usecase.watch.ObserveUnlockedEpisodesUseCase
 import com.takehome.drama.domain.usecase.watch.UnlockEpisodeUseCase
 import com.takehome.drama.feature.watch.presentation.common.RewardedAdState
@@ -72,7 +73,7 @@ class ShowDetailViewModelTest {
     private val preferences = FakeUserPreferencesRepository()
     private val unlockRepository = FakeEpisodeUnlockRepository()
     private val adsConfig = FakeAdsConfigRepository()
-    private val ads = FakeAdsPresenter()
+    private val ads = FakeRewardAdManager()
 
     private fun rewardedOff() {
         adsConfig.config.value = AdsConfig(placements = mapOf(AdPlacement.RewardedBonus.id to PlacementConfig(false)))
@@ -93,7 +94,8 @@ class ShowDetailViewModelTest {
         observeUnlockedEpisodes = ObserveUnlockedEpisodesUseCase(unlockRepository),
         unlockEpisode = UnlockEpisodeUseCase(unlockRepository),
         isAdPlacementEnabled = IsAdPlacementEnabledUseCase(adsConfig, testAppConfig),
-        adsPresenter = ads,
+        observeAdPlacement = ObserveAdPlacementUseCase(adsConfig, testAppConfig),
+        rewardAdManager = ads,
     )
 
     @Test
@@ -373,5 +375,71 @@ class ShowDetailViewModelTest {
             assertEquals(ShowDetailSingleEvent.OpenPlayer(SHOW_ID, 5), awaitItem())
         }
         assertNull(viewModel.viewState.value.unlockSheet)
+    }
+
+    @Test
+    fun `show with locked episodes preloads the rewarded ad once on open`() = runTest(mainRule.dispatcher) {
+        viewModel()
+        // Progress đổi → lưới tính lại, không preload thêm lần nữa.
+        progressRepository.save(progress(index = 1, positionMs = 10_000))
+        assertEquals(1, ads.preloads)
+        assertEquals(0, ads.rewardedLoads)
+    }
+
+    @Test
+    fun `every episode free - nothing to preload`() = runTest(mainRule.dispatcher) {
+        catalogRepository.episodes = mapOf(SHOW_ID to Result.success(testEpisodes(count = 5, free = 5)))
+        viewModel()
+        assertEquals(0, ads.preloads)
+    }
+
+    @Test
+    fun `after a reward the next ad is preloaded for the next locked episode`() = runTest(mainRule.dispatcher) {
+        val viewModel = viewModel()
+        viewModel.processIntent(ShowDetailIntent.EpisodeClick(index = 5))
+        viewModel.processIntent(ShowDetailIntent.RewardResult(episodeIndex = 5, earned = true))
+        assertEquals(2, ads.preloads)
+    }
+
+    @Test
+    fun `remote config turning rewarded off while the unlock sheet is open closes it with the locked toast`() =
+        runTest(mainRule.dispatcher) {
+            ads.rewardedGate = CompletableDeferred()
+            val viewModel = viewModel()
+            viewModel.processIntent(ShowDetailIntent.EpisodeClick(index = 5))
+            viewModel.singleEvent.test {
+                rewardedOff()
+                assertEquals(ShowDetailSingleEvent.ShowToast(R.string.watch_episode_locked, 6, success = false), awaitItem())
+            }
+            assertNull(viewModel.viewState.value.unlockSheet)
+            ads.rewardedGate!!.complete(Unit)
+            assertNull(viewModel.viewState.value.unlockSheet)
+        }
+
+    @Test
+    fun `kill switch and blocked version behave like rewarded off - locked toast, no sheet, no preload`() =
+        runTest(mainRule.dispatcher) {
+            adsConfig.config.value = AdsConfig(enable = false)
+            val killed = viewModel()
+            killed.singleEvent.test {
+                killed.processIntent(ShowDetailIntent.EpisodeClick(index = 5))
+                assertEquals(ShowDetailSingleEvent.ShowToast(R.string.watch_episode_locked, 6, success = false), awaitItem())
+            }
+            adsConfig.config.value = AdsConfig(disabledVersions = listOf(testAppConfig.versionName))
+            val blocked = viewModel()
+            blocked.processIntent(ShowDetailIntent.EpisodeClick(index = 5))
+            assertNull(blocked.viewState.value.unlockSheet)
+            assertEquals(0, ads.preloads)
+        }
+
+    @Test
+    fun `rewarded off at open then turned on - preloads then, and the sheet opens`() = runTest(mainRule.dispatcher) {
+        rewardedOff()
+        val viewModel = viewModel()
+        assertEquals(0, ads.preloads)
+        adsConfig.config.value = AdsConfig()
+        assertEquals(1, ads.preloads)
+        viewModel.processIntent(ShowDetailIntent.EpisodeClick(index = 5))
+        assertEquals(RewardedAdState.Ready, viewModel.viewState.value.unlockSheet?.ad)
     }
 }

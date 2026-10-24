@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.json.JsonElement
 import timber.log.Timber
 
 class AdsConfigRepositoryImpl(
@@ -27,7 +28,13 @@ class AdsConfigRepositoryImpl(
     ) { remote, override -> override ?: remote }
         .distinctUntilChanged()
 
-    override fun current(): AdsConfig =
-        debugOverride.config.value ?: runCatching { AdsConfigParser.parse(remoteConfig.get(RemoteKeys.ADS_CONFIG)) }
-            .getOrDefault(AdsConfig.DEFAULT)
+    /** Parse lần gần nhất theo giá trị raw — `current()` chạy trước mỗi preload/show, không parse lại JSON cũ. */
+    @Volatile
+    private var lastParsed: Pair<JsonElement, AdsConfig>? = null
+
+    override fun current(): AdsConfig = debugOverride.config.value ?: runCatching {
+        val raw = remoteConfig.get(RemoteKeys.ADS_CONFIG)
+        lastParsed?.takeIf { it.first == raw }?.second
+            ?: AdsConfigParser.parse(raw).also { lastParsed = raw to it }
+    }.getOrDefault(AdsConfig.DEFAULT)
 }

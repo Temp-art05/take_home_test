@@ -11,11 +11,12 @@ import com.takehome.drama.domain.usecase.onboarding.IsOnboardingDoneUseCase
 import com.takehome.drama.feature.onboarding.R
 import com.takehome.drama.feature.onboarding.navigation.SplashScreenProvider.Splash
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
- * SCR-0001: chờ **cả** catalogue (nạp cache in-memory cho Home) **và** Remote Config — RC có trần
+ * SCR-0001: hiện tối thiểu [MIN_SHOW_MS], chờ **cả** catalogue (nạp cache in-memory cho Home) **và** Remote Config — RC có trần
  * [RC_TIMEOUT_MS], cả lượt có trần [MAX_WAIT_MS], nên splash không bao giờ treo. Catalogue lỗi vẫn đi
  * tiếp: màn sau tự hiện trạng thái lỗi + Try again (0603).
  *
@@ -58,12 +59,15 @@ class SplashViewModel(
 
     private fun start() {
         viewModelScope.launch {
+            // Splash ở lại tối thiểu MIN_SHOW_MS: không loé qua, và còn kịp tap logo 7 lần bật log ads.
+            val minShow = async { delay(MIN_SHOW_MS) }
             withTimeoutOrNull(MAX_WAIT_MS) {
                 val catalog = async { getCatalog() }
                 val config = async { remoteConfig.awaitFetch(RC_TIMEOUT_MS) }
                 catalog.await()
                 config.await()
             }
+            minShow.await()
             sendEvent(if (isOnboardingDone()) SplashSingleEvent.GoHome else SplashSingleEvent.GoOnboarding)
         }
     }
@@ -71,6 +75,7 @@ class SplashViewModel(
     companion object {
         const val RC_TIMEOUT_MS = 3_000L
         const val MAX_WAIT_MS = 8_000L
+        const val MIN_SHOW_MS = 1_000L
         const val LOG_TAPS = 7
         const val LOG_TAP_RESET_MS = 3_000L
     }

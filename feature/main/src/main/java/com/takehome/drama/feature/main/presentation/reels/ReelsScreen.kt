@@ -63,7 +63,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.takehome.drama.core.ads.AdsPresenter
 import com.takehome.drama.core.designsystem.component.AppToastHost
 import com.takehome.drama.core.designsystem.component.ErrorState
 import com.takehome.drama.core.designsystem.component.GhostPillButton
@@ -89,7 +88,6 @@ import com.takehome.drama.feature.main.R
 import kotlin.math.abs
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 
 /** Overlay mờ hết khi trang lệch ~60% chiều cao (như Player). */
 private const val OVERLAY_FADE = 1.6f
@@ -103,10 +101,7 @@ internal fun ReelsScreen(
     onNavigate: (NavigationRequest) -> Unit,
     isSelected: Boolean,
     viewModel: ReelsViewModel = koinViewModel(),
-    adsPresenter: AdsPresenter = koinInject(),
 ) {
-    // Tab Reels đang mở = đang phát video: quay lại app không bật app-open ad.
-    if (isSelected) adsPresenter.BlockResumeAds()
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     // Không `by`: chỉ thanh track đọc `.value` → tick 500ms không recompose cả màn.
     val progress = viewModel.playbackProgress.collectAsStateWithLifecycle()

@@ -36,6 +36,8 @@ internal data class NativeAdStyle(
     /** Nút CTA: pill sáng chữ tối — nổi nhưng không lẫn với gradient của nút chính app. */
     val ctaBackground: Int,
     val ctaText: Int,
+    /** Nền sau media — lộ ra hai bên / trên dưới khi ảnh không cùng tỉ lệ 16:9. */
+    val mediaBackground: Int,
     /** Badge "Ad" đè lên media: nền scrim tối để đọc được trên mọi ảnh. */
     val badgeBackground: Int,
     val badgeText: Int,
@@ -48,7 +50,7 @@ internal data class NativeAdStyle(
 )
 
 /**
- * Card native kiểu "sponsored" của feed, dựng bằng code (đề cấm XML layout): media 16:9 tràn viền trên,
+ * Card native kiểu "sponsored" của feed, dựng bằng code (đề cấm XML layout): media 16:9 (FIT_CENTER) tràn viền trên,
  * badge "Ad" đè góc đầu media, dưới là icon + headline + body 2 dòng và CTA dạng pill ở cuối hàng. Card nền
  * `surface` bo 16dp như thẻ nội dung của app. AdChoices do SDK tự đặt góc trên-cuối.
  */
@@ -58,6 +60,7 @@ internal class NativeAdCard(private val context: Context, private val style: Nat
     val view = NativeAdView(context).also { it.tag = this }
 
     private val media = MediaView(context)
+    private val mediaFrame = AspectRatioFrame(context)
     private val badge = text(style.badgeSp, style.badgeText, bold = true).apply {
         setText(R.string.ads_native_badge)
         background = rounded(style.badgeBackground, dp(RADIUS_ICON_DP).toFloat())
@@ -84,7 +87,8 @@ internal class NativeAdCard(private val context: Context, private val style: Nat
 
     init {
         view.layoutDirection = View.LAYOUT_DIRECTION_LOCALE
-        val mediaFrame = AspectRatioFrame(context).apply {
+        mediaFrame.apply {
+            setBackgroundColor(style.mediaBackground)
             addView(media, FrameLayout.LayoutParams(MATCH, MATCH))
             addView(
                 badge,
@@ -124,7 +128,12 @@ internal class NativeAdCard(private val context: Context, private val style: Nat
         view.callToActionView = cta
     }
 
+    /** Ad đang gắn — `AndroidView.update` chạy mỗi lần recompose, cùng ad thì không bind lại. */
+    private var bound: NativeAd? = null
+
     fun bind(ad: NativeAd) {
+        if (bound === ad) return
+        bound = ad
         headline.text = ad.headline.orEmpty()
         // Không có body thì dòng phụ là tên nhà quảng cáo (vẫn là asset của ad, không tự bịa chữ).
         body.showText(ad.body ?: ad.advertiser)
@@ -132,8 +141,9 @@ internal class NativeAdCard(private val context: Context, private val style: Nat
         val drawable = ad.icon?.drawable
         icon.setImageDrawable(drawable)
         icon.visibility = if (drawable == null) View.GONE else View.VISIBLE
+        // FIT_CENTER trong khung 16:9: ảnh khác tỉ lệ (vuông, dọc) hiện đủ trên nền tối, không bị cắt như CENTER_CROP.
         media.mediaContent = ad.mediaContent
-        media.setImageScaleType(ImageView.ScaleType.CENTER_CROP)
+        media.setImageScaleType(ImageView.ScaleType.FIT_CENTER)
         view.setNativeAd(ad)
     }
 
@@ -167,7 +177,7 @@ internal class NativeAdCard(private val context: Context, private val style: Nat
 
     private fun dp(value: Int): Int = (value * context.resources.displayMetrics.density).toInt()
 
-    /** Khung giữ media ở tỉ lệ 16:9 theo bề ngang card. */
+    /** Khung giữ media ở tỉ lệ 16:9 theo bề ngang card — thẻ gọn trong feed. */
     private class AspectRatioFrame(context: Context) : FrameLayout(context) {
         override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
             val width = MeasureSpec.getSize(widthMeasureSpec)

@@ -3,7 +3,9 @@ package com.takehome.drama.core.ui.foundation.locale
 import com.takehome.drama.domain.model.LaunchLanguages
 import java.util.Locale
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AppLocaleTest {
@@ -30,5 +32,26 @@ class AppLocaleTest {
     @Test
     fun `plain portuguese still picks the brazilian locale`() {
         assertEquals(AppLocale.PortugueseBrazil, AppLocale.fromLocale(Locale.forLanguageTag("pt-PT")))
+    }
+
+    @Test
+    fun `following the system and picking the language already shown - nothing to apply`() {
+        assertFalse(AppLocale.needsApply(AppLocale.English, current = AppLocale.System, displayed = Locale.forLanguageTag("en-US")))
+    }
+
+    @Test
+    fun `same explicit locale - nothing to apply`() {
+        assertFalse(AppLocale.needsApply(AppLocale.French, current = AppLocale.French, displayed = Locale.FRENCH))
+    }
+
+    @Test
+    fun `a different language is applied`() {
+        assertTrue(AppLocale.needsApply(AppLocale.Hindi, current = AppLocale.System, displayed = Locale.forLanguageTag("en-US")))
+        assertTrue(AppLocale.needsApply(AppLocale.English, current = AppLocale.French, displayed = Locale.FRENCH))
+    }
+
+    @Test
+    fun `going back to the system language from an explicit one is applied`() {
+        assertTrue(AppLocale.needsApply(AppLocale.System, current = AppLocale.French, displayed = Locale.FRENCH))
     }
 }

@@ -58,7 +58,7 @@ object RemoteKeys {
         put("enable", true)
         putJsonArray("disabled_versions") {}
         putJsonObject("placements") {
-            listOf("interstitial_onboarding", "native_home", "rewarded_bonus", "app_open_resume").forEach { id ->
+            listOf("interstitial_onboarding", "native_home", "rewarded_bonus").forEach { id ->
                 putJsonObject(id) { put("enable", true) }
             }
         }

@@ -23,23 +23,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.takehome.drama.core.ads.AdsPresenter
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
-import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.core.ui.foundation.format.format
 import com.takehome.drama.core.ui.foundation.format.rememberTimeFormat
 import com.takehome.drama.domain.usecase.discovery.Daypart
 import com.takehome.drama.domain.usecase.discovery.opensAt
+import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.feature.onboarding.R
 import com.takehome.drama.feature.onboarding.presentation.component.OnboardingScaffold
-import org.koin.compose.koinInject
 
 @Composable
 fun NotificationPromptScreen(
     viewModel: NotificationPromptViewModel,
     onFinish: () -> Unit,
-    adsPresenter: AdsPresenter = koinInject(),
 ) {
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         viewModel.processIntent(NotificationPromptIntent.PermissionResult(granted))
@@ -48,8 +45,6 @@ fun NotificationPromptScreen(
         when (event) {
             NotificationPromptSingleEvent.RequestPermission ->
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    // Hộp xin quyền có thể đẩy app xuống nền — quay lại không được bật app-open ad.
-                    adsPresenter.suppressNextResumeAd()
                     launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 } else {
                     // Không tới được đây (0004 bỏ qua màn này dưới API 33) — vẫn đi tiếp cho chắc.

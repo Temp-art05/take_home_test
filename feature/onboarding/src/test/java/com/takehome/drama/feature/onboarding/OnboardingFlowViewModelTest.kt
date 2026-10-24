@@ -2,9 +2,15 @@ package com.takehome.drama.feature.onboarding
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
-import com.takehome.drama.core.ads.FakeAdsPresenter
+import com.takehome.drama.core.ads.FakeInterstitialAdManager
+import com.takehome.drama.core.ads.interstitial.InterstitialAdManager
+import com.takehome.drama.domain.fake.FakeAdsConfigRepository
 import com.takehome.drama.domain.fake.MainDispatcherRule
+import com.takehome.drama.domain.fake.testAppConfig
 import com.takehome.drama.domain.model.ads.AdPlacement
+import com.takehome.drama.domain.model.ads.AdsConfig
+import com.takehome.drama.domain.model.ads.PlacementConfig
+import com.takehome.drama.domain.usecase.ads.ObserveAdPlacementUseCase
 import com.takehome.drama.feature.onboarding.presentation.flow.OnboardingFlowIntent
 import com.takehome.drama.feature.onboarding.presentation.flow.OnboardingFlowSingleEvent
 import com.takehome.drama.feature.onboarding.presentation.flow.OnboardingFlowViewModel
@@ -26,15 +32,20 @@ class OnboardingFlowViewModelTest {
     @get:Rule
     val mainRule = MainDispatcherRule()
 
-    private val ads = FakeAdsPresenter()
+    private val ads = FakeInterstitialAdManager()
+    private val adsConfig = FakeAdsConfigRepository()
 
     private fun viewModel(startStep: Int = 0, savedState: SavedStateHandle = SavedStateHandle(mapOf("startStep" to startStep))) =
-        OnboardingFlowViewModel(savedState, ads)
+        OnboardingFlowViewModel(savedState, ads, ObserveAdPlacementUseCase(adsConfig, testAppConfig))
+
+    private fun interstitialOff() {
+        adsConfig.config.value = AdsConfig(placements = mapOf(AdPlacement.InterstitialOnboarding.id to PlacementConfig(false)))
+    }
 
     @Test
     fun `interstitial is preloaded when the flow opens so the end never waits for it`() {
         viewModel()
-        assertEquals(listOf(AdPlacement.InterstitialOnboarding), ads.preloaded)
+        assertEquals(listOf(InterstitialAdManager.AdType.ONBOARDING), ads.preloaded)
     }
 
     @Test
@@ -131,5 +142,29 @@ class OnboardingFlowViewModelTest {
         val savedState = SavedStateHandle(mapOf("startStep" to 0))
         viewModel(savedState = savedState).processIntent(OnboardingFlowIntent.Next(from = OnboardingStep.Language))
         assertEquals(OnboardingStep.ValueProp, viewModel(savedState = savedState).viewState.value.step)
+    }
+
+    @Test
+    fun `interstitial off at open - nothing preloaded`() {
+        interstitialOff()
+        viewModel()
+        assertEquals(emptyList<InterstitialAdManager.AdType>(), ads.preloaded)
+    }
+
+    @Test
+    fun `remote config turning the interstitial on later preloads it then`() {
+        interstitialOff()
+        viewModel()
+        adsConfig.config.value = AdsConfig()
+        assertEquals(listOf(InterstitialAdManager.AdType.ONBOARDING), ads.preloaded)
+    }
+
+    @Test
+    fun `kill switch or blocked version at open - nothing preloaded`() {
+        adsConfig.config.value = AdsConfig(enable = false)
+        viewModel()
+        adsConfig.config.value = AdsConfig(disabledVersions = listOf(testAppConfig.versionName))
+        viewModel()
+        assertEquals(emptyList<InterstitialAdManager.AdType>(), ads.preloaded)
     }
 }

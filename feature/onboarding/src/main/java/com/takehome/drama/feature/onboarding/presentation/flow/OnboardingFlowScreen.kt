@@ -12,11 +12,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.takehome.drama.core.ads.AdsPresenter
+import com.takehome.drama.core.ads.interstitial.InterstitialAdManager
 import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.navigation.destination.Destination
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
-import com.takehome.drama.domain.model.ads.AdPlacement
 import com.takehome.drama.feature.onboarding.presentation.language.OnboardingLanguageScreen
 import com.takehome.drama.feature.onboarding.presentation.notification.NotificationPromptScreen
 import com.takehome.drama.feature.onboarding.presentation.taste.TastePickerScreen
@@ -37,7 +36,7 @@ fun OnboardingFlowScreen(
     viewModel: OnboardingFlowViewModel,
     home: Destination,
     onNavigate: (NavigationRequest) -> Unit,
-    adsPresenter: AdsPresenter = koinInject(),
+    interstitialAdManager: InterstitialAdManager = koinInject(),
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     val pagerState = rememberPagerState(initialPage = viewState.step.ordinal) { OnboardingStep.entries.size }
@@ -52,7 +51,11 @@ fun OnboardingFlowScreen(
             OnboardingFlowSingleEvent.FinishWithAd -> {
                 // Callback chỉ báo VM (VM sống qua recreate); điều hướng do composition đang sống làm.
                 val adClosed = { viewModel.processIntent(OnboardingFlowIntent.AdClosed) }
-                if (activity != null) adsPresenter.showInterstitialIfReady(activity, AdPlacement.InterstitialOnboarding, adClosed) else adClosed()
+                if (activity != null) {
+                    interstitialAdManager.showIfReady(activity, InterstitialAdManager.AdType.ONBOARDING, adClosed)
+                } else {
+                    adClosed()
+                }
             }
             OnboardingFlowSingleEvent.NavigateHome -> onNavigate(NavigationRequest.NavigateToAndClearBackStack(home))
         }
