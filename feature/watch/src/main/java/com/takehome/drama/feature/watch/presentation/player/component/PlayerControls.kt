@@ -178,6 +178,8 @@ private fun RailItem(
             .defaultMinSize(minWidth = AppTheme.dimensions.touchTarget, minHeight = AppTheme.dimensions.touchTarget)
             .clip(AppTheme.shapes.md)
             .combinedClickable(role = Role.Button, onClick = onClick, onLongClick = onLongClick)
+            // Nhãn dài (id "Kecepatan") chạm góc bo của clip → bị cắt 2 bên; chừa đệm trong vùng clip.
+            .padding(horizontal = 6.dp)
             .then(if (contentDescription != null) Modifier.semantics { this.contentDescription = contentDescription } else Modifier),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(5.dp),

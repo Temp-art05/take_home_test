@@ -26,6 +26,7 @@ import com.takehome.drama.feature.main.R
 import java.util.Locale
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -75,6 +76,8 @@ class ReelsViewModel(
 
     /** Lần đầu hiện tab thì tự phát; user pause rồi rời tab thì quay lại vẫn pause. */
     private var playOnActive = true
+
+    private var languageJob: Job? = null
 
     override fun initState() = ReelsViewState(
         current = savedStateHandle[KEY_CURRENT] ?: 0,
@@ -136,6 +139,28 @@ class ReelsViewModel(
             refreshPages()
             refreshPlaylist()
             requestClips()
+            observeLanguage(loaded)
+        }
+    }
+
+    /**
+     * Đổi ngôn ngữ ở Settings không dựng lại Activity (VM sống tiếp) → phải tự theo dõi: ngôn ngữ nội dung đổi
+     * thì nạp lại clip (URL theo `sources` của ngôn ngữ mới) và tên/mô tả.
+     */
+    private fun observeLanguage(catalog: Catalog) {
+        languageJob?.cancel()
+        languageJob = viewModelScope.launch {
+            userPreferencesRepository.preferences
+                .map { resolveContentLanguage(it.contentLanguage, Locale.getDefault().language, catalog) }
+                .distinctUntilChanged()
+                .collect { resolved ->
+                    if (resolved == language) return@collect
+                    language = resolved
+                    clips.clear()
+                    statuses.clear()
+                    refreshPlaylist()
+                    requestClips()
+                }
         }
     }
 
@@ -148,8 +173,12 @@ class ReelsViewModel(
             .filter { it.id !in statuses }
             .forEach { show ->
                 statuses[show.id] = ClipStatus.Loading
+                val requested = language
                 viewModelScope.launch {
-                    getReelClip(show.id, language, catalog.defaultLanguage)
+                    val result = getReelClip(show.id, requested, catalog.defaultLanguage)
+                    // Ngôn ngữ đã đổi trong lúc tải: clip này thuộc bản cũ, bản mới đã được yêu cầu lại.
+                    if (requested != language) return@launch
+                    result
                         .onSuccess { clip -> onClip(show, clip) }
                         .onFailure {
                             statuses[show.id] = ClipStatus.Failed
