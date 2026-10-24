@@ -4,17 +4,16 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,7 +29,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -42,15 +41,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.SpanStyle
@@ -68,28 +68,28 @@ import com.takehome.drama.core.ads.reward.RewardAdManager
 import com.takehome.drama.core.designsystem.component.AppAsyncImage
 import com.takehome.drama.core.designsystem.component.AppBottomSheet
 import com.takehome.drama.core.designsystem.component.AppToastHost
-import com.takehome.drama.core.designsystem.component.ChoiceChip
 import com.takehome.drama.core.designsystem.component.ErrorBlankState
-import com.takehome.drama.core.designsystem.component.SkeletonBlock
-import com.takehome.drama.core.designsystem.component.SkeletonHost
 import com.takehome.drama.core.designsystem.component.GhostIconButton
 import com.takehome.drama.core.designsystem.component.GradientButton
 import com.takehome.drama.core.designsystem.component.OutlinePillButton
+import com.takehome.drama.core.designsystem.component.SkeletonBlock
+import com.takehome.drama.core.designsystem.component.SkeletonHost
 import com.takehome.drama.core.designsystem.component.rememberToastState
 import com.takehome.drama.core.designsystem.ext.applyIf
+import com.takehome.drama.core.designsystem.icon.AppIcons
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
 import com.takehome.drama.core.navigation.core.NavigationRequest
+import com.takehome.drama.core.ui.foundation.error.ErrorKind
+import com.takehome.drama.core.ui.foundation.error.body
+import com.takehome.drama.core.ui.foundation.error.retryLabel
+import com.takehome.drama.core.ui.foundation.error.title
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.core.ui.foundation.format.formatCompactCount
 import com.takehome.drama.core.ui.foundation.format.formatCount
 import com.takehome.drama.domain.usecase.watch.EpisodeCell
 import com.takehome.drama.domain.usecase.watch.EpisodeCellState
 import com.takehome.drama.domain.usecase.watch.EpisodeRange
-import com.takehome.drama.core.ui.foundation.error.ErrorKind
-import com.takehome.drama.core.ui.foundation.error.body
-import com.takehome.drama.core.ui.foundation.error.retryLabel
-import com.takehome.drama.core.ui.foundation.error.title
 import com.takehome.drama.feature.watch.R
 import com.takehome.drama.feature.watch.navigation.PlayerScreenProvider
 import com.takehome.drama.feature.watch.presentation.common.EpisodeGridCell
@@ -141,6 +141,7 @@ fun ShowDetailScreen(
             onIntent = viewModel::processIntent,
         )
         UnlockSheet(sheet = viewState.unlockSheet, onIntent = viewModel::processIntent)
+        RangeSheet(viewState, onIntent = viewModel::processIntent)
         AppToastHost(
             state = toastState,
             modifier = Modifier
@@ -229,8 +230,7 @@ private fun DetailGrid(
                 ranges = viewState.ranges,
                 selected = viewState.selectedRange,
                 episodeCount = viewState.cells.size,
-                watchedCount = viewState.watchedCount,
-                onSelect = { onIntent(ShowDetailIntent.RangeSelect(it)) },
+                onOpenRanges = { onIntent(ShowDetailIntent.RangeSheetOpen) },
             )
         }
         if (viewState.episodesErrorRes != null) {
@@ -439,55 +439,87 @@ private fun CtaRow(viewState: ShowDetailViewState, onIntent: (ShowDetailIntent) 
 }
 
 /**
- * "Episodes" + "44 eps · 7 watched", dưới là tab khoảng 20 tập (cùng kiểu chip với sheet 0303). Tab lọc
- * lưới — chọn tab là thấy ngay đúng các tập đó, không phải cuộn tìm.
+ * "Episodes" + nút dải "1–20 ⌄" như mockup 0301 — bấm mở [RangeSheet]. Chỉ một dải (≤ 20 tập) thì chỉ hiện "1–N".
+ * Lưới chỉ hiện các tập của dải đang chọn: chọn dải là thấy ngay đúng các tập đó, không phải cuộn tìm.
  */
 @Composable
 private fun EpisodesHeader(
     ranges: List<EpisodeRange>,
     selected: EpisodeRange?,
     episodeCount: Int,
-    watchedCount: Int,
-    onSelect: (EpisodeRange) -> Unit,
+    onOpenRanges: () -> Unit,
 ) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = AppTheme.dimensions.s5, bottom = AppTheme.dimensions.s1),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(
-                text = stringResource(R.string.watch_episodes),
-                style = AppTypography.titleSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.weight(1f),
-            )
-            if (episodeCount > 0) {
-                Text(
-                    text = pluralStringResource(
-                        R.plurals.watch_episodes_summary,
-                        watchedCount,
-                        pluralStringResource(R.plurals.watch_episode_count, episodeCount, episodeCount),
-                        watchedCount,
-                    ),
-                    style = AppTypography.label,
-                    color = AppTheme.colors.text3,
+        Text(
+            text = stringResource(R.string.watch_episodes),
+            style = AppTypography.titleSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.weight(1f),
+        )
+        val label = when {
+            selected != null -> stringResource(R.string.watch_range, selected.firstLabel, selected.lastLabel)
+            episodeCount > 0 -> stringResource(R.string.watch_range, 1, episodeCount)
+            else -> return@Row
+        }
+        val pickable = ranges.size > 1
+        val pickLabel = stringResource(R.string.watch_range_pick_cd)
+        Row(
+            modifier = Modifier
+                .defaultMinSize(minHeight = AppTheme.dimensions.touchTarget)
+                .clip(AppTheme.shapes.md)
+                .then(if (pickable) Modifier.clickable(role = Role.Button, onClickLabel = pickLabel, onClick = onOpenRanges) else Modifier)
+                .padding(start = AppTheme.dimensions.s2),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = label, style = AppTypography.label, color = AppTheme.colors.text3)
+            if (pickable) {
+                Icon(
+                    imageVector = AppIcons.ChevronDown,
+                    contentDescription = null,
+                    tint = AppTheme.colors.text3,
+                    modifier = Modifier.padding(start = AppTheme.dimensions.s1).size(16.dp),
                 )
             }
         }
-        if (ranges.size > 1) {
-            Row(
-                modifier = Modifier
-                    .horizontalScroll(rememberScrollState())
-                    .padding(top = AppTheme.dimensions.s3),
-                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.s2),
-            ) {
-                ranges.forEach { range ->
-                    ChoiceChip(
+    }
+}
+
+/** Sheet chọn dải tập của nút "1–20 ⌄": mỗi dải một hàng, dải đang xem có dấu ✓. */
+@Composable
+private fun RangeSheet(viewState: ShowDetailViewState, onIntent: (ShowDetailIntent) -> Unit) {
+    AppBottomSheet(visible = viewState.rangeSheetVisible, onDismiss = { onIntent(ShowDetailIntent.RangeSheetDismiss) }) {
+        Text(
+            text = stringResource(R.string.watch_episodes),
+            style = AppTypography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = AppTheme.dimensions.s2),
+        )
+        // AppBottomSheet đã tự cuộn nội dung — lồng thêm verticalScroll là crash (đo với chiều cao vô hạn).
+        Column {
+            viewState.ranges.forEach { range ->
+                val selected = range == viewState.selectedRange
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultMinSize(minHeight = 52.dp)
+                        .clip(AppTheme.shapes.md)
+                        .selectable(selected = selected, role = Role.RadioButton) { onIntent(ShowDetailIntent.RangeSelect(range)) },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
                         text = stringResource(R.string.watch_range, range.firstLabel, range.lastLabel),
-                        selected = range == selected,
-                        onClick = { onSelect(range) },
+                        style = AppTypography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f),
                     )
+                    if (selected) {
+                        Icon(AppIcons.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                    }
                 }
             }
         }

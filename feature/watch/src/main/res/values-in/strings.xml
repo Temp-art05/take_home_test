@@ -18,6 +18,7 @@
     <string name="watch_saved_to_library">Tersimpan di Koleksimu</string>
     <string name="watch_removed_from_library">Dihapus dari Koleksimu</string>
     <string name="watch_range">%1$d–%2$d</string>
+    <string name="watch_range_pick_cd">Pilih rentang episode</string>
     <string name="watch_episodes_error">Gagal memuat episode.</string>
     <string name="watch_player_episode_of">Ep. %1$d / %2$d</string>
     <string name="watch_like_cd">Suka</string>

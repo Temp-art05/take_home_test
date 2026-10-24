@@ -20,6 +20,7 @@
     <string name="watch_saved_to_library">Ajouté à votre bibliothèque</string>
     <string name="watch_removed_from_library">Retiré de votre bibliothèque</string>
     <string name="watch_range">%1$d–%2$d</string>
+    <string name="watch_range_pick_cd">Choisir la plage d\'épisodes</string>
     <string name="watch_episodes_error">Impossible de charger les épisodes.</string>
 
     <!-- SCR-0302 Player -->

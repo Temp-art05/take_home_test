@@ -12,6 +12,7 @@ import com.takehome.drama.core.utils.network.ConnectivityMonitor
 import com.takehome.drama.domain.model.Catalog
 import com.takehome.drama.domain.model.findShow
 import com.takehome.drama.domain.model.genres
+import com.takehome.drama.domain.model.newestTag
 import com.takehome.drama.domain.model.hero
 import com.takehome.drama.domain.model.showsInGenre
 import com.takehome.drama.domain.repository.UserPreferencesRepository
@@ -118,7 +119,10 @@ class BrowseViewModel(
             val saved = userPreferencesRepository.preferences.first().contentLanguage
             language = resolveContentLanguage(saved, Locale.getDefault().language, loaded)
             catalog = loaded
-            val chips = listOf(BrowseChip(null, "")) + loaded.genres().map { BrowseChip(it.id, it.name.resolveTagLabel(language, loaded.defaultLanguage)) }
+            // All · genre… · New (cuối, như mockup) — New chỉ khi có show gắn tag `newest`.
+            val chips = listOf(BrowseChip(null, "")) +
+                (loaded.genres() + listOfNotNull(loaded.newestTag()))
+                    .map { BrowseChip(it.id, it.name.resolveTagLabel(language, loaded.defaultLanguage)) }
             val selectedChip = currentState.selectedChip?.takeIf { id -> chips.any { it.tagId == id } }
             updateState {
                 copy(

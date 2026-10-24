@@ -235,11 +235,19 @@ class PlayerViewModelTest {
     }
 
     @Test
-    fun `episode without any source is an error, not a crash`() = runTest(mainRule.dispatcher) {
+    fun `free episode without any source is flagged on its page, the pager keeps working`() = runTest(mainRule.dispatcher) {
         val broken = testEpisode(0).copy(sources = emptyMap())
-        catalogRepository.episodes = mapOf(SHOW_ID to Result.success(ShowEpisodes(SHOW_ID, listOf(broken))))
-        assertEquals(R.string.watch_error_no_source, viewModel().viewState.value.errorRes)
+        catalogRepository.episodes = mapOf(SHOW_ID to Result.success(ShowEpisodes(SHOW_ID, listOf(broken, testEpisode(1)))))
+        val viewModel = viewModel()
+
+        val state = viewModel.viewState.value
+        assertTrue(state.sourceUnavailable)
+        assertNull(state.errorRes)
         assertTrue(player.loads.isEmpty())
+
+        viewModel.processIntent(PlayerIntent.PageSettled(index = 1))
+        assertFalse(viewModel.viewState.value.sourceUnavailable)
+        assertEquals(url(1), player.loads.last().url)
     }
 
     @Test

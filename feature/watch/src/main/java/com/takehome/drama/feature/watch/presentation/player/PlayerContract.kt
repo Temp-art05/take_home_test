@@ -27,6 +27,8 @@ data class PlayerViewState(
     val episodeNumber: Int = 0,
     val episodeTotal: Int = 0,
     val isLocked: Boolean = false,
+    /** Tập free nhưng không rendition nào phát được: báo trên trang đó, pager vẫn vuốt sang tập khác (không lỗi toàn màn). */
+    val sourceUnavailable: Boolean = false,
     /** Nút "Watch an ad to unlock" của trang khoá; null = không có nút (tập free / `rewarded_bonus` tắt). */
     val unlockAd: RewardedAdState? = null,
     /**

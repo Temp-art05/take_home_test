@@ -101,6 +101,8 @@ class ShowDetailViewModel(
             ShowDetailIntent.ContinueClick -> currentState.continueCta?.let { openEpisode(it.episodeIndex) }
             is ShowDetailIntent.EpisodeClick -> openEpisode(intent.index)
             is ShowDetailIntent.RangeSelect -> selectRange(intent.range)
+            ShowDetailIntent.RangeSheetOpen -> if (currentState.ranges.size > 1) updateState { copy(rangeSheetVisible = true) }
+            ShowDetailIntent.RangeSheetDismiss -> updateState { copy(rangeSheetVisible = false) }
             ShowDetailIntent.SaveClick -> toggleSaved()
             ShowDetailIntent.UnlockWithAdClick -> showRewarded()
             ShowDetailIntent.UnlockSheetDismiss -> closeUnlockSheet()
@@ -309,7 +311,7 @@ class ShowDetailViewModel(
 
     private fun selectRange(range: EpisodeRange) {
         rangePickedByUser = true
-        updateState { copy(selectedRange = range) }
+        updateState { copy(selectedRange = range, rangeSheetVisible = false) }
     }
 
     private fun toggleSaved() {
