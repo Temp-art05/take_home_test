@@ -247,6 +247,7 @@ class PlayerViewModel(
                 episodeIndex = episode.index,
                 episodeNumber = episode.displayNumber,
                 isLocked = !episode.isWatchable(),
+                sourceUnavailable = false,
                 unlockAd = null,
                 likeCount = episode.likeCount + if (episode.index in likedEpisodes) 1 else 0,
                 isLiked = episode.index in likedEpisodes,
@@ -291,8 +292,12 @@ class PlayerViewModel(
     private fun startPlayback(episode: Episode, positionMs: Long, playWhenReady: Boolean) {
         val defaultLanguage = catalog?.defaultLanguage ?: return
         val preferred = currentState.quality ?: autoQualityCap
-        val source = pickVideoSource(episode, contentLanguage, defaultLanguage, preferred)
-            ?: return fail(R.string.watch_error_no_source)
+        val source = pickVideoSource(episode, contentLanguage, defaultLanguage, preferred) ?: run {
+            // Một tập hỏng không được khoá cả Player: dừng trang này, giữ pager.
+            player.setCurrent(episodes.indexOf(episode), startPositionMs = 0, playWhenReady = false)
+            updateState { copy(sourceUnavailable = true) }
+            return
+        }
         playingQuality = source.quality
         updateState {
             copy(

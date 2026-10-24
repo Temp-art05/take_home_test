@@ -88,6 +88,9 @@ object AppIcons {
 
     val Plus: ImageVector by lazy { stroked("Plus", "M12 5v14M5 12h14", width = 2f) }
 
+    /** `⌄` của nút mở danh sách (vd. dải tập "1–20 ⌄" ở Detail) — ký tự ▾ hiện thành chấm trên một số font. */
+    val ChevronDown: ImageVector by lazy { stroked("ChevronDown", "m6 9.5 6 6 6-6", width = 2f) }
+
     /** `›` cuối hàng — tự lật khi RTL. */
     val ChevronEnd: ImageVector by lazy { stroked("ChevronEnd", "m9.5 6 6 6-6 6", width = 2f, autoMirror = true) }
 

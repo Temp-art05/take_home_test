@@ -5,6 +5,7 @@ import com.takehome.drama.domain.fake.show
 import com.takehome.drama.domain.fake.tag
 import com.takehome.drama.domain.model.genres
 import com.takehome.drama.domain.model.hero
+import com.takehome.drama.domain.model.newestTag
 import com.takehome.drama.domain.model.rails
 import com.takehome.drama.domain.model.showsInGenre
 import com.takehome.drama.domain.model.tagsOf
@@ -115,5 +116,15 @@ class CatalogQueriesTest {
     @Test
     fun `content language - default language when device language is not offered`() {
         assertEquals("en", resolveContentLanguage(saved = null, deviceLanguage = "fr", catalog = catalog(emptyList())))
+    }
+
+    @Test
+    fun `New chip is the newest rail tag, only when a show carries it`() {
+        val newest = tag("newest", isCategory = false, orderPriority = 0)
+        val empty = catalog(shows = listOf(show("1")), tags = listOf(newest))
+        assertNull(empty.newestTag())
+
+        val withShow = catalog(shows = listOf(show("1", tagIds = listOf("newest"))), tags = listOf(newest))
+        assertEquals("newest", withShow.newestTag()?.id)
     }
 }

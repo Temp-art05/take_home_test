@@ -18,6 +18,7 @@
     <string name="watch_saved_to_library">Kitaplığına kaydedildi</string>
     <string name="watch_removed_from_library">Kitaplığından kaldırıldı</string>
     <string name="watch_range">%1$d–%2$d</string>
+    <string name="watch_range_pick_cd">Bölüm aralığını seç</string>
     <string name="watch_episodes_error">Bölümler yüklenemedi.</string>
     <string name="watch_player_episode_of">Bölüm %1$d / %2$d</string>
     <string name="watch_like_cd">Beğen</string>

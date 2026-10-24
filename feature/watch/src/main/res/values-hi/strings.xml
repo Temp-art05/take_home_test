@@ -20,6 +20,7 @@
     <string name="watch_saved_to_library">आपकी लाइब्रेरी में सेव हुआ</string>
     <string name="watch_removed_from_library">आपकी लाइब्रेरी से हटाया गया</string>
     <string name="watch_range">%1$d–%2$d</string>
+    <string name="watch_range_pick_cd">एपिसोड की रेंज चुनें</string>
     <string name="watch_episodes_error">एपिसोड लोड नहीं हो सके।</string>
 
     <!-- SCR-0302 Player -->
