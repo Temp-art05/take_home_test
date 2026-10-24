@@ -54,4 +54,18 @@ class AppLocaleTest {
     fun `going back to the system language from an explicit one is applied`() {
         assertTrue(AppLocale.needsApply(AppLocale.System, current = AppLocale.French, displayed = Locale.FRENCH))
     }
+
+    @Test
+    fun `back to the device language that is already shown does not change the display`() {
+        val en = Locale.forLanguageTag("en")
+        assertFalse(AppLocale.changesDisplayedLanguage(AppLocale.System, displayed = en, device = Locale.forLanguageTag("en-US")))
+        assertFalse(AppLocale.changesDisplayedLanguage(AppLocale.Indonesian, displayed = Locale("in"), device = en))
+    }
+
+    @Test
+    fun `another language or a different device language changes the display`() {
+        val en = Locale.forLanguageTag("en")
+        assertTrue(AppLocale.changesDisplayedLanguage(AppLocale.Arabic, displayed = en, device = en))
+        assertTrue(AppLocale.changesDisplayedLanguage(AppLocale.System, displayed = en, device = Locale.forLanguageTag("fr-FR")))
+    }
 }

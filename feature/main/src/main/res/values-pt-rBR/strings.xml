@@ -85,12 +85,62 @@
     <string name="library_history">Histórico</string>
     <string name="library_saved">Salvas</string>
 
-    <string name="skeleton_open_show">Abrir série %1$s</string>
-    <string name="skeleton_play_show">Reproduzir série %1$s</string>
-    <string name="skeleton_open_history">Histórico</string>
-    <string name="skeleton_open_saved">Salvas</string>
-    <string name="skeleton_open_language">Idioma do app</string>
-
     <string name="language_title">Idioma</string>
     <string name="language_system">Idioma do dispositivo</string>
+
+    <!-- Phase 6: Library, History, Saved, Settings, Language -->
+    <string name="search_no_results_body">Tente um título ou um gênero - a correnteza leva o resto.</string>
+    <string name="library_watched">Assistidos</string>
+    <string name="library_history_row">Histórico</string>
+    <string name="library_recent">Recentes</string>
+    <string name="library_see_all">Ver tudo</string>
+    <string name="history_tab_watching">Assistindo</string>
+    <string name="history_tab_finished">Concluídas</string>
+    <string name="common_edit">Editar</string>
+    <string name="common_done">Pronto</string>
+    <string name="history_meta">Ep. %1$d / %2$d · %3$s</string>
+    <string name="history_today">hoje</string>
+    <string name="history_yesterday">ontem</string>
+    <string name="history_last_week">semana passada</string>
+    <string name="common_more_cd">Mais opções para %1$s</string>
+    <string name="common_remove_cd">Remover %1$s</string>
+    <string name="history_sheet_details">Detalhes da série</string>
+    <string name="history_sheet_remove">Remover do histórico</string>
+    <string name="history_removed">Removido do histórico</string>
+    <string name="history_empty_watching_title">Nada no flow por enquanto</string>
+    <string name="history_empty_watching_body">Comece um episódio e ele vai te esperar aqui quando você voltar.</string>
+    <string name="history_empty_finished_title">Nenhuma série concluída ainda</string>
+    <string name="history_empty_finished_body">As séries que você assiste até o último episódio aparecem aqui.</string>
+    <string name="common_find_next">Encontre seu próximo flow</string>
+    <string name="saved_filter_all">Tudo · %1$d</string>
+    <string name="saved_filter_airing">Em exibição</string>
+    <string name="saved_filter_complete">Completas</string>
+    <string name="saved_sheet_remove">Remover dos Salvos</string>
+    <string name="saved_empty_title">Sua lista está vazia</string>
+    <string name="saved_empty_body">Achou algo para ver depois? Toque em ＋ e ele vai te esperar aqui, fora da correnteza.</string>
+    <string name="saved_filter_empty_airing">Nenhuma série em exibição salva</string>
+    <string name="saved_filter_empty_complete">Nenhuma série completa salva</string>
+    <string name="settings_group_language">Idioma</string>
+    <string name="settings_app_language">Idioma do app</string>
+    <string name="settings_group_appearance">Aparência</string>
+    <string name="settings_theme_dark">Escuro</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_group_policies">Políticas</string>
+    <string name="settings_terms">Termos de Uso</string>
+    <string name="settings_privacy">Política de Privacidade</string>
+    <string name="settings_licenses">Licenças de código aberto</string>
+    <string name="settings_policy_unavailable">Disponível no lançamento</string>
+    <string name="language_description">Vale para toda a interface do app. As mudanças valem na hora - sem reiniciar.</string>
+    <string name="language_current">Atualmente %1$s</string>
+    <string name="language_choose_manually">Escolher manualmente</string>
+    <plurals name="history_min_left">
+        <item quantity="one">falta %1$d min</item>
+        <item quantity="many">faltam %1$d min</item>
+        <item quantity="other">faltam %1$d min</item>
+    </plurals>
+    <plurals name="history_days_ago">
+        <item quantity="one">há %1$d dia</item>
+        <item quantity="many">há %1$d dias</item>
+        <item quantity="other">há %1$d dias</item>
+    </plurals>
 </resources>

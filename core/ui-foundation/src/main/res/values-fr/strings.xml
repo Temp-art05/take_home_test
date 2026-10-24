@@ -4,4 +4,8 @@
     <string name="error_server">Un problème est survenu de notre côté. Réessayez plus tard.</string>
     <string name="error_unauthorized">Votre session a expiré. Veuillez vous reconnecter.</string>
     <string name="error_unexpected">Un problème est survenu. Veuillez réessayer.</string>
+    <string name="state_offline_title">Vous êtes hors ligne</string>
+    <string name="state_offline_body">Vérifiez le Wi-Fi ou les données mobiles - la rivière sera toujours là.</string>
+    <string name="state_error_title">Un problème est survenu</string>
+    <string name="state_try_again">Réessayer</string>
 </resources>

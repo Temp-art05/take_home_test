@@ -1,6 +1,7 @@
 package com.takehome.drama.feature.watch.presentation.detail
 
 import androidx.annotation.StringRes
+import com.takehome.drama.core.ui.foundation.error.UiError
 import com.takehome.drama.core.ui.foundation.vm.SingleEvent
 import com.takehome.drama.core.ui.foundation.vm.ViewIntent
 import com.takehome.drama.core.ui.foundation.vm.ViewState
@@ -11,7 +12,7 @@ import com.takehome.drama.feature.watch.presentation.common.RewardedAdState
 data class ShowDetailViewState(
     val isLoading: Boolean = true,
     /** Lỗi toàn màn (catalogue lỗi / show không tồn tại). */
-    @StringRes val errorRes: Int? = null,
+    val error: UiError? = null,
     val title: String = "",
     val posterUrl: String = "",
     val tags: List<String> = emptyList(),

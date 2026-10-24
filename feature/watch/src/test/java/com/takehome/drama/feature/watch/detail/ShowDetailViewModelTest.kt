@@ -3,6 +3,7 @@ package com.takehome.drama.feature.watch.detail
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.takehome.drama.core.ads.FakeRewardAdManager
+import com.takehome.drama.core.ui.foundation.error.ErrorKind
 import com.takehome.drama.domain.fake.FakeAdsConfigRepository
 import com.takehome.drama.domain.fake.FakeEpisodeUnlockRepository
 import com.takehome.drama.domain.fake.testAppConfig
@@ -185,7 +186,7 @@ class ShowDetailViewModelTest {
         val viewModel = viewModel()
         val failed = viewModel.viewState.value
         assertEquals("The Ex-Wife Returns", failed.title)
-        assertNull(failed.errorRes)
+        assertNull(failed.error)
         assertNotNull(failed.episodesErrorRes)
         assertNull(failed.continueCta)
 
@@ -233,13 +234,14 @@ class ShowDetailViewModelTest {
     @Test
     fun `catalogue failing is a full screen error`() = runTest(mainRule.dispatcher) {
         catalogRepository.catalog = Result.failure(DomainException.Network())
-        assertNotNull(viewModel().viewState.value.errorRes)
+        assertNotNull(viewModel().viewState.value.error)
     }
 
     @Test
     fun `unknown show id is a not found error, not a crash`() = runTest(mainRule.dispatcher) {
         val state = viewModel(showId = "nope").viewState.value
-        assertEquals(R.string.watch_show_not_found, state.errorRes)
+        assertEquals(R.string.watch_show_not_found, state.error?.messageRes)
+        assertEquals(ErrorKind.NotFound, state.error?.kind)
     }
 
     @Test

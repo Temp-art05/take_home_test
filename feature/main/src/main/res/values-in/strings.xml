@@ -70,11 +70,58 @@
     <string name="reels_unavailable">Serial ini tidak punya episode gratis untuk pratinjau.</string>
     <string name="library_history">Riwayat tontonan</string>
     <string name="library_saved">Tersimpan</string>
-    <string name="skeleton_open_show">Buka serial %1$s</string>
-    <string name="skeleton_play_show">Putar serial %1$s</string>
-    <string name="skeleton_open_history">Riwayat tontonan</string>
-    <string name="skeleton_open_saved">Tersimpan</string>
-    <string name="skeleton_open_language">Bahasa aplikasi</string>
     <string name="language_title">Bahasa</string>
     <string name="language_system">Ikuti bahasa perangkat</string>
+
+    <!-- Phase 6: Library, History, Saved, Settings, Language -->
+    <string name="search_no_results_body">Coba judul serial atau genre - arus akan membawa sisanya.</string>
+    <string name="library_watched">Ditonton</string>
+    <string name="library_history_row">Riwayat</string>
+    <string name="library_recent">Terbaru</string>
+    <string name="library_see_all">Lihat semua</string>
+    <string name="history_tab_watching">Sedang ditonton</string>
+    <string name="history_tab_finished">Selesai</string>
+    <string name="common_edit">Edit</string>
+    <string name="common_done">Selesai</string>
+    <string name="history_meta">Ep. %1$d / %2$d · %3$s</string>
+    <string name="history_today">hari ini</string>
+    <string name="history_yesterday">kemarin</string>
+    <string name="history_last_week">minggu lalu</string>
+    <string name="common_more_cd">Opsi lain untuk %1$s</string>
+    <string name="common_remove_cd">Hapus %1$s</string>
+    <string name="history_sheet_details">Detail serial</string>
+    <string name="history_sheet_remove">Hapus dari riwayat</string>
+    <string name="history_removed">Dihapus dari riwayat</string>
+    <string name="history_empty_watching_title">Belum ada apa-apa di arus</string>
+    <string name="history_empty_watching_body">Mulai satu episode dan ia akan menunggumu di sini saat kamu kembali.</string>
+    <string name="history_empty_finished_title">Belum ada serial yang selesai</string>
+    <string name="history_empty_finished_body">Serial yang kamu tonton sampai episode terakhir akan muncul di sini.</string>
+    <string name="common_find_next">Temukan alur berikutnya</string>
+    <string name="saved_filter_all">Semua · %1$d</string>
+    <string name="saved_filter_airing">Tayang</string>
+    <string name="saved_filter_complete">Tamat</string>
+    <string name="saved_sheet_remove">Hapus dari Tersimpan</string>
+    <string name="saved_empty_title">Daftar tontonanmu kosong</string>
+    <string name="saved_empty_body">Menemukan sesuatu yang ingin kamu tonton lagi? Ketuk ＋ dan ia akan menunggu di sini, di luar arus.</string>
+    <string name="saved_filter_empty_airing">Tidak ada serial tayang yang disimpan</string>
+    <string name="saved_filter_empty_complete">Tidak ada serial tamat yang disimpan</string>
+    <string name="settings_group_language">Bahasa</string>
+    <string name="settings_app_language">Bahasa aplikasi</string>
+    <string name="settings_group_appearance">Tampilan</string>
+    <string name="settings_theme_dark">Gelap</string>
+    <string name="settings_theme_light">Terang</string>
+    <string name="settings_group_policies">Kebijakan</string>
+    <string name="settings_terms">Ketentuan Penggunaan</string>
+    <string name="settings_privacy">Kebijakan Privasi</string>
+    <string name="settings_licenses">Lisensi open source</string>
+    <string name="settings_policy_unavailable">Tersedia saat peluncuran</string>
+    <string name="language_description">Berlaku untuk seluruh antarmuka aplikasi. Perubahan langsung berlaku - tanpa perlu memulai ulang.</string>
+    <string name="language_current">Saat ini %1$s</string>
+    <string name="language_choose_manually">Pilih manual</string>
+    <plurals name="history_min_left">
+        <item quantity="other">%1$d menit lagi</item>
+    </plurals>
+    <plurals name="history_days_ago">
+        <item quantity="other">%1$d hari lalu</item>
+    </plurals>
 </resources>

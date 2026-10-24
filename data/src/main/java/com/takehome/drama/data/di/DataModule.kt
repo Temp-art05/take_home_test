@@ -14,6 +14,8 @@ import com.takehome.drama.data.local.datasource.episodeUnlockDataStore
 import com.takehome.drama.data.remote.datasource.CatalogAssetDataSourceImpl
 import com.takehome.drama.data.remote.datasource.CatalogDataSource
 import com.takehome.drama.data.remote.datasource.CatalogRemoteDataSourceImpl
+import com.takehome.drama.data.remote.datasource.DebugCatalogFault
+import com.takehome.drama.data.remote.datasource.FaultInjectingCatalogDataSource
 import com.takehome.drama.data.remote.http.ApiConfig
 import com.takehome.drama.data.remote.http.defaultJson
 import com.takehome.drama.data.remote.http.provideHttpClient
@@ -36,9 +38,13 @@ import com.takehome.drama.domain.usecase.discovery.WallClock
 import com.takehome.drama.domain.usecase.history.GetContinueTargetUseCase
 import com.takehome.drama.domain.usecase.history.GetResumePositionUseCase
 import com.takehome.drama.domain.usecase.history.ObserveShowProgressUseCase
+import com.takehome.drama.domain.usecase.history.EpochClock
+import com.takehome.drama.domain.usecase.history.GetContinueEpisodeUseCase
 import com.takehome.drama.domain.usecase.history.ObserveWatchHistoryUseCase
+import com.takehome.drama.domain.usecase.history.RemoveFromHistoryUseCase
 import com.takehome.drama.domain.usecase.history.SaveWatchProgressUseCase
 import com.takehome.drama.domain.usecase.library.ObserveIsShowSavedUseCase
+import com.takehome.drama.domain.usecase.library.ObserveLibrarySummaryUseCase
 import com.takehome.drama.domain.usecase.library.ObserveSavedShowsUseCase
 import com.takehome.drama.domain.usecase.library.SetShowSavedUseCase
 import com.takehome.drama.domain.usecase.onboarding.CompleteOnboardingUseCase
@@ -51,6 +57,8 @@ import com.takehome.drama.domain.usecase.reels.GetReelClipUseCase
 import com.takehome.drama.domain.usecase.reels.GetReelsFeedUseCase
 import com.takehome.drama.domain.usecase.search.GetPopularShowsUseCase
 import com.takehome.drama.domain.usecase.search.SearchShowsUseCase
+import com.takehome.drama.domain.usecase.settings.ObserveThemeUseCase
+import com.takehome.drama.domain.usecase.settings.SetThemeUseCase
 import com.takehome.drama.domain.usecase.watch.GetEndActionUseCase
 import com.takehome.drama.domain.usecase.watch.GetEpisodeGridUseCase
 import com.takehome.drama.domain.usecase.watch.GetEpisodeRangesUseCase
@@ -59,7 +67,7 @@ import com.takehome.drama.domain.usecase.watch.ObserveUnlockedEpisodesUseCase
 import com.takehome.drama.domain.usecase.watch.PickVideoSourceUseCase
 import com.takehome.drama.domain.usecase.watch.UnlockEpisodeUseCase
 import org.koin.android.ext.koin.androidContext
-import org.koin.dsl.bind
+import org.koin.dsl.binds
 import org.koin.dsl.module
 
 /**
@@ -75,12 +83,16 @@ val dataModule = module {
     single { get<AppDatabase>().savedShowDao() }
 
     // Datasource — flavor dev đọc fixtures trong assets, prod gọi API.
+    single { DebugCatalogFault() }
     single<CatalogDataSource> {
-        if (get<AppConfig>().useFixtures) {
+        val config = get<AppConfig>()
+        val source = if (config.useFixtures) {
             CatalogAssetDataSourceImpl(androidContext().assets, defaultJson)
         } else {
             CatalogRemoteDataSourceImpl(get())
         }
+        // Dev: cho launcher debug ép tải chậm / lỗi mạng để chụp SCR-0601 / SCR-0603.
+        if (config.isDevFlavor) FaultInjectingCatalogDataSource(source, get()) else source
     }
     single<WatchProgressLocalDataSource> { WatchProgressLocalDataSourceImpl(get()) }
     single<SavedShowLocalDataSource> { SavedShowLocalDataSourceImpl(get()) }
@@ -110,6 +122,9 @@ val dataModule = module {
     factory { GetContinueTargetUseCase(get()) }
     factory { ObserveWatchHistoryUseCase(get()) }
     factory { ObserveShowProgressUseCase(get()) }
+    factory { RemoveFromHistoryUseCase(get()) }
+    factory { GetContinueEpisodeUseCase(get(), get()) }
+    factory { ObserveLibrarySummaryUseCase(get(), get()) }
     factory { SetShowSavedUseCase(get()) }
     factory { ObserveIsShowSavedUseCase(get()) }
     factory { ObserveSavedShowsUseCase(get()) }
@@ -124,7 +139,9 @@ val dataModule = module {
     factory { GetPopularShowsUseCase() }
     factory { GetReelsFeedUseCase() }
     factory { GetReelClipUseCase(get(), get()) }
+    factory { ObserveThemeUseCase(get()) }
+    factory { SetThemeUseCase(get()) }
 
-    // Đồng hồ máy cho Day Cycle — single để flavor dev ép giờ một lần cho cả phiên.
-    single { SystemWallClock() } bind WallClock::class
+    // Đồng hồ máy cho Day Cycle + History — single để flavor dev ép giờ một lần cho cả phiên.
+    single { SystemWallClock() } binds arrayOf(WallClock::class, EpochClock::class)
 }

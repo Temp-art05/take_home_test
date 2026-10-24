@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.Flow
 interface WatchProgressRepository {
     suspend fun save(progress: WatchProgress): Result<Unit>
 
+    /** Xoá mọi tập đã lưu của một show (History "Remove") — vị trí resume cũng mất. */
+    suspend fun removeShow(showId: String): Result<Unit>
+
     /** Lỗi đọc DB → null, coi như chưa xem (đã log): mở từ đầu tốt hơn chặn phát. */
     suspend fun get(showId: String, episodeIndex: Int): WatchProgress?
 

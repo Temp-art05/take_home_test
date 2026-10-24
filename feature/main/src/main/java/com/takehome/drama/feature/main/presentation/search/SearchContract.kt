@@ -1,6 +1,6 @@
 package com.takehome.drama.feature.main.presentation.search
 
-import androidx.annotation.StringRes
+import com.takehome.drama.core.ui.foundation.error.UiError
 import com.takehome.drama.core.ui.foundation.vm.SingleEvent
 import com.takehome.drama.core.ui.foundation.vm.ViewIntent
 import com.takehome.drama.core.ui.foundation.vm.ViewState
@@ -17,7 +17,7 @@ data class SearchViewState(
     /** Chip "Genres" lúc chưa nhập — chạm = điền tên genre vào ô. */
     val genres: List<String> = emptyList(),
     val popular: List<ShowCard> = emptyList(),
-    @StringRes val errorRes: Int? = null,
+    val error: UiError? = null,
 ) : ViewState
 
 sealed interface SearchIntent : ViewIntent {

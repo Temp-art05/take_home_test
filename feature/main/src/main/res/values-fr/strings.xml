@@ -85,12 +85,62 @@
     <string name="library_history">Historique</string>
     <string name="library_saved">Enregistrées</string>
 
-    <string name="skeleton_open_show">Ouvrir la série %1$s</string>
-    <string name="skeleton_play_show">Lire la série %1$s</string>
-    <string name="skeleton_open_history">Historique</string>
-    <string name="skeleton_open_saved">Enregistrées</string>
-    <string name="skeleton_open_language">Langue de l\'app</string>
-
     <string name="language_title">Langue</string>
     <string name="language_system">Langue de l\'appareil</string>
+
+    <!-- Phase 6: Library, History, Saved, Settings, Language -->
+    <string name="search_no_results_body">Essayez un titre ou un genre - le courant fera le reste.</string>
+    <string name="library_watched">Vus</string>
+    <string name="library_history_row">Historique</string>
+    <string name="library_recent">Récents</string>
+    <string name="library_see_all">Tout voir</string>
+    <string name="history_tab_watching">En cours</string>
+    <string name="history_tab_finished">Terminées</string>
+    <string name="common_edit">Modifier</string>
+    <string name="common_done">OK</string>
+    <string name="history_meta">Ép. %1$d / %2$d · %3$s</string>
+    <string name="history_today">aujourd\'hui</string>
+    <string name="history_yesterday">hier</string>
+    <string name="history_last_week">la semaine dernière</string>
+    <string name="common_more_cd">Plus d\'options pour %1$s</string>
+    <string name="common_remove_cd">Retirer %1$s</string>
+    <string name="history_sheet_details">Détails de la série</string>
+    <string name="history_sheet_remove">Retirer de l\'historique</string>
+    <string name="history_removed">Retiré de l\'historique</string>
+    <string name="history_empty_watching_title">Rien dans le flux pour l\'instant</string>
+    <string name="history_empty_watching_body">Lancez un épisode, il vous attendra ici à votre retour.</string>
+    <string name="history_empty_finished_title">Aucune série terminée</string>
+    <string name="history_empty_finished_body">Les séries regardées jusqu\'au dernier épisode arrivent ici.</string>
+    <string name="common_find_next">Trouvez votre prochain flow</string>
+    <string name="saved_filter_all">Tout · %1$d</string>
+    <string name="saved_filter_airing">En diffusion</string>
+    <string name="saved_filter_complete">Terminées</string>
+    <string name="saved_sheet_remove">Retirer des favoris</string>
+    <string name="saved_empty_title">Votre liste est vide</string>
+    <string name="saved_empty_body">Vous voulez y revenir plus tard ? Touchez ＋ et elle vous attendra ici, hors du courant.</string>
+    <string name="saved_filter_empty_airing">Aucune série en diffusion enregistrée</string>
+    <string name="saved_filter_empty_complete">Aucune série terminée enregistrée</string>
+    <string name="settings_group_language">Langue</string>
+    <string name="settings_app_language">Langue de l\'appli</string>
+    <string name="settings_group_appearance">Apparence</string>
+    <string name="settings_theme_dark">Sombre</string>
+    <string name="settings_theme_light">Clair</string>
+    <string name="settings_group_policies">Règles</string>
+    <string name="settings_terms">Conditions d\'utilisation</string>
+    <string name="settings_privacy">Politique de confidentialité</string>
+    <string name="settings_licenses">Licences open source</string>
+    <string name="settings_policy_unavailable">Disponible au lancement</string>
+    <string name="language_description">S\'applique à toute l\'interface de l\'appli. Les changements sont immédiats - pas besoin de redémarrer.</string>
+    <string name="language_current">Actuellement %1$s</string>
+    <string name="language_choose_manually">Choisir manuellement</string>
+    <plurals name="history_min_left">
+        <item quantity="one">%1$d min restante</item>
+        <item quantity="many">%1$d min restantes</item>
+        <item quantity="other">%1$d min restantes</item>
+    </plurals>
+    <plurals name="history_days_ago">
+        <item quantity="one">il y a %1$d jour</item>
+        <item quantity="many">il y a %1$d jours</item>
+        <item quantity="other">il y a %1$d jours</item>
+    </plurals>
 </resources>

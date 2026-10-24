@@ -10,6 +10,7 @@ import com.takehome.drama.core.media.PlaybackSpeed
 import com.takehome.drama.core.media.PlaybackState
 import com.takehome.drama.core.media.progress
 import com.takehome.drama.core.ui.foundation.error.toErrorRes
+import com.takehome.drama.core.ui.foundation.error.toUiError
 import com.takehome.drama.core.ui.foundation.vm.BaseViewModel
 import com.takehome.drama.domain.model.Catalog
 import com.takehome.drama.domain.model.Show
@@ -102,7 +103,7 @@ class ReelsViewModel(
             ReelsIntent.ToggleSave -> toggleSave()
             ReelsIntent.ToggleDescription -> updateState { copy(descriptionExpanded = !descriptionExpanded) }
             ReelsIntent.WatchAll -> watchAll()
-            ReelsIntent.Retry -> load()
+            ReelsIntent.Retry -> if (!currentState.isLoading) load()
             ReelsIntent.RetryClip -> retryCurrent()
             is ReelsIntent.TabVisible -> {
                 tabVisible = intent.visible
@@ -120,10 +121,10 @@ class ReelsViewModel(
     }
 
     private fun load() {
-        updateState { copy(isLoading = true, errorRes = null) }
+        updateState { copy(isLoading = true, error = null) }
         viewModelScope.launch {
             val loaded = getCatalog().getOrElse { error ->
-                updateState { copy(isLoading = false, errorRes = error.toErrorRes()) }
+                updateState { copy(isLoading = false, error = error.toUiError()) }
                 return@launch
             }
             val preferences = userPreferencesRepository.preferences.first()

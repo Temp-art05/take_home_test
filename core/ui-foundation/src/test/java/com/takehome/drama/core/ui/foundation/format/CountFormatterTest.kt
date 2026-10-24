@@ -47,6 +47,13 @@ class CountFormatterTest {
         assertEquals(EXPECTED_HI, formatCompactCount(4_700_000, Locale.forLanguageTag("hi")))
     }
 
+    @Test
+    fun `full count uses the same digits as percent-d in strings`() {
+        assertEquals("1,234", formatCount(1_234, en))
+        val ar = Locale.forLanguageTag("ar")
+        assertEquals(String.format(ar, "%d", 5), formatCount(5, ar))
+    }
+
     // ICU chèn no-break space giữa số và đơn vị.
     private companion object {
         const val EXPECTED_AR = "٤٫٧\u00A0مليون"

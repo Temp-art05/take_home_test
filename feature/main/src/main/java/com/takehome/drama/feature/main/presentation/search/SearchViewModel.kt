@@ -3,7 +3,7 @@ package com.takehome.drama.feature.main.presentation.search
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.takehome.drama.core.ui.foundation.error.toErrorRes
+import com.takehome.drama.core.ui.foundation.error.toUiError
 import com.takehome.drama.core.ui.foundation.vm.BaseViewModel
 import com.takehome.drama.domain.model.Catalog
 import com.takehome.drama.domain.model.genres
@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
@@ -45,6 +46,7 @@ class SearchViewModel(
      */
     private val queries = MutableSharedFlow<String>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     private var catalog: Catalog? = null
+    private var loadJob: Job? = null
     private var language = ""
 
     override fun initState() = SearchViewState(
@@ -62,15 +64,15 @@ class SearchViewModel(
             is SearchIntent.FillQuery -> setQuery(intent.text, immediate = true)
             is SearchIntent.OpenShow -> sendEvent(SearchSingleEvent.OpenShow(intent.showId))
             SearchIntent.Back -> sendEvent(SearchSingleEvent.NavigateBack)
-            SearchIntent.Retry -> load()
+            SearchIntent.Retry -> if (loadJob?.isActive != true) load()
         }
     }
 
     private fun load() {
-        updateState { copy(errorRes = null) }
-        viewModelScope.launch {
+        updateState { copy(error = null) }
+        loadJob = viewModelScope.launch {
             val loaded = getCatalog().getOrElse { error ->
-                updateState { copy(errorRes = error.toErrorRes()) }
+                updateState { copy(error = error.toUiError()) }
                 return@launch
             }
             val saved = userPreferencesRepository.preferences.first().contentLanguage

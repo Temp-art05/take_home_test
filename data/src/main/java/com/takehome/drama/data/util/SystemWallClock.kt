@@ -2,16 +2,19 @@ package com.takehome.drama.data.util
 
 import com.takehome.drama.domain.usecase.discovery.ClockTime
 import com.takehome.drama.domain.usecase.discovery.WallClock
+import com.takehome.drama.domain.usecase.history.EpochClock
 import java.util.Calendar
 
 /**
  * Giờ máy theo múi giờ hiện tại. [overrideHour] chỉ để flavor dev chụp Home ở một khung giờ cố định
  * (`--ei debug_hour 21`); bản prod không bao giờ gán.
  */
-class SystemWallClock : WallClock {
+class SystemWallClock : WallClock, EpochClock {
 
     @Volatile
     var overrideHour: Int? = null
+
+    override fun nowMillis(): Long = System.currentTimeMillis()
 
     override fun now(): ClockTime {
         val calendar = Calendar.getInstance()

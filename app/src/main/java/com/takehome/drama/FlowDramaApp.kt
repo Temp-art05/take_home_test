@@ -15,7 +15,6 @@ import com.takehome.drama.core.designsystem.component.appImageLoader
 import com.takehome.drama.core.media.DeviceTier
 import com.takehome.drama.core.media.mediaModule
 import com.takehome.drama.core.media.prepareMediaCache
-import com.takehome.drama.core.navigation.core.skeletonModule
 import com.takehome.drama.core.utils.notification.NotificationHelper
 import com.takehome.drama.data.di.dataModule
 import com.takehome.drama.di.AppScope
@@ -62,7 +61,6 @@ class FlowDramaApp : Application(), SingletonImageLoader.Factory {
                 adsModule,
                 // Dev: `adb shell run-as com.takehome.drama touch files/force_low_tier` (hoặc force_normal_tier) để ép mức máy.
                 mediaModule(tierOverride = ::devTierOverride),
-                skeletonModule,
                 onboardingModule,
                 mainModule,
                 watchModule,

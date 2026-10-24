@@ -163,4 +163,91 @@ object AppTypography {
         fontWeight = FontWeight.Bold,
         fontSize = 12.sp,
     )
+
+    /** `.blank h3` — 18sp/700. */
+    val blankTitle = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.Bold,
+        fontSize = 18.sp,
+        lineHeight = 23.sp,
+        letterSpacing = (-0.01).em,
+    )
+
+    /** `.blank p` — 13.5sp, line-height 1.6. */
+    val blankBody = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.Normal,
+        fontSize = 13.5.sp,
+        lineHeight = 21.6.sp,
+    )
+
+    /** Nhãn hàng `.r .l` của Settings/Library — 14.5sp. */
+    val rowLabel = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.5.sp,
+        lineHeight = 20.sp,
+    )
+
+    /** Dòng phụ `.r .l small` — 11.5sp. */
+    val rowSupporting = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.Normal,
+        fontSize = 11.5.sp,
+        lineHeight = 15.sp,
+    )
+
+    /** Giá trị `.r .v` — 13sp. */
+    val rowValue = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.Normal,
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+    )
+
+    /** `.glabel` — 11sp/700 viết hoa, giãn 0.1em. */
+    val groupLabel = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.Bold,
+        fontSize = 11.sp,
+        letterSpacing = 0.1.em,
+    )
+
+    /** Số trên thẻ `.mt b` của Library — 17sp/700. */
+    val statValue = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.Bold,
+        fontSize = 17.sp,
+        lineHeight = 22.sp,
+    )
+
+    /** Nhãn dưới số `.mt span` — 11sp. */
+    val statLabel = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.Normal,
+        fontSize = 11.sp,
+        lineHeight = 14.sp,
+    )
+
+    /** Đoạn giải thích dưới header (SCR-0502) — 12.5sp, line-height 1.6. */
+    val note = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.5.sp,
+        lineHeight = 20.sp,
+    )
+
+    /** Nút chữ ở header ("Edit") — 13.5sp. */
+    val textAction = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.Normal,
+        fontSize = 13.5.sp,
+    )
+
+    /** Nút `.seg a` — 13.5sp/600. */
+    val segment = TextStyle(
+        fontFamily = family,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 13.5.sp,
+    )
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,9 +54,9 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.takehome.drama.core.designsystem.component.AppToastHost
 import com.takehome.drama.core.designsystem.component.ChoiceChip
-import com.takehome.drama.core.designsystem.component.ErrorState
+import com.takehome.drama.core.designsystem.component.SkeletonBlock
+import com.takehome.drama.core.designsystem.component.SkeletonHost
 import com.takehome.drama.core.designsystem.component.GradientButton
-import com.takehome.drama.core.designsystem.component.LoadingState
 import com.takehome.drama.core.designsystem.component.KeyArt
 import com.takehome.drama.core.designsystem.component.rememberToastState
 import com.takehome.drama.core.designsystem.icon.AppIcons
@@ -69,6 +70,7 @@ import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.core.utils.extension.findActivity
 import com.takehome.drama.domain.model.ShowStatus
 import com.takehome.drama.feature.main.R
+import com.takehome.drama.feature.main.presentation.common.UiErrorState
 import com.takehome.drama.feature.main.navigation.SearchScreenProvider
 import com.takehome.drama.feature.main.presentation.common.ShowCard
 import com.takehome.drama.feature.main.presentation.common.label
@@ -107,7 +109,7 @@ internal fun BrowseScreen(
 
     Box(Modifier.fillMaxSize()) {
         BrowseContent(viewState = viewState, slot = slots[0], onIntent = viewModel::processIntent)
-        AppToastHost(state = toastState, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 30.dp))
+        AppToastHost(state = toastState, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = AppTheme.dimensions.s4))
     }
 }
 
@@ -135,18 +137,12 @@ private fun ColumnScope.BrowseColumn(
 ) {
     val gutter = AppTheme.dimensions.screenGutter
     PreviewDock(viewState, slot, dockHeight, onIntent)
-    if (viewState.isLoading && viewState.grid.isEmpty()) {
-        Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-            LoadingState()
-        }
+    if (viewState.error != null) {
+        UiErrorState(error = viewState.error, onRetry = { onIntent(BrowseIntent.Retry) }, modifier = Modifier.weight(1f))
         return
     }
-    if (viewState.errorRes != null) {
-        ErrorState(
-            message = stringResource(viewState.errorRes),
-            retryLabel = stringResource(R.string.common_retry),
-            onRetry = { onIntent(BrowseIntent.Retry) },
-        )
+    if (viewState.isLoading && viewState.grid.isEmpty()) {
+        BrowseGridSkeleton()
         return
     }
     LazyRow(
@@ -316,6 +312,24 @@ private fun GridPoster(show: ShowCard, selected: Boolean, onClick: () -> Unit) {
                 .fillMaxSize()
                 .clip(if (selected) AppTheme.shapes.sm else shape),
         )
+    }
+}
+
+/** SCR-0601 của Browse: hàng chip + lưới 4 cột đúng chỗ poster sắp hiện. */
+@Composable
+private fun ColumnScope.BrowseGridSkeleton() {
+    val gutter = AppTheme.dimensions.screenGutter
+    SkeletonHost {
+        Column(Modifier.weight(1f).padding(horizontal = gutter)) {
+            Row(Modifier.padding(top = AppTheme.dimensions.s3), horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.s2)) {
+                repeat(4) { SkeletonBlock(Modifier.width(64.dp).height(34.dp), AppTheme.shapes.full) }
+            }
+            repeat(2) {
+                Row(Modifier.padding(top = 30.dp), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                    repeat(GRID_COLUMNS) { SkeletonBlock(Modifier.weight(1f).aspectRatio(2f / 3f), AppTheme.shapes.poster) }
+                }
+            }
+        }
     }
 }
 

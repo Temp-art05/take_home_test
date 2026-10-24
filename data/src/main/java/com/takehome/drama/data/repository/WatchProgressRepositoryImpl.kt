@@ -16,6 +16,8 @@ class WatchProgressRepositoryImpl(
 ) : WatchProgressRepository {
     override suspend fun save(progress: WatchProgress) = withLocalCatching { local.upsert(progress.toEntity()) }
 
+    override suspend fun removeShow(showId: String) = withLocalCatching { local.deleteForShow(showId) }
+
     override suspend fun get(showId: String, episodeIndex: Int): WatchProgress? =
         withLocalCatching { local.get(showId, episodeIndex)?.toDomain() }
             .onFailure { Timber.e(it, "Read watch progress failed") }

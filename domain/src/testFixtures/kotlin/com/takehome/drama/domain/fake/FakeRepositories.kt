@@ -47,6 +47,22 @@ class FakeCatalogRepository(
 class FakeWatchProgressRepository : WatchProgressRepository {
     val rows = MutableStateFlow<List<WatchProgress>>(emptyList())
 
+    /** Đặt để `removeShow` trả lỗi — giả lập Room ghi hỏng. */
+    var removeFailure: Throwable? = null
+    var removeCalls = 0
+        private set
+
+    /** Đặt để `removeShow` treo tới khi test `complete` — giả lập bấm xoá lặp khi đang ghi. */
+    var removeGate: CompletableDeferred<Unit>? = null
+
+    override suspend fun removeShow(showId: String): Result<Unit> {
+        removeCalls++
+        removeGate?.await()
+        removeFailure?.let { return Result.failure(it) }
+        rows.update { list -> list.filterNot { it.showId == showId } }
+        return Result.success(Unit)
+    }
+
     override suspend fun save(progress: WatchProgress): Result<Unit> {
         rows.update { list ->
             list.filterNot { it.showId == progress.showId && it.episodeIndex == progress.episodeIndex } + progress
@@ -71,6 +87,8 @@ class FakeWatchProgressRepository : WatchProgressRepository {
 class FakeSavedShowRepository : SavedShowRepository {
     val rows = MutableStateFlow<List<SavedShow>>(emptyList())
     private var clock = 0L
+    var removeCalls = 0
+        private set
 
     override suspend fun save(showId: String): Result<Unit> {
         rows.update { list -> list.filterNot { it.showId == showId } + SavedShow(showId, ++clock) }
@@ -78,6 +96,7 @@ class FakeSavedShowRepository : SavedShowRepository {
     }
 
     override suspend fun remove(showId: String): Result<Unit> {
+        removeCalls++
         rows.update { list -> list.filterNot { it.showId == showId } }
         return Result.success(Unit)
     }
@@ -94,12 +113,21 @@ class FakeUserPreferencesRepository(initial: UserPreferences = UserPreferences(c
 
     /** Đặt để mọi lần ghi treo tới khi test `complete` — giả lập DataStore chậm (bấm lặp). */
     var writeGate: CompletableDeferred<Unit>? = null
+    var themeWrites = 0
+        private set
+
+    /** Khác null → `setTheme` trả lỗi này, không đổi state (DataStore ghi hỏng). */
+    var themeFailure: Throwable? = null
 
     override suspend fun setContentLanguage(language: String) = set { copy(contentLanguage = language) }
 
     override suspend fun setTasteTagIds(tagIds: Set<String>) = set { copy(tasteTagIds = tagIds) }
 
-    override suspend fun setTheme(theme: ThemeMode) = set { copy(theme = theme) }
+    override suspend fun setTheme(theme: ThemeMode): Result<Unit> {
+        themeWrites++
+        themeFailure?.let { return Result.failure(it) }
+        return set { copy(theme = theme) }
+    }
 
     override suspend fun setOnboardingDone(done: Boolean) = set { copy(onboardingDone = done) }
 

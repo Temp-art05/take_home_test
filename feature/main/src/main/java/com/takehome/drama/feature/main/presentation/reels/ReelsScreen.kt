@@ -64,7 +64,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.takehome.drama.core.designsystem.component.AppToastHost
-import com.takehome.drama.core.designsystem.component.ErrorState
 import com.takehome.drama.core.designsystem.component.GhostPillButton
 import com.takehome.drama.core.designsystem.component.GradientButton
 import com.takehome.drama.core.designsystem.component.KeyArt
@@ -85,6 +84,7 @@ import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.core.ui.foundation.format.formatCompactCount
 import com.takehome.drama.core.utils.extension.findActivity
 import com.takehome.drama.feature.main.R
+import com.takehome.drama.feature.main.presentation.common.UiErrorState
 import kotlin.math.abs
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -140,7 +140,8 @@ internal fun ReelsScreen(
 
     Box(Modifier.fillMaxSize().background(AppTheme.colors.media.background)) {
         ReelsContent(viewState, pagerState, progress, slots, viewModel::processIntent)
-        AppToastHost(state = toastState, modifier = Modifier.align(Alignment.Center).padding(bottom = 120.dp))
+        // 0605: nổi ngay trên tab bar (tab bar nằm dưới nội dung tab), không giữa màn che video.
+        AppToastHost(state = toastState, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = AppTheme.dimensions.s4))
     }
 }
 
@@ -180,10 +181,10 @@ private fun ReelsContent(
         // Scrim trên cố định cho status bar (mockup `.sc-t` 150).
         Box(Modifier.fillMaxWidth().height(150.dp).background(AppTheme.colors.scrimTop))
         when {
-            viewState.errorRes != null -> ErrorState(
-                message = stringResource(viewState.errorRes),
-                retryLabel = stringResource(R.string.common_retry),
+            viewState.error != null -> UiErrorState(
+                error = viewState.error,
                 onRetry = { onIntent(ReelsIntent.Retry) },
+                modifier = Modifier.background(MaterialTheme.colorScheme.background),
             )
             viewState.isLoading -> Spinner(Modifier.align(Alignment.Center))
         }

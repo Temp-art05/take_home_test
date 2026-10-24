@@ -85,12 +85,62 @@
     <string name="library_history">Historial</string>
     <string name="library_saved">Guardadas</string>
 
-    <string name="skeleton_open_show">Abrir serie %1$s</string>
-    <string name="skeleton_play_show">Reproducir serie %1$s</string>
-    <string name="skeleton_open_history">Historial</string>
-    <string name="skeleton_open_saved">Guardadas</string>
-    <string name="skeleton_open_language">Idioma de la app</string>
-
     <string name="language_title">Idioma</string>
     <string name="language_system">Idioma del dispositivo</string>
+
+    <!-- Phase 6: Library, History, Saved, Settings, Language -->
+    <string name="search_no_results_body">Prueba con un título o un género: la corriente hará el resto.</string>
+    <string name="library_watched">Vistos</string>
+    <string name="library_history_row">Historial</string>
+    <string name="library_recent">Recientes</string>
+    <string name="library_see_all">Ver todo</string>
+    <string name="history_tab_watching">Viendo</string>
+    <string name="history_tab_finished">Terminadas</string>
+    <string name="common_edit">Editar</string>
+    <string name="common_done">Listo</string>
+    <string name="history_meta">Ep. %1$d / %2$d · %3$s</string>
+    <string name="history_today">hoy</string>
+    <string name="history_yesterday">ayer</string>
+    <string name="history_last_week">la semana pasada</string>
+    <string name="common_more_cd">Más opciones para %1$s</string>
+    <string name="common_remove_cd">Quitar %1$s</string>
+    <string name="history_sheet_details">Detalles de la serie</string>
+    <string name="history_sheet_remove">Quitar del historial</string>
+    <string name="history_removed">Quitado del historial</string>
+    <string name="history_empty_watching_title">Aún no hay nada en el flow</string>
+    <string name="history_empty_watching_body">Empieza un episodio y te esperará aquí cuando vuelvas.</string>
+    <string name="history_empty_finished_title">Aún no hay series terminadas</string>
+    <string name="history_empty_finished_body">Las series que ves hasta el último episodio llegan aquí.</string>
+    <string name="common_find_next">Encuentra tu próximo flow</string>
+    <string name="saved_filter_all">Todo · %1$d</string>
+    <string name="saved_filter_airing">En emisión</string>
+    <string name="saved_filter_complete">Completas</string>
+    <string name="saved_sheet_remove">Quitar de Guardados</string>
+    <string name="saved_empty_title">Tu lista está vacía</string>
+    <string name="saved_empty_body">¿Encontraste algo para volver a ver? Toca ＋ y te esperará aquí, fuera de la corriente.</string>
+    <string name="saved_filter_empty_airing">No hay series en emisión guardadas</string>
+    <string name="saved_filter_empty_complete">No hay series completas guardadas</string>
+    <string name="settings_group_language">Idioma</string>
+    <string name="settings_app_language">Idioma de la app</string>
+    <string name="settings_group_appearance">Apariencia</string>
+    <string name="settings_theme_dark">Oscuro</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_group_policies">Políticas</string>
+    <string name="settings_terms">Términos de uso</string>
+    <string name="settings_privacy">Política de privacidad</string>
+    <string name="settings_licenses">Licencias de código abierto</string>
+    <string name="settings_policy_unavailable">Disponible en el lanzamiento</string>
+    <string name="language_description">Se aplica a toda la interfaz de la app. Los cambios son inmediatos: no hace falta reiniciar.</string>
+    <string name="language_current">Ahora: %1$s</string>
+    <string name="language_choose_manually">Elegir manualmente</string>
+    <plurals name="history_min_left">
+        <item quantity="one">queda %1$d min</item>
+        <item quantity="many">quedan %1$d min</item>
+        <item quantity="other">quedan %1$d min</item>
+    </plurals>
+    <plurals name="history_days_ago">
+        <item quantity="one">hace %1$d día</item>
+        <item quantity="many">hace %1$d días</item>
+        <item quantity="other">hace %1$d días</item>
+    </plurals>
 </resources>

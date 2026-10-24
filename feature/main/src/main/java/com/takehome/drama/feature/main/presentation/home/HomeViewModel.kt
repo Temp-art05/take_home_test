@@ -1,7 +1,7 @@
 package com.takehome.drama.feature.main.presentation.home
 
 import androidx.lifecycle.viewModelScope
-import com.takehome.drama.core.ui.foundation.error.toErrorRes
+import com.takehome.drama.core.ui.foundation.error.toUiError
 import com.takehome.drama.core.ui.foundation.vm.BaseViewModel
 import com.takehome.drama.domain.model.Catalog
 import com.takehome.drama.domain.model.ads.AdPlacement
@@ -52,7 +52,7 @@ class HomeViewModel(
     override fun processIntent(intent: HomeIntent) {
         when (intent) {
             HomeIntent.ScreenStarted -> updateState { withClock() }
-            HomeIntent.Retry -> load()
+            HomeIntent.Retry -> if (!currentState.isLoading) load()
             is HomeIntent.OpenShow -> sendEvent(HomeSingleEvent.OpenShow(intent.showId))
             is HomeIntent.ContinueShow -> continueShow(intent.showId, intent.episodeIndex)
             HomeIntent.OpenSearch -> sendEvent(HomeSingleEvent.OpenSearch)
@@ -81,11 +81,11 @@ class HomeViewModel(
     }
 
     private fun load() {
-        updateState { copy(isLoading = true, errorRes = null) }
+        updateState { copy(isLoading = true, error = null) }
         viewModelScope.launch {
             getCatalog()
                 .onSuccess(::observeFeed)
-                .onFailure { error -> updateState { copy(isLoading = false, errorRes = error.toErrorRes()) } }
+                .onFailure { error -> updateState { copy(isLoading = false, error = error.toUiError()) } }
         }
     }
 
@@ -100,7 +100,7 @@ class HomeViewModel(
                 updateState {
                     copy(
                         isLoading = false,
-                        errorRes = null,
+                        error = null,
                         hero = feed.hero?.toCard(catalog, language),
                         rails = feed.rails.map { rail ->
                             HomeRail(
