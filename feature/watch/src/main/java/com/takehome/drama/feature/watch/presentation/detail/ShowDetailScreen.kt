@@ -1,5 +1,6 @@
 package com.takehome.drama.feature.watch.presentation.detail
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -62,7 +63,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.takehome.drama.core.ads.reward.RewardAdManager
 import com.takehome.drama.core.designsystem.component.AppAsyncImage
+import com.takehome.drama.core.designsystem.component.AppBottomSheet
 import com.takehome.drama.core.designsystem.component.AppToastHost
 import com.takehome.drama.core.designsystem.component.ChoiceChip
 import com.takehome.drama.core.designsystem.component.ErrorState
@@ -83,6 +86,8 @@ import com.takehome.drama.domain.usecase.watch.EpisodeRange
 import com.takehome.drama.feature.watch.R
 import com.takehome.drama.feature.watch.navigation.PlayerScreenProvider
 import com.takehome.drama.feature.watch.presentation.common.EpisodeGridCell
+import com.takehome.drama.feature.watch.presentation.common.UnlockEpisodeSheetContent
+import org.koin.compose.koinInject
 
 private const val GRID_COLUMNS = 5
 
@@ -94,11 +99,13 @@ private val CellGap = 9.dp
 fun ShowDetailScreen(
     viewModel: ShowDetailViewModel,
     onNavigate: (NavigationRequest) -> Unit,
+    rewardAdManager: RewardAdManager = koinInject(),
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     val gridState = rememberLazyGridState()
     val toastState = rememberToastState()
     val resources = LocalResources.current
+    val activity = LocalActivity.current
 
     viewModel.singleEvent.CollectAsEffect { event ->
         when (event) {
@@ -110,6 +117,13 @@ fun ShowDetailScreen(
                 text = event.formatArg?.let { resources.getString(event.messageRes, it) } ?: resources.getString(event.messageRes),
                 success = event.success,
             )
+            is ShowDetailSingleEvent.ShowRewarded -> {
+                // Callback đi qua processIntent của VM (sống qua xoay máy), không giữ state ở Screen.
+                val onResult = { earned: Boolean ->
+                    viewModel.processIntent(ShowDetailIntent.RewardResult(event.episodeIndex, earned))
+                }
+                if (activity != null) rewardAdManager.show(activity, RewardAdManager.AdType.UNLOCK_EPISODE, onResult) else onResult(false)
+            }
         }
     }
 
@@ -119,6 +133,7 @@ fun ShowDetailScreen(
             gridState = gridState,
             onIntent = viewModel::processIntent,
         )
+        UnlockSheet(sheet = viewState.unlockSheet, onIntent = viewModel::processIntent)
         AppToastHost(
             state = toastState,
             modifier = Modifier
@@ -126,6 +141,25 @@ fun ShowDetailScreen(
                 .navigationBarsPadding()
                 .padding(bottom = AppTheme.dimensions.s6),
         )
+    }
+}
+
+/** Sheet "xem quảng cáo để mở tập"; giữ nội dung cũ trong lúc animation đóng. */
+@Composable
+private fun UnlockSheet(sheet: UnlockSheet?, onIntent: (ShowDetailIntent) -> Unit) {
+    // Ô nhớ thường, không phải snapshot state: ghi trong composition không gây recompose thêm.
+    val last = remember { arrayOfNulls<UnlockSheet>(1) }
+    if (sheet != null) last[0] = sheet
+    val shown = sheet ?: last[0]
+    AppBottomSheet(visible = sheet != null, onDismiss = { onIntent(ShowDetailIntent.UnlockSheetDismiss) }) {
+        shown?.let {
+            UnlockEpisodeSheetContent(
+                episodeNumber = it.episodeNumber,
+                ad = it.ad,
+                onWatchAd = { onIntent(ShowDetailIntent.UnlockWithAdClick) },
+                onNotNow = { onIntent(ShowDetailIntent.UnlockSheetDismiss) },
+            )
+        }
     }
 }
 

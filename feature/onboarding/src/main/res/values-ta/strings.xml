@@ -5,6 +5,8 @@
 
     <!-- SCR-0001 Splash -->
     <string name="onboarding_splash_tag">குறு நாடகத் தொடர்கள்</string>
+    <string name="onboarding_splash_ad_logs_on">விளம்பரப் பதிவுகள் இயக்கப்பட்டன</string>
+    <string name="onboarding_splash_ad_logs_off">விளம்பரப் பதிவுகள் முடக்கப்பட்டன</string>
 
     <!-- SCR-0002 Language -->
     <string name="onboarding_language_title">உங்கள் மொழி</string>

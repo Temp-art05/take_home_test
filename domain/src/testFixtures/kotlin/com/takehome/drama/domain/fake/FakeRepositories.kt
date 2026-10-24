@@ -1,17 +1,21 @@
 package com.takehome.drama.domain.fake
 
 import com.takehome.drama.domain.model.Catalog
+import com.takehome.drama.domain.model.ads.AdsConfig
 import com.takehome.drama.domain.model.SavedShow
 import com.takehome.drama.domain.model.ShowEpisodes
 import com.takehome.drama.domain.model.ThemeMode
 import com.takehome.drama.domain.model.UserPreferences
 import com.takehome.drama.domain.model.WatchProgress
+import com.takehome.drama.domain.repository.AdsConfigRepository
 import com.takehome.drama.domain.repository.CatalogRepository
+import com.takehome.drama.domain.repository.EpisodeUnlockRepository
 import com.takehome.drama.domain.repository.SavedShowRepository
 import com.takehome.drama.domain.repository.UserPreferencesRepository
 import com.takehome.drama.domain.repository.WatchProgressRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -106,6 +110,24 @@ class FakeUserPreferencesRepository(initial: UserPreferences = UserPreferences(c
     private suspend fun set(block: UserPreferences.() -> UserPreferences): Result<Unit> {
         writeGate?.await()
         state.update(block)
+        return Result.success(Unit)
+    }
+}
+
+class FakeAdsConfigRepository(initial: AdsConfig = AdsConfig.DEFAULT) : AdsConfigRepository {
+    override val config = MutableStateFlow(initial)
+    override fun current(): AdsConfig = config.value
+}
+
+class FakeEpisodeUnlockRepository : EpisodeUnlockRepository {
+    /** showId → index đã mở. */
+    val unlocked = MutableStateFlow<Map<String, Set<Int>>>(emptyMap())
+
+    override fun observeUnlocked(showId: String): Flow<Set<Int>> =
+        unlocked.map { it[showId].orEmpty() }.distinctUntilChanged()
+
+    override suspend fun unlock(showId: String, episodeIndex: Int): Result<Unit> {
+        unlocked.update { it + (showId to (it[showId].orEmpty() + episodeIndex)) }
         return Result.success(Unit)
     }
 }

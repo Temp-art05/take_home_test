@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.takehome.drama.core.ads.nativead.NativeAdManager
 import com.takehome.drama.core.designsystem.component.ErrorState
 import com.takehome.drama.core.designsystem.component.KeyArt
 import com.takehome.drama.core.designsystem.component.Wordmark
@@ -68,6 +69,7 @@ import com.takehome.drama.feature.main.presentation.common.pitchRes
 import com.takehome.drama.feature.main.presentation.common.titleRes
 import com.takehome.drama.feature.main.presentation.main.model.MainTab
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @Composable
 internal fun HomeScreen(
@@ -75,6 +77,7 @@ internal fun HomeScreen(
     onNavigate: (NavigationRequest) -> Unit,
     onSwitchTab: (MainTab) -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
+    nativeAdManager: NativeAdManager = koinInject(),
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     viewModel.singleEvent.CollectAsEffect { event ->
@@ -88,13 +91,18 @@ internal fun HomeScreen(
         }
     }
     LifecycleEventEffect(Lifecycle.Event.ON_START) { viewModel.processIntent(HomeIntent.ScreenStarted) }
-    HomeContent(viewState = viewState, onIntent = viewModel::processIntent)
+    HomeContent(
+        viewState = viewState,
+        onIntent = viewModel::processIntent,
+        nativeAd = { modifier -> nativeAdManager.Slot(NativeAdManager.AdType.HOME, modifier) },
+    )
 }
 
 @Composable
 private fun HomeContent(
     viewState: HomeViewState,
     onIntent: (HomeIntent) -> Unit,
+    nativeAd: @Composable (Modifier) -> Unit = {},
 ) {
     Column(
         Modifier
@@ -109,7 +117,7 @@ private fun HomeContent(
                 retryLabel = stringResource(R.string.common_retry),
                 onRetry = { onIntent(HomeIntent.Retry) },
             )
-            else -> HomeFeedList(viewState, onIntent)
+            else -> HomeFeedList(viewState, onIntent, nativeAd)
         }
     }
 }
@@ -142,7 +150,7 @@ private fun AppBarIcon(icon: androidx.compose.ui.graphics.vector.ImageVector, la
 }
 
 @Composable
-private fun HomeFeedList(viewState: HomeViewState, onIntent: (HomeIntent) -> Unit) {
+private fun HomeFeedList(viewState: HomeViewState, onIntent: (HomeIntent) -> Unit, nativeAd: @Composable (Modifier) -> Unit) {
     val gutter = AppTheme.dimensions.screenGutter
     LazyColumn(contentPadding = PaddingValues(bottom = AppTheme.dimensions.s6)) {
         item(key = "daypart") { DaypartHeader(viewState.daypart, viewState.clock) }
@@ -173,6 +181,13 @@ private fun HomeFeedList(viewState: HomeViewState, onIntent: (HomeIntent) -> Uni
                         ContinueCardView(card, onClick = { onIntent(HomeIntent.ContinueShow(card.show.id, card.episodeIndex)) })
                     }
                 }
+            }
+        }
+        // native_home: sau phần "đang dở" của user, trước các rail khám phá — hoà vào feed, không chen giữa
+        // hero và thẻ daypart. Không có ad (tắt / chưa load / offline) thì ô không vẽ gì, không khung trống.
+        if (viewState.showNativeAd) {
+            item(key = "ad-native") {
+                nativeAd(Modifier.padding(start = gutter, end = gutter, top = AppTheme.dimensions.s5))
             }
         }
         viewState.rails.forEach { rail ->

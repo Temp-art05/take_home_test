@@ -4,7 +4,9 @@ import androidx.lifecycle.viewModelScope
 import com.takehome.drama.core.ui.foundation.error.toErrorRes
 import com.takehome.drama.core.ui.foundation.vm.BaseViewModel
 import com.takehome.drama.domain.model.Catalog
+import com.takehome.drama.domain.model.ads.AdPlacement
 import com.takehome.drama.domain.repository.UserPreferencesRepository
+import com.takehome.drama.domain.usecase.ads.ObserveAdPlacementUseCase
 import com.takehome.drama.domain.usecase.catalog.GetCatalogUseCase
 import com.takehome.drama.domain.usecase.catalog.ResolveContentLanguageUseCase
 import com.takehome.drama.domain.usecase.discovery.GetHomeFeedUseCase
@@ -33,6 +35,7 @@ class HomeViewModel(
     private val resolveContentLanguage: ResolveContentLanguageUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val wallClock: WallClock,
+    private val observeAdPlacement: ObserveAdPlacementUseCase,
 ) : BaseViewModel<HomeIntent, HomeViewState, HomeSingleEvent>() {
 
     private var feedJob: Job? = null
@@ -41,6 +44,9 @@ class HomeViewModel(
 
     init {
         load()
+        viewModelScope.launch {
+            observeAdPlacement(AdPlacement.NativeHome).collect { enabled -> updateState { copy(showNativeAd = enabled) } }
+        }
     }
 
     override fun processIntent(intent: HomeIntent) {

@@ -22,6 +22,24 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Lib ads của tác giả (lib-ads-android) phát hành qua GitHub Packages — token đọc ở gradle.properties.
+        maven {
+            url = uri("https://maven.pkg.github.com/lurdsoft/lib-ads-android")
+            credentials {
+                username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
+                password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
+            }
+            content { includeGroup("com.github.dinhn") }
+        }
+        // ads-admob kéo theo mediation adapter Pangle + Mintegral (như HomeMorph) — SDK của họ chỉ có ở repo riêng.
+        maven {
+            url = uri("https://artifact.bytedance.com/repository/pangle")
+            content { includeGroupByRegex("com\\.pangle.*") }
+        }
+        maven {
+            url = uri("https://dl-maven-android.mintegral.com/repository/mbridge_android_sdk_oversea")
+            content { includeGroupByRegex("com\\.mbridge.*") }
+        }
     }
 }
 
@@ -35,6 +53,7 @@ include(":core:analytics")
 include(":core:ui-foundation")
 include(":core:design-system")
 include(":core:media")
+include(":core:ads")
 include(":feature:onboarding")
 include(":feature:main")
 include(":feature:watch")

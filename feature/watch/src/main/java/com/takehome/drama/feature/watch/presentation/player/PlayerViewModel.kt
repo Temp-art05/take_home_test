@@ -3,6 +3,7 @@ package com.takehome.drama.feature.watch.presentation.player
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.takehome.drama.core.ads.reward.RewardAdManager
 import com.takehome.drama.core.media.EpisodeFeedPlayer
 import com.takehome.drama.core.media.EpisodeFeedPlayerFactory
 import com.takehome.drama.core.media.FeedItem
@@ -16,8 +17,11 @@ import com.takehome.drama.domain.model.Catalog
 import com.takehome.drama.domain.model.Episode
 import com.takehome.drama.domain.model.Show
 import com.takehome.drama.domain.model.WatchProgress
+import com.takehome.drama.domain.model.ads.AdPlacement
 import com.takehome.drama.domain.model.findShow
 import com.takehome.drama.domain.repository.UserPreferencesRepository
+import com.takehome.drama.domain.usecase.ads.IsAdPlacementEnabledUseCase
+import com.takehome.drama.domain.usecase.ads.ObserveAdPlacementUseCase
 import com.takehome.drama.domain.usecase.catalog.GetCatalogUseCase
 import com.takehome.drama.domain.usecase.catalog.ResolveContentLanguageUseCase
 import com.takehome.drama.domain.usecase.history.GetResumePositionUseCase
@@ -28,14 +32,16 @@ import com.takehome.drama.domain.usecase.watch.GetEndActionUseCase
 import com.takehome.drama.domain.usecase.watch.GetEpisodeGridUseCase
 import com.takehome.drama.domain.usecase.watch.GetEpisodeRangesUseCase
 import com.takehome.drama.domain.usecase.watch.GetShowEpisodesUseCase
+import com.takehome.drama.domain.usecase.watch.ObserveUnlockedEpisodesUseCase
 import com.takehome.drama.domain.usecase.watch.PickVideoSourceUseCase
 import com.takehome.drama.domain.usecase.watch.PlaybackQualityPolicy
+import com.takehome.drama.domain.usecase.watch.UnlockEpisodeUseCase
+import com.takehome.drama.domain.usecase.watch.isWatchable
 import com.takehome.drama.feature.watch.R
 import com.takehome.drama.feature.watch.navigation.PlayerScreenProvider.Player
+import com.takehome.drama.feature.watch.presentation.common.RewardedAdState
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerPage
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerSheet
-import java.util.Locale
-import kotlin.math.abs
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
@@ -43,10 +49,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.Locale
+import kotlin.math.abs
 
 /**
  * ViewModel **sở hữu** [EpisodeFeedPlayer]: xoay máy không dựng lại player, không rebuffer, không mất
@@ -69,6 +78,11 @@ class PlayerViewModel(
     private val observeShowProgress: ObserveShowProgressUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
     playerFactory: EpisodeFeedPlayerFactory,
+    private val observeUnlockedEpisodes: ObserveUnlockedEpisodesUseCase,
+    private val unlockEpisode: UnlockEpisodeUseCase,
+    private val isAdPlacementEnabled: IsAdPlacementEnabledUseCase,
+    observeAdPlacement: ObserveAdPlacementUseCase,
+    private val rewardAdManager: RewardAdManager,
 ) : BaseViewModel<PlayerIntent, PlayerViewState, PlayerSingleEvent>() {
 
     private val route = savedStateHandle.toRoute<Player>()
@@ -107,6 +121,13 @@ class PlayerViewModel(
     private var openJob: Job? = null
     private var stallJob: Job? = null
     private var observersStarted = false
+    private var rewardedLoadJob: Job? = null
+
+    /** Tập khoá đã mở bằng rewarded (`Episode.index`). Ở đây mọi quyết định "xem được không" đi qua [isWatchable]. */
+    private var unlocked: Set<Int> = emptySet()
+
+    /** Đã gửi [PlayerSingleEvent.ShowRewarded], chờ kết quả — chặn bấm lặp. */
+    private var rewardedShowing = false
 
     private val currentEpisode: Episode?
         get() = episodes.firstOrNull { it.index == currentState.episodeIndex }
@@ -120,6 +141,8 @@ class PlayerViewModel(
     init {
         player.setSpeed(currentState.speed)
         viewModelScope.launch { player.state.collect(::onPlayback) }
+        // Giá trị đầu = trạng thái lúc mở (load() tự xét); chỉ phản ứng khi Remote Config đổi sau đó.
+        viewModelScope.launch { observeAdPlacement(AdPlacement.RewardedBonus).drop(1).collect(::onRewardedPlacementChanged) }
         load()
     }
 
@@ -142,6 +165,8 @@ class PlayerViewModel(
             PlayerIntent.AutoplayToggle -> toggleAutoplay()
             PlayerIntent.ToggleDescription -> updateState { copy(descriptionExpanded = !descriptionExpanded) }
             PlayerIntent.SwitchBackToHd -> switchBackToHd()
+            PlayerIntent.UnlockWithAdClick -> showRewarded()
+            is PlayerIntent.RewardResult -> onRewardResult(intent.episodeIndex, intent.earned)
             is PlayerIntent.PageSettled -> onPageSettled(intent.index)
             PlayerIntent.ScreenStarted -> onScreenStarted()
             is PlayerIntent.ScreenStopped -> if (!intent.isChangingConfigurations) onScreenStopped()
@@ -159,9 +184,11 @@ class PlayerViewModel(
             if (loaded.episodes.isEmpty()) return@launch fail(R.string.watch_error_no_source)
 
             val preferences = userPreferencesRepository.preferences.first()
+            unlocked = observeUnlockedEpisodes(showId).first()
             catalog = loadedCatalog
             show = loadedShow
             episodes = loaded.episodes
+            preloadRewardedIfLocked()
             contentLanguage = resolveContentLanguage(
                 saved = preferences.contentLanguage,
                 deviceLanguage = Locale.getDefault().language,
@@ -219,7 +246,8 @@ class PlayerViewModel(
             copy(
                 episodeIndex = episode.index,
                 episodeNumber = episode.displayNumber,
-                isLocked = !episode.isFree,
+                isLocked = !episode.isWatchable(),
+                unlockAd = null,
                 likeCount = episode.likeCount + if (episode.index in likedEpisodes) 1 else 0,
                 isLiked = episode.index in likedEpisodes,
                 endAction = null,
@@ -230,9 +258,10 @@ class PlayerViewModel(
         }
         refreshGrid()
         val position = episodes.indexOf(episode)
-        if (!episode.isFree) {
+        if (!episode.isWatchable()) {
             // Dừng tập trước, giữ cửa sổ preload quanh trang khoá để vuốt tiếp vẫn nhanh.
             player.setCurrent(position, startPositionMs = 0, playWhenReady = false)
+            offerRewardedUnlock(episode.index)
             return
         }
         openJob = viewModelScope.launch {
@@ -249,7 +278,7 @@ class PlayerViewModel(
         val preferred = currentState.quality ?: autoQualityCap
         player.setPlaylist(
             episodes.map { episode ->
-                val url = if (episode.isFree) {
+                val url = if (episode.isWatchable()) {
                     pickVideoSource(episode, contentLanguage, defaultLanguage, preferred)?.url
                 } else {
                     null
@@ -277,7 +306,7 @@ class PlayerViewModel(
     /** Ngôn ngữ / quality đổi: dựng lại URL cả playlist rồi nạp tập hiện tại tại vị trí đang phát. */
     private fun reloadAtCurrentPosition(playWhenReady: Boolean = player.state.value.playWhenReady) {
         refreshPlaylist()
-        val episode = currentEpisode?.takeIf { it.isFree } ?: return
+        val episode = currentEpisode?.takeIf { it.isWatchable() } ?: return
         startPlayback(episode, player.currentPositionMs(), playWhenReady && isScreenStarted)
     }
 
@@ -296,7 +325,7 @@ class PlayerViewModel(
 
     private fun onEnded(playback: PlaybackState) {
         saveProgress(playback.durationMs, playback.durationMs)
-        val action = getEndAction(episodes, currentState.episodeIndex, currentState.autoplayNext)
+        val action = getEndAction(episodes, currentState.episodeIndex, currentState.autoplayNext, unlocked)
         if (action is EndAction.PlayNext) {
             // Chỉ cuộn; tập kế mở khi trang dừng (PageSettled) như user tự vuốt. Đổi tập trước khi cuộn
             // thì trang cũ (player bị tua về 0) và top bar đổi giữa lúc trượt → flash.
@@ -339,7 +368,7 @@ class PlayerViewModel(
     /** [final] = lần lưu khi rời/ẩn màn: không để `onCleared` huỷ giữa chừng. */
     private fun saveProgress(positionMs: Long, durationMs: Long, final: Boolean = false) {
         val episode = currentEpisode ?: return
-        if (durationMs <= 0 || !episode.isFree) return
+        if (durationMs <= 0 || !episode.isWatchable()) return
         lastSavedPositionMs = positionMs
         val record = WatchProgress(
             showId = showId,
@@ -428,8 +457,15 @@ class PlayerViewModel(
 
     private fun selectEpisode(index: Int) {
         val episode = episodes.firstOrNull { it.index == index } ?: return
-        if (!episode.isFree) {
-            sendEvent(PlayerSingleEvent.ShowToast(R.string.watch_episode_locked, episode.displayNumber))
+        if (!episode.isWatchable()) {
+            if (isAdPlacementEnabled(AdPlacement.RewardedBonus)) {
+                // Tới trang khoá của tập đó — nút mở bằng rewarded nằm ở đấy, user tự quyết có bấm không.
+                updateState { copy(sheet = PlayerSheet.None) }
+                saveCurrentProgress()
+                sendEvent(PlayerSingleEvent.ScrollToEpisode(index))
+            } else {
+                sendEvent(PlayerSingleEvent.ShowToast(R.string.watch_episode_locked, episode.displayNumber, success = false))
+            }
             return
         }
         updateState { copy(sheet = PlayerSheet.None) }
@@ -500,7 +536,7 @@ class PlayerViewModel(
                     val liked = episode.index in likedEpisodes
                     PlayerPage(
                         episodeIndex = episode.index,
-                        isLocked = !episode.isFree,
+                        isLocked = !episode.isWatchable(),
                         episodeNumber = episode.displayNumber,
                         likeCount = episode.likeCount + if (liked) 1 else 0,
                         isLiked = liked,
@@ -514,9 +550,87 @@ class PlayerViewModel(
     private fun refreshGrid() {
         updateState {
             copy(
-                cells = getEpisodeGrid(episodes, progress, currentIndex = episodeIndex),
+                cells = getEpisodeGrid(episodes, progress, currentIndex = episodeIndex, unlocked = unlocked),
                 watchedCount = getEpisodeGrid.watchedCount(episodes, progress),
             )
+        }
+    }
+
+    private fun Episode.isWatchable(): Boolean = isWatchable(unlocked)
+
+    /**
+     * Remote Config đổi khi đang ở Player (fetch về muộn, Console bật/tắt): tắt → ẩn nút "Watch an ad" (trang khoá
+     * chỉ còn thông báo khoá), không báo "No ad available"; bật → load sẵn và mời xem nếu đang ở trang khoá.
+     */
+    private fun onRewardedPlacementChanged(enabled: Boolean) {
+        if (episodes.isEmpty()) return
+        if (enabled) {
+            preloadRewardedIfLocked()
+            if (currentState.isLocked && currentState.unlockAd == null) offerRewardedUnlock(currentState.episodeIndex)
+        } else if (!rewardedShowing) {
+            rewardedLoadJob?.cancel()
+            updateState { copy(unlockAd = null) }
+        }
+    }
+
+    /** Show còn tập khoá → load rewarded sẵn từ lúc mở Player, tới trang khoá ad thường đã sẵn. */
+    private fun preloadRewardedIfLocked() {
+        if (!isAdPlacementEnabled(AdPlacement.RewardedBonus) || episodes.all { it.isWatchable() }) return
+        rewardAdManager.preload(RewardAdManager.AdType.UNLOCK_EPISODE)
+    }
+
+    /** Trang khoá + `rewarded_bonus` bật → nút mở bằng ad; ad load ngay để lúc bấm khỏi chờ. */
+    private fun offerRewardedUnlock(index: Int) {
+        rewardedLoadJob?.cancel()
+        rewardedShowing = false
+        if (!isAdPlacementEnabled(AdPlacement.RewardedBonus)) return
+        updateState { copy(unlockAd = RewardedAdState.Loading) }
+        rewardedLoadJob = viewModelScope.launch {
+            val available = rewardAdManager.load(RewardAdManager.AdType.UNLOCK_EPISODE)
+            if (currentState.episodeIndex != index || !currentState.isLocked) return@launch
+            updateState {
+                copy(
+                    unlockAd = when {
+                        // Bị tắt trong lúc load: ẩn nút, không báo "No ad available".
+                        !isAdPlacementEnabled(AdPlacement.RewardedBonus) -> null
+                        available -> RewardedAdState.Ready
+                        else -> RewardedAdState.Unavailable
+                    },
+                )
+            }
+        }
+    }
+
+    /** Không ad nào giữa lúc video phát: trang khoá vốn đã dừng, vẫn pause chắc chắn trước khi show. */
+    private fun showRewarded() {
+        if (currentState.unlockAd != RewardedAdState.Ready || rewardedShowing) return
+        rewardedShowing = true
+        player.pause()
+        sendEvent(PlayerSingleEvent.ShowRewarded(currentState.episodeIndex))
+    }
+
+    /** Xem hết → mở tập và phát ngay tại trang này (không rời Player); đóng sớm → giữ khoá, cho xem lại. */
+    private fun onRewardResult(index: Int, earned: Boolean) {
+        rewardedShowing = false
+        // Ad vừa xem đã dùng hết — load sẵn bản kế cho tập khoá tiếp theo.
+        preloadRewardedIfLocked()
+        val episode = episodes.firstOrNull { it.index == index } ?: return
+        if (!earned) {
+            sendEvent(PlayerSingleEvent.ShowToast(R.string.watch_unlock_incomplete, formatArg = null, success = false))
+            if (currentState.episodeIndex == index) offerRewardedUnlock(index)
+            return
+        }
+        viewModelScope.launch {
+            unlockEpisode(showId, index).onSuccess {
+                unlocked = unlocked + index
+                sendEvent(PlayerSingleEvent.ShowToast(R.string.watch_unlock_success, episode.displayNumber, success = true))
+                refreshPlaylist()
+                refreshPages()
+                if (currentState.episodeIndex == index) openEpisode(index, positionMs = 0) else refreshGrid()
+            }.onFailure { error ->
+                sendEvent(PlayerSingleEvent.ShowToast(error.toErrorRes(), formatArg = null, success = false))
+                if (currentState.episodeIndex == index) offerRewardedUnlock(index)
+            }
         }
     }
 

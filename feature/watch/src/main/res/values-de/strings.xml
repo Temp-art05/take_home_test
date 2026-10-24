@@ -51,4 +51,16 @@
     <string name="watch_quality_more_data">Braucht mehr Daten</string>
     <string name="watch_language">Sprache</string>
     <string name="watch_autoplay_next">Nächste Folge autom. abspielen</string>
+
+    <!-- Mở tập khoá bằng rewarded ad (Phase 5) -->
+    <string name="watch_unlock_title">Folge %1$d freischalten</string>
+    <string name="watch_unlock_body">Sieh dir eine kurze Videoanzeige an, um diese Folge zu öffnen. Sie bleibt freigeschaltet.</string>
+    <string name="watch_unlock_watch_ad">Anzeige ansehen</string>
+    <string name="watch_unlock_not_now">Jetzt nicht</string>
+    <string name="watch_unlock_unavailable">Gerade ist keine Anzeige verfügbar. Versuch es später noch mal.</string>
+    <string name="watch_unlock_success">Folge %1$d freigeschaltet</string>
+    <string name="watch_unlock_incomplete">Sieh dir die ganze Anzeige an, um freizuschalten</string>
+    <string name="watch_unlock_with_ad">Anzeige ansehen und freischalten</string>
+    <string name="watch_locked_body_ad">Sieh dir eine kurze Anzeige an, um sie zu öffnen, oder wähl eine Gratisfolge.</string>
+    <string name="watch_unlock_loading_cd">Anzeige wird geladen</string>
 </resources>

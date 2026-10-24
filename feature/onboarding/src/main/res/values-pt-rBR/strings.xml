@@ -5,6 +5,8 @@
 
     <!-- SCR-0001 Splash -->
     <string name="onboarding_splash_tag">Séries curtas</string>
+    <string name="onboarding_splash_ad_logs_on">Logs de anúncios ativados</string>
+    <string name="onboarding_splash_ad_logs_off">Logs de anúncios desativados</string>
 
     <!-- SCR-0002 Language -->
     <string name="onboarding_language_title">Seu idioma</string>

@@ -50,4 +50,16 @@
     <string name="watch_quality_more_data">Pakai lebih banyak data</string>
     <string name="watch_language">Bahasa</string>
     <string name="watch_autoplay_next">Putar otomatis episode berikutnya</string>
+
+    <!-- Mở tập khoá bằng rewarded ad (Phase 5) -->
+    <string name="watch_unlock_title">Buka Episode %1$d</string>
+    <string name="watch_unlock_body">Tonton iklan video singkat untuk membuka episode ini. Episode tetap terbuka.</string>
+    <string name="watch_unlock_watch_ad">Tonton iklan</string>
+    <string name="watch_unlock_not_now">Nanti saja</string>
+    <string name="watch_unlock_unavailable">Belum ada iklan saat ini. Coba lagi nanti.</string>
+    <string name="watch_unlock_success">Episode %1$d terbuka</string>
+    <string name="watch_unlock_incomplete">Tonton iklan sampai selesai untuk membuka</string>
+    <string name="watch_unlock_with_ad">Tonton iklan untuk membuka</string>
+    <string name="watch_locked_body_ad">Tonton iklan singkat untuk membukanya, atau pilih episode gratis.</string>
+    <string name="watch_unlock_loading_cd">Memuat iklan</string>
 </resources>

@@ -5,6 +5,8 @@
 
     <!-- SCR-0001 Splash -->
     <string name="onboarding_splash_tag">مسلسلات درامية قصيرة</string>
+    <string name="onboarding_splash_ad_logs_on">تم تشغيل سجلات الإعلانات</string>
+    <string name="onboarding_splash_ad_logs_off">تم إيقاف سجلات الإعلانات</string>
 
     <!-- SCR-0002 Language -->
     <string name="onboarding_language_title">لغتك</string>

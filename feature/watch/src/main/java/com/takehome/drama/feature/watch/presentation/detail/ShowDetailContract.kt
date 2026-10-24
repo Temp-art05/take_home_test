@@ -6,6 +6,7 @@ import com.takehome.drama.core.ui.foundation.vm.ViewIntent
 import com.takehome.drama.core.ui.foundation.vm.ViewState
 import com.takehome.drama.domain.usecase.watch.EpisodeCell
 import com.takehome.drama.domain.usecase.watch.EpisodeRange
+import com.takehome.drama.feature.watch.presentation.common.RewardedAdState
 
 data class ShowDetailViewState(
     val isLoading: Boolean = true,
@@ -31,6 +32,8 @@ data class ShowDetailViewState(
     val watchedCount: Int = 0,
     val continueCta: ContinueCta? = null,
     val isSaved: Boolean = false,
+    /** Sheet "xem quảng cáo để mở tập" — chỉ khi placement `rewarded_bonus` bật. Sống qua xoay máy (state VM). */
+    val unlockSheet: UnlockSheet? = null,
 ) : ViewState {
     /** Ô của tab đang chọn; chưa có tab (≤ 20 tập) thì cả lưới. */
     val visibleCells: List<EpisodeCell>
@@ -46,6 +49,12 @@ data class ContinueCta(
     val isLocked: Boolean,
 )
 
+data class UnlockSheet(
+    val episodeIndex: Int,
+    val episodeNumber: Int,
+    val ad: RewardedAdState,
+)
+
 sealed interface ShowDetailIntent : ViewIntent {
     data object BackClick : ShowDetailIntent
     data object RetryClick : ShowDetailIntent
@@ -57,6 +66,13 @@ sealed interface ShowDetailIntent : ViewIntent {
     data class EpisodeClick(val index: Int) : ShowDetailIntent
     data class RangeSelect(val range: EpisodeRange) : ShowDetailIntent
     data object SaveClick : ShowDetailIntent
+
+    /** Nút "Watch ad" trong sheet mở tập — hành động user bấm duy nhất dẫn tới rewarded. */
+    data object UnlockWithAdClick : ShowDetailIntent
+    data object UnlockSheetDismiss : ShowDetailIntent
+
+    /** Rewarded đã đóng; [earned] = xem hết, nhận thưởng. */
+    data class RewardResult(val episodeIndex: Int, val earned: Boolean) : ShowDetailIntent
 }
 
 sealed interface ShowDetailSingleEvent : SingleEvent {
@@ -66,5 +82,6 @@ sealed interface ShowDetailSingleEvent : SingleEvent {
     /** [formatArg] null = chuỗi không tham số. */
     data class ShowToast(@StringRes val messageRes: Int, val formatArg: Int?, val success: Boolean) : ShowDetailSingleEvent
 
-    /** [position] là vị trí ô trong lưới. */
+    /** Screen cần Activity để hiện rewarded; kết quả quay lại bằng [ShowDetailIntent.RewardResult]. */
+    data class ShowRewarded(val episodeIndex: Int) : ShowDetailSingleEvent
 }

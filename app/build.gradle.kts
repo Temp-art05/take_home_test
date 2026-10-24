@@ -20,7 +20,7 @@ android {
     defaultConfig {
         applicationId = "com.takehome.drama"
         versionCode = 1
-        versionName = "1.0.0"
+        versionName = "1.0.1"
     }
 
     androidResources {
@@ -99,6 +99,7 @@ dependencies {
     implementation(project(":core:ui-foundation"))
     implementation(project(":core:design-system"))
     implementation(project(":core:media"))
+    implementation(project(":core:ads"))
     implementation(project(":feature:onboarding"))
     implementation(project(":feature:main"))
     implementation(project(":feature:watch"))

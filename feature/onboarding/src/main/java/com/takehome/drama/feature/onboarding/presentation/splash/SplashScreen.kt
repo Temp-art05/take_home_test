@@ -1,10 +1,12 @@
 package com.takehome.drama.feature.onboarding.presentation.splash
 
+import android.os.SystemClock
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,14 +17,18 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.takehome.drama.core.designsystem.component.AppToastHost
 import com.takehome.drama.core.designsystem.component.FlowMark
 import com.takehome.drama.core.designsystem.component.Wordmark
+import com.takehome.drama.core.designsystem.component.rememberToastState
+import com.takehome.drama.core.designsystem.ext.clickableNoRipple
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
 import com.takehome.drama.core.navigation.core.NavigationRequest
@@ -37,19 +43,31 @@ fun SplashScreen(
     home: Destination,
     onNavigate: (NavigationRequest) -> Unit,
 ) {
+    val resources = LocalResources.current
+    val toastState = rememberToastState()
     viewModel.singleEvent.CollectAsEffect { event ->
-        val destination = when (event) {
-            SplashSingleEvent.GoHome -> home
-            SplashSingleEvent.GoOnboarding -> OnboardingScreenProvider.Onboarding()
+        when (event) {
+            SplashSingleEvent.GoHome -> onNavigate(NavigationRequest.NavigateToAndClearBackStack(home))
+            SplashSingleEvent.GoOnboarding ->
+                onNavigate(NavigationRequest.NavigateToAndClearBackStack(OnboardingScreenProvider.Onboarding()))
+            is SplashSingleEvent.ShowToast -> toastState.show(resources.getString(event.messageRes), success = true)
         }
-        onNavigate(NavigationRequest.NavigateToAndClearBackStack(destination))
     }
-    SplashContent()
+    Box(Modifier.fillMaxSize()) {
+        SplashContent(onLogoTap = { viewModel.processIntent(SplashIntent.LogoTapped(SystemClock.uptimeMillis())) })
+        AppToastHost(
+            state = toastState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = AppTheme.dimensions.s6 * 2),
+        )
+    }
 }
 
 /** `.splash`: glow cam 14% sau logo, mark 78dp, wordmark 30sp, tag `text3`. Không progress bar. */
 @Composable
-private fun SplashContent() {
+private fun SplashContent(onLogoTap: () -> Unit = {}) {
     val glow = AppTheme.colors.splashGlow
     Box(
         modifier = Modifier
@@ -69,7 +87,8 @@ private fun SplashContent() {
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            FlowMark(size = AppTheme.dimensions.splashMark)
+            // Easter egg tap 7 lần bật log ads (như HomeMorph): không ripple — người dùng không thấy.
+            FlowMark(size = AppTheme.dimensions.splashMark, modifier = Modifier.clickableNoRipple(onClick = onLogoTap))
             Wordmark(splash = true, modifier = Modifier.padding(top = AppTheme.dimensions.s5))
             Text(
                 text = stringResource(R.string.onboarding_splash_tag).uppercase(),

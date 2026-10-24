@@ -34,6 +34,8 @@ data class HomeViewState(
     /** Rail theo tag `isCategory = false` — fixtures không show nào gắn nên thường rỗng. */
     val rails: List<HomeRail> = emptyList(),
     val alsoFlowing: List<ShowCard> = emptyList(),
+    /** Placement `native_home` theo Remote Config. Bật vẫn chỉ hiện khi đã load được ad (không giữ chỗ). */
+    val showNativeAd: Boolean = false,
 ) : ViewState
 
 sealed interface HomeIntent : ViewIntent {

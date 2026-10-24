@@ -61,4 +61,16 @@
     <string name="watch_quality_more_data">அதிக டேட்டா செலவாகும்</string>
     <string name="watch_language">மொழி</string>
     <string name="watch_autoplay_next">அடுத்த எபிசோடைத் தானாக இயக்கு</string>
+
+    <!-- Mở tập khoá bằng rewarded ad (Phase 5) -->
+    <string name="watch_unlock_title">எபிசோடு %1$d-ஐத் திறக்கவும்</string>
+    <string name="watch_unlock_body">இந்த எபிசோடைத் திறக்க ஒரு சிறிய வீடியோ விளம்பரத்தைப் பாருங்கள். இது திறந்தே இருக்கும்.</string>
+    <string name="watch_unlock_watch_ad">விளம்பரம் பார்</string>
+    <string name="watch_unlock_not_now">இப்போது வேண்டாம்</string>
+    <string name="watch_unlock_unavailable">இப்போது விளம்பரம் இல்லை. பிறகு மீண்டும் முயலவும்.</string>
+    <string name="watch_unlock_success">எபிசோடு %1$d திறக்கப்பட்டது</string>
+    <string name="watch_unlock_incomplete">திறக்க முழு விளம்பரத்தையும் பாருங்கள்</string>
+    <string name="watch_unlock_with_ad">திறக்க ஒரு விளம்பரம் பாருங்கள்</string>
+    <string name="watch_locked_body_ad">இதைத் திறக்க சிறிய விளம்பரம் பாருங்கள், அல்லது இலவச எபிசோடைத் தேர்ந்தெடுங்கள்.</string>
+    <string name="watch_unlock_loading_cd">விளம்பரம் ஏற்றப்படுகிறது</string>
 </resources>

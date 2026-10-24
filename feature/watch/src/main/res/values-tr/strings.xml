@@ -51,4 +51,16 @@
     <string name="watch_quality_more_data">Daha fazla veri kullanır</string>
     <string name="watch_language">Dil</string>
     <string name="watch_autoplay_next">Sonraki bölümü otomatik oynat</string>
+
+    <!-- Mở tập khoá bằng rewarded ad (Phase 5) -->
+    <string name="watch_unlock_title">%1$d. bölümün kilidini aç</string>
+    <string name="watch_unlock_body">Bu bölümü açmak için kısa bir video reklam izle. Kilidi açık kalır.</string>
+    <string name="watch_unlock_watch_ad">Reklam izle</string>
+    <string name="watch_unlock_not_now">Şimdi değil</string>
+    <string name="watch_unlock_unavailable">Şu anda reklam yok. Daha sonra tekrar dene.</string>
+    <string name="watch_unlock_success">%1$d. bölümün kilidi açıldı</string>
+    <string name="watch_unlock_incomplete">Kilidi açmak için reklamın tamamını izle</string>
+    <string name="watch_unlock_with_ad">Kilidi açmak için reklam izle</string>
+    <string name="watch_locked_body_ad">Açmak için kısa bir reklam izle ya da ücretsiz bir bölüm seç.</string>
+    <string name="watch_unlock_loading_cd">Reklam yükleniyor</string>
 </resources>

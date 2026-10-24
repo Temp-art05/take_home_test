@@ -19,7 +19,21 @@ sealed interface OnboardingFlowIntent : ViewIntent {
     data class Next(val from: OnboardingStep) : OnboardingFlowIntent
 
     data object Back : OnboardingFlowIntent
+
+    /** Bước cuối (Taste khi API < 33, Notification prompt khi 33+) đã lưu onboarding xong. */
+    data object Finish : OnboardingFlowIntent
+
+    /**
+     * Interstitial đã đóng (hoặc không có). Đi qua VM chứ không gọi navigate thẳng trong callback:
+     * Activity có thể bị dựng lại lúc ad đang hiện, NavController của composition cũ đã huỷ.
+     */
+    data object AdClosed : OnboardingFlowIntent
 }
 
-/** Kết thúc onboarding (→ Home) do bước con điều hướng; host không có event riêng. */
-sealed interface OnboardingFlowSingleEvent : SingleEvent
+sealed interface OnboardingFlowSingleEvent : SingleEvent {
+    /** Screen hiện interstitial `interstitial_onboarding` nếu đã load sẵn, đóng (hoặc không có) → Home. */
+    data object FinishWithAd : OnboardingFlowSingleEvent
+
+    /** Vào Home, xoá back stack onboarding. */
+    data object NavigateHome : OnboardingFlowSingleEvent
+}

@@ -4,6 +4,8 @@
     <string name="onboarding_continue">Lanjut</string>
     <string name="onboarding_skip">Lewati</string>
     <string name="onboarding_splash_tag">Serial Drama Pendek</string>
+    <string name="onboarding_splash_ad_logs_on">Log iklan aktif</string>
+    <string name="onboarding_splash_ad_logs_off">Log iklan nonaktif</string>
     <string name="onboarding_language_title">Bahasamu</string>
     <string name="onboarding_language_body">Kami sesuaikan dengan ponselmu. Ubah kapan saja di Setelan.</string>
     <string name="onboarding_value_prop_title">Semua episode terbuka.\nCeritanya terus mengalir.</string>

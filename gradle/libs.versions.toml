@@ -45,6 +45,10 @@ coil = "3.6.3"
 # Media3 (ExoPlayer)
 media3 = "1.11.1"
 
+# Ads — lib ads của tác giả (GitHub Packages) + đúng bản play-services-ads lib 1.1.1 đã kiểm
+adsLib = "1.1.1"
+playServicesAds = "23.6.0"
+
 # Test
 junit = "4.13.2"
 turbine = "1.2.1"
@@ -124,6 +128,13 @@ coil-gif = { group = "io.coil-kt.coil3", name = "coil-gif", version.ref = "coil"
 # Media3
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 media3-ui-compose = { group = "androidx.media3", name = "media3-ui-compose", version.ref = "media3" }
+
+# Ads
+play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
+ads-core = { group = "com.github.dinhn", name = "ads-core", version.ref = "adsLib" }
+ads-admob = { group = "com.github.dinhn", name = "ads-admob", version.ref = "adsLib" }
+# Lib tự bắn ad_impression / paid_ad_impression… sang Firebase (AdsConfig.trackWithFirebase).
+ads-firebase = { group = "com.github.dinhn", name = "ads-firebase", version.ref = "adsLib" }
 
 # Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }

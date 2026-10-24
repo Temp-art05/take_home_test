@@ -16,6 +16,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlowDrama">
 
+        <!-- AdMob: app id **test** của Google (README §2.3). Ad unit id nằm ở :core:ads/AdUnits.kt. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
+        <!-- SDK tự init/load ở thread nền thay vì main thread lúc app khởi động. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.flag.OPTIMIZE_INITIALIZATION"
+            android:value="true" />
+        <meta-data
+            android:name="com.google.android.gms.ads.flag.OPTIMIZE_AD_LOADING"
+            android:value="true" />
+
         <!-- MainActivity -->
         <activity
             android:name="com.takehome.drama.MainActivity"
