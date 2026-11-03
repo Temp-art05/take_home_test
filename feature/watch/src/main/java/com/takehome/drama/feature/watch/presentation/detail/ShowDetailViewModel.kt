@@ -34,7 +34,7 @@ import com.takehome.drama.domain.usecase.watch.ObserveUnlockedEpisodesUseCase
 import com.takehome.drama.domain.usecase.watch.UnlockEpisodeUseCase
 import com.takehome.drama.domain.usecase.watch.isWatchable
 import com.takehome.drama.feature.watch.R
-import com.takehome.drama.feature.watch.navigation.ShowDetailScreenProvider.ShowDetail
+import com.takehome.drama.feature.watch.presentation.detail.ShowDetailScreenProvider.ShowDetail
 import com.takehome.drama.feature.watch.presentation.common.RewardedAdState
 import java.util.Locale
 import kotlinx.coroutines.Job

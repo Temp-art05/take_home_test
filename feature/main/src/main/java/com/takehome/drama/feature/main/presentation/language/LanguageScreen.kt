@@ -30,7 +30,6 @@ import com.takehome.drama.core.designsystem.component.SettingsRow
 import com.takehome.drama.core.designsystem.component.SettingsRows
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
-import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.core.ui.foundation.locale.AppLocale
 import com.takehome.drama.core.ui.foundation.locale.LanguageLabels
@@ -40,7 +39,7 @@ import java.util.Locale
 @Composable
 fun LanguageScreen(
     viewModel: LanguageViewModel,
-    onNavigate: (NavigationRequest) -> Unit
+    onBack: () -> Unit,
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
 
@@ -53,7 +52,7 @@ fun LanguageScreen(
 
     viewModel.singleEvent.CollectAsEffect { event ->
         when (event) {
-            LanguageSingleEvent.NavigateBack -> onNavigate(NavigationRequest.NavigateUp())
+            LanguageSingleEvent.NavigateBack -> onBack()
             // Activity dựng lại với locale mới, vẫn ở màn này (không restart app).
             is LanguageSingleEvent.ApplyLocale -> {
                 AppLocale.apply(event.locale)
@@ -67,7 +66,8 @@ fun LanguageScreen(
     LanguageContent(
         viewState = viewState,
         deviceLabel = LanguageLabels.deviceLanguage(deviceLocale),
-        onIntent = { intent -> viewModel.processIntent(intent) },
+        onBackClick = { viewModel.processIntent(LanguageIntent.BackClick) },
+        onLocaleSelect = { locale -> viewModel.processIntent(LanguageIntent.SelectLocale(locale)) },
     )
 }
 
@@ -87,7 +87,8 @@ internal fun rememberDeviceLocale(): Locale {
 private fun LanguageContent(
     viewState: LanguageViewState,
     deviceLabel: String,
-    onIntent: (LanguageIntent) -> Unit,
+    onBackClick: () -> Unit,
+    onLocaleSelect: (AppLocale) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -96,7 +97,7 @@ private fun LanguageContent(
     ) {
         AppTopBar(
             title = stringResource(R.string.language_title),
-            onBack = { onIntent(LanguageIntent.BackClick) },
+            onBack = onBackClick,
             backContentDescription = stringResource(R.string.common_back),
         )
         Column(
@@ -118,7 +119,7 @@ private fun LanguageContent(
                     supporting = stringResource(R.string.language_current, deviceLabel),
                     trailing = if (viewState.selected == AppLocale.System) RowTrailing.Selected else RowTrailing.None,
                     selectable = true,
-                    onClick = { onIntent(LanguageIntent.SelectLocale(AppLocale.System)) },
+                    onClick = { onLocaleSelect(AppLocale.System) },
                     divider = false,
                 )
             }
@@ -130,7 +131,7 @@ private fun LanguageContent(
                         label = locale.endonym.orEmpty(),
                         trailing = if (viewState.selected == locale) RowTrailing.Selected else RowTrailing.None,
                         selectable = true,
-                        onClick = { onIntent(LanguageIntent.SelectLocale(locale)) },
+                        onClick = { onLocaleSelect(locale) },
                         divider = index < manual.lastIndex,
                     )
                 }
@@ -143,6 +144,11 @@ private fun LanguageContent(
 @Composable
 private fun LanguageContentPreview() {
     AppTheme {
-        LanguageContent(viewState = LanguageViewState(), deviceLabel = "English (U.S.)", onIntent = {})
+        LanguageContent(
+            viewState = LanguageViewState(),
+            deviceLabel = "English (U.S.)",
+            onBackClick = {},
+            onLocaleSelect = {},
+        )
     }
 }

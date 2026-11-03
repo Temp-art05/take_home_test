@@ -5,9 +5,9 @@ import com.takehome.drama.domain.fake.FakeUserPreferencesRepository
 import com.takehome.drama.domain.fake.MainDispatcherRule
 import com.takehome.drama.domain.model.UserPreferences
 import com.takehome.drama.domain.usecase.onboarding.CompleteOnboardingUseCase
-import com.takehome.drama.feature.onboarding.presentation.notification.NotificationPromptIntent
-import com.takehome.drama.feature.onboarding.presentation.notification.NotificationPromptSingleEvent
-import com.takehome.drama.feature.onboarding.presentation.notification.NotificationPromptViewModel
+import com.takehome.drama.feature.onboarding.presentation.flow.notification.NotificationPromptIntent
+import com.takehome.drama.feature.onboarding.presentation.flow.notification.NotificationPromptSingleEvent
+import com.takehome.drama.feature.onboarding.presentation.flow.notification.NotificationPromptViewModel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals

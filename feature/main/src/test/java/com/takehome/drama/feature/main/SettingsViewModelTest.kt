@@ -7,9 +7,9 @@ import com.takehome.drama.domain.fake.testAppConfig
 import com.takehome.drama.domain.model.ThemeMode
 import com.takehome.drama.domain.usecase.settings.ObserveThemeUseCase
 import com.takehome.drama.domain.usecase.settings.SetThemeUseCase
-import com.takehome.drama.feature.main.presentation.settings.SettingsIntent
-import com.takehome.drama.feature.main.presentation.settings.SettingsSingleEvent
-import com.takehome.drama.feature.main.presentation.settings.SettingsViewModel
+import com.takehome.drama.feature.main.presentation.main.settings.SettingsIntent
+import com.takehome.drama.feature.main.presentation.main.settings.SettingsSingleEvent
+import com.takehome.drama.feature.main.presentation.main.settings.SettingsViewModel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals

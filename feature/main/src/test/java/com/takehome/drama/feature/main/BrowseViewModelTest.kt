@@ -16,9 +16,9 @@ import com.takehome.drama.domain.usecase.library.SetShowSavedUseCase
 import com.takehome.drama.domain.usecase.reels.GetReelClipUseCase
 import com.takehome.drama.domain.usecase.watch.GetShowEpisodesUseCase
 import com.takehome.drama.domain.usecase.watch.PickVideoSourceUseCase
-import com.takehome.drama.feature.main.presentation.browse.BrowseIntent
-import com.takehome.drama.feature.main.presentation.browse.BrowseSingleEvent
-import com.takehome.drama.feature.main.presentation.browse.BrowseViewModel
+import com.takehome.drama.feature.main.presentation.main.browse.BrowseIntent
+import com.takehome.drama.feature.main.presentation.main.browse.BrowseSingleEvent
+import com.takehome.drama.feature.main.presentation.main.browse.BrowseViewModel
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

@@ -13,13 +13,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.takehome.drama.core.ads.interstitial.InterstitialAdManager
-import com.takehome.drama.core.navigation.core.NavigationRequest
-import com.takehome.drama.core.navigation.destination.Destination
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
-import com.takehome.drama.feature.onboarding.presentation.language.OnboardingLanguageScreen
-import com.takehome.drama.feature.onboarding.presentation.notification.NotificationPromptScreen
-import com.takehome.drama.feature.onboarding.presentation.taste.TastePickerScreen
-import com.takehome.drama.feature.onboarding.presentation.valueprop.ValuePropScreen
+import com.takehome.drama.feature.onboarding.presentation.flow.language.OnboardingLanguageScreen
+import com.takehome.drama.feature.onboarding.presentation.flow.notification.NotificationPromptScreen
+import com.takehome.drama.feature.onboarding.presentation.flow.taste.TastePickerScreen
+import com.takehome.drama.feature.onboarding.presentation.flow.valueprop.ValuePropScreen
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
@@ -34,8 +32,7 @@ import org.koin.compose.koinInject
 @Composable
 fun OnboardingFlowScreen(
     viewModel: OnboardingFlowViewModel,
-    home: Destination,
-    onNavigate: (NavigationRequest) -> Unit,
+    onOpenHome: () -> Unit,
     interstitialAdManager: InterstitialAdManager = koinInject(),
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
@@ -57,12 +54,10 @@ fun OnboardingFlowScreen(
                     adClosed()
                 }
             }
-            OnboardingFlowSingleEvent.NavigateHome -> onNavigate(NavigationRequest.NavigateToAndClearBackStack(home))
+            OnboardingFlowSingleEvent.NavigateHome -> onOpenHome()
         }
     }
 
-    val next = { step: OnboardingStep -> viewModel.processIntent(OnboardingFlowIntent.Next(from = step)) }
-    val finish = { viewModel.processIntent(OnboardingFlowIntent.Finish) }
     HorizontalPager(
         state = pagerState,
         userScrollEnabled = false,
@@ -73,14 +68,23 @@ fun OnboardingFlowScreen(
         key = { OnboardingStep.entries[it] },
     ) { page ->
         when (OnboardingStep.entries[page]) {
-            OnboardingStep.Language ->
-                OnboardingLanguageScreen(viewModel = koinViewModel(), onNext = { next(OnboardingStep.Language) })
-            OnboardingStep.ValueProp ->
-                ValuePropScreen(viewModel = koinViewModel(), onNext = { next(OnboardingStep.ValueProp) })
-            OnboardingStep.Taste ->
-                TastePickerScreen(viewModel = koinViewModel(), onNext = { next(OnboardingStep.Taste) }, onFinish = finish)
-            OnboardingStep.NotificationPrompt ->
-                NotificationPromptScreen(viewModel = koinViewModel(), onFinish = finish)
+            OnboardingStep.Language -> OnboardingLanguageScreen(
+                viewModel = koinViewModel(),
+                onNext = { viewModel.processIntent(OnboardingFlowIntent.Next(from = OnboardingStep.Language)) },
+            )
+            OnboardingStep.ValueProp -> ValuePropScreen(
+                viewModel = koinViewModel(),
+                onNext = { viewModel.processIntent(OnboardingFlowIntent.Next(from = OnboardingStep.ValueProp)) },
+            )
+            OnboardingStep.Taste -> TastePickerScreen(
+                viewModel = koinViewModel(),
+                onNext = { viewModel.processIntent(OnboardingFlowIntent.Next(from = OnboardingStep.Taste)) },
+                onFinish = { viewModel.processIntent(OnboardingFlowIntent.Finish) },
+            )
+            OnboardingStep.NotificationPrompt -> NotificationPromptScreen(
+                viewModel = koinViewModel(),
+                onFinish = { viewModel.processIntent(OnboardingFlowIntent.Finish) },
+            )
         }
     }
 }

@@ -20,9 +20,9 @@ import com.takehome.drama.domain.usecase.discovery.GetHomeFeedUseCase
 import com.takehome.drama.domain.usecase.history.GetContinueTargetUseCase
 import com.takehome.drama.domain.usecase.history.ObserveWatchHistoryUseCase
 import com.takehome.drama.domain.usecase.watch.GetShowEpisodesUseCase
-import com.takehome.drama.feature.main.presentation.home.HomeIntent
-import com.takehome.drama.feature.main.presentation.home.HomeSingleEvent
-import com.takehome.drama.feature.main.presentation.home.HomeViewModel
+import com.takehome.drama.feature.main.presentation.main.home.HomeIntent
+import com.takehome.drama.feature.main.presentation.main.home.HomeSingleEvent
+import com.takehome.drama.feature.main.presentation.main.home.HomeViewModel
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

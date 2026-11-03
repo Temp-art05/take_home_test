@@ -9,7 +9,7 @@ import com.takehome.drama.core.ui.foundation.vm.BaseViewModel
 import com.takehome.drama.domain.usecase.catalog.GetCatalogUseCase
 import com.takehome.drama.domain.usecase.onboarding.IsOnboardingDoneUseCase
 import com.takehome.drama.feature.onboarding.R
-import com.takehome.drama.feature.onboarding.navigation.SplashScreenProvider.Splash
+import com.takehome.drama.feature.onboarding.presentation.splash.SplashScreenProvider.Splash
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

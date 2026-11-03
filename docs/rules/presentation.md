@@ -3,13 +3,15 @@
 ## Bộ file mỗi màn hình
 
 Đặt trong `presentation/<screen>/` của feature; composable riêng của màn ở `component/`, UI model/enum ở `model/` (xem `architecture.md`).
+Màn con của một container nằm **trong** package container: tab của Main ở `presentation/main/<tab>/`
+(`main/home`, `main/reels`…), bước onboarding ở `presentation/flow/<step>/`. Feature không có package `navigation/`.
 
 | File | Nội dung |
 |---|---|
 | `FooContract.kt` | `data class FooViewState : ViewState`, `sealed interface FooIntent : ViewIntent`, `sealed interface FooSingleEvent : SingleEvent` |
 | `FooViewModel.kt` | `BaseViewModel<FooIntent, FooViewState, FooSingleEvent>` |
 | `FooScreen.kt` | `FooScreen` (nối ViewModel) + `FooContent` (stateless, có preview) |
-| `navigation/FooScreenProvider.kt` | chỉ màn là một destination: `@Serializable` destination + factory composable |
+| `FooScreenProvider.kt` | cùng package với màn, chỉ khi màn là một destination: `@Serializable` destination + map từng callback điều hướng sang `NavigationRequest` |
 
 ## MVI — mọi hành động đi qua `processIntent`
 
@@ -32,19 +34,25 @@ override fun processIntent(intent: FooIntent) {
     }
 }
 
-// Screen
+// Screen — chỗ DUY NHẤT gọi processIntent, mỗi hành động một dòng
 FooContent(
     viewState = viewState,
-    onIntent = { intent -> viewModel.processIntent(intent) },
+    onRetryClick = { viewModel.processIntent(FooIntent.RetryClick) },
+    onTabSelected = { tab -> viewModel.processIntent(FooIntent.SelectTab(tab)) },
 )
 
-// Content — stateless, chỉ biết gửi intent
+// Content — stateless, mỗi hành động một callback có tên
 @Composable
 private fun FooContent(
     viewState: FooViewState,
-    onIntent: (FooIntent) -> Unit,
+    onRetryClick: () -> Unit,
+    onTabSelected: (MainTab) -> Unit,
 )
 ```
+
+**Cấm** `onIntent: (FooIntent) -> Unit` ở Content hay composable con, cấm gom lambda vào data class/holder:
+đọc chữ ký composable phải thấy ngay nó làm được gì. Callback hành động không có default `= {}` (preview tự
+truyền `{}`), để sót callback là lỗi compile chứ không phải nút bấm câm.
 
 Lý do: một cửa vào duy nhất cho mọi hành động — đọc `FooIntent` là biết màn có những hành động gì,
 log/analytics hành động gắn được ở một chỗ, và luồng dữ liệu một chiều (Intent → State/Event).
@@ -91,9 +99,31 @@ log/analytics hành động gắn được ở một chỗ, và luồng dữ li�
 
 - Destination là `@Serializable data object/class : Destination`, khai **bên trong** `ScreenProvider`.
 - Đăng ký ở `AppNavGraph`: `applyDestination(FooScreenProvider())`.
-- Điều hướng: `onNavigate(NavigationRequest.NavigateTo(...))` (`NavigateToAndClearBackStack`,
-  `PopBackStack`, `NavigateUp`, `PopTo`). Có throttle chống double-tap; điều hướng không do user bấm
-  (deeplink, hết phiên) gọi `NavigationThrottle.awaitWindow()` trước.
+- **Mỗi đích một callback có tên**, không truyền `onNavigate: (NavigationRequest) -> Unit` xuống Screen:
+
+```kotlin
+// FooScreen — không import NavigationRequest, WatchRoutes hay destination màn khác
+@Composable
+fun FooScreen(
+    viewModel: FooViewModel,
+    onBack: () -> Unit,
+    onOpenShowDetail: (showId: String) -> Unit,
+    onOpenSettings: () -> Unit,
+)
+
+// FooScreenProvider — chỗ duy nhất đổi callback thành NavigationRequest
+FooScreen(
+    viewModel = viewModel,
+    onBack = { onNavigationRequest(NavigationRequest.PopBackStack) },
+    onOpenShowDetail = { showId -> onNavigationRequest(NavigationRequest.NavigateTo(watchRoutes.showDetail(showId))) },
+    onOpenSettings = { onNavigationRequest(NavigationRequest.NavigateTo(SettingsScreenProvider.Settings)) },
+)
+```
+
+  Container (Main) nhận đủ callback của các tab rồi chuyển cho từng tab đúng cái nó cần; đổi tab nội bộ cũng là
+  callback riêng (`onOpenBrowseTab`), không phải `onSwitchTab(MainTab)`.
+- `NavigationRequest`: `NavigateTo`, `NavigateToAndClearBackStack`, `PopBackStack`, `NavigateUp`, `PopTo`. Có throttle
+  chống double-tap; điều hướng không do user bấm (deeplink, hết phiên) gọi `NavigationThrottle.awaitWindow()` trước.
 
 ## Main 5 tab (Home, Reels, Browse, Library, Settings)
 

@@ -13,7 +13,7 @@ import com.takehome.drama.domain.usecase.catalog.ResolveContentLanguageUseCase
 import com.takehome.drama.domain.usecase.search.GetPopularShowsUseCase
 import com.takehome.drama.domain.usecase.search.SearchResult
 import com.takehome.drama.domain.usecase.search.SearchShowsUseCase
-import com.takehome.drama.feature.main.navigation.SearchScreenProvider.Search
+import com.takehome.drama.feature.main.presentation.search.SearchScreenProvider.Search
 import com.takehome.drama.feature.main.presentation.common.toCard
 import java.util.Locale
 import kotlinx.coroutines.FlowPreview

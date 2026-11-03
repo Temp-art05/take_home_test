@@ -41,19 +41,20 @@ Quy tắc cứng:
 ```
 feature/foo/src/main/java/com/takehome/drama/feature/foo/
   di/                 FooModule.kt — viewModelOf(...), bind bridge impl
-  navigation/         FooScreenProvider.kt (Destination @Serializable khai bên trong)
   presentation/
     <screen>/
       FooContract.kt  FooViewState + FooSingleEvent
       FooViewModel.kt
       FooScreen.kt    FooScreen + FooContent (stateless, có preview)
+      FooScreenProvider.kt  khi màn là destination (Destination @Serializable khai bên trong)
+      <child>/        màn con của container (tab của Main, bước onboarding)
       component/      composable riêng của màn này
       model/          UI model / enum của màn (MainTab, ...)
   bridge/             FooBridgeImpl.kt — khi feature khác cần gọi chức năng của foo
   domain/  data/      CHỈ khi dữ liệu này feature khác không dùng (xem dưới)
 ```
 
-Mẫu thật: `:feature:main` (`presentation/main/{component,model}`, `presentation/home/component`, `navigation/`, `di/`).
+Mẫu thật: `:feature:main` (`presentation/main/{component,model}`, tab `presentation/main/{home,reels,browse,library,settings}`, `presentation/search/SearchScreenProvider.kt`, `di/`).
 Luồng đủ tầng domain → data → presentation: `docs/guides/sample-flow.md`.
 
 ### Domain

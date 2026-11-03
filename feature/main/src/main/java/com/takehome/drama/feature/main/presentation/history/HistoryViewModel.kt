@@ -14,8 +14,8 @@ import com.takehome.drama.domain.usecase.history.GetContinueEpisodeUseCase
 import com.takehome.drama.domain.usecase.history.ObserveWatchHistoryUseCase
 import com.takehome.drama.domain.usecase.history.RemoveFromHistoryUseCase
 import com.takehome.drama.feature.main.R
-import com.takehome.drama.feature.main.presentation.library.model.HistoryRow
-import com.takehome.drama.feature.main.presentation.library.model.toRow
+import com.takehome.drama.feature.main.presentation.main.library.model.HistoryRow
+import com.takehome.drama.feature.main.presentation.main.library.model.toRow
 import com.takehome.drama.feature.main.presentation.main.MainTabRequests
 import com.takehome.drama.feature.main.presentation.main.model.MainTab
 import java.util.Locale
