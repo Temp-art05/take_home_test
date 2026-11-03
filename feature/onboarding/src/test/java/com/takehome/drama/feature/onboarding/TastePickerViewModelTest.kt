@@ -16,9 +16,9 @@ import com.takehome.drama.domain.usecase.onboarding.CompleteOnboardingUseCase
 import com.takehome.drama.domain.usecase.onboarding.GetMoodOptionsUseCase
 import com.takehome.drama.domain.usecase.onboarding.Mood
 import com.takehome.drama.domain.usecase.onboarding.SaveTasteUseCase
-import com.takehome.drama.feature.onboarding.presentation.taste.TastePickerIntent
-import com.takehome.drama.feature.onboarding.presentation.taste.TastePickerSingleEvent
-import com.takehome.drama.feature.onboarding.presentation.taste.TastePickerViewModel
+import com.takehome.drama.feature.onboarding.presentation.flow.taste.TastePickerIntent
+import com.takehome.drama.feature.onboarding.presentation.flow.taste.TastePickerSingleEvent
+import com.takehome.drama.feature.onboarding.presentation.flow.taste.TastePickerViewModel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals

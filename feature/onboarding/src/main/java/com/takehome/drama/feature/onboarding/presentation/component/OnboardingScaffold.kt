@@ -54,7 +54,7 @@ fun OnboardingScaffold(
     modifier: Modifier = Modifier,
     primaryEnabled: Boolean = true,
     secondaryLabel: String? = null,
-    onSecondary: () -> Unit = {},
+    onSecondary: (() -> Unit)? = null,
     titleAtBottom: Boolean = false,
     background: @Composable BoxScope.() -> Unit = {},
     content: @Composable ColumnScope.() -> Unit = {},
@@ -126,7 +126,7 @@ private fun Footer(
     onPrimary: () -> Unit,
     primaryEnabled: Boolean,
     secondaryLabel: String?,
-    onSecondary: () -> Unit,
+    onSecondary: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxWidth().padding(bottom = 26.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -139,7 +139,7 @@ private fun Footer(
                 .fillMaxWidth()
                 .height(AppTheme.dimensions.ctaHeight),
         )
-        if (secondaryLabel != null) {
+        if (secondaryLabel != null && onSecondary != null) {
             Text(
                 text = secondaryLabel,
                 style = AppTypography.body.copy(fontSize = 13.5.sp),

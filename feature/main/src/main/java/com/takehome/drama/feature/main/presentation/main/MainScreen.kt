@@ -21,23 +21,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.takehome.drama.core.designsystem.theme.AppTheme
-import com.takehome.drama.core.navigation.core.NavigationRequest
-import com.takehome.drama.core.navigation.destination.WatchRoutes
-import com.takehome.drama.feature.main.presentation.browse.BrowseScreen
-import com.takehome.drama.feature.main.presentation.home.HomeScreen
-import com.takehome.drama.feature.main.presentation.library.LibraryScreen
+import com.takehome.drama.feature.main.presentation.main.browse.BrowseScreen
+import com.takehome.drama.feature.main.presentation.main.home.HomeScreen
+import com.takehome.drama.feature.main.presentation.main.library.LibraryScreen
 import com.takehome.drama.feature.main.presentation.main.component.MainBottomNavBar
 import com.takehome.drama.feature.main.presentation.main.model.MainTab
-import com.takehome.drama.feature.main.presentation.reels.ReelsScreen
-import com.takehome.drama.feature.main.presentation.settings.SettingsScreen
+import com.takehome.drama.feature.main.presentation.main.reels.ReelsScreen
+import com.takehome.drama.feature.main.presentation.main.settings.SettingsScreen
 
 private val tabs = MainTab.entries
 
 @Composable
 fun MainScreen(
     viewModel: MainViewModel,
-    watchRoutes: WatchRoutes,
-    onNavigate: (NavigationRequest) -> Unit,
+    onOpenShowDetail: (showId: String) -> Unit,
+    onOpenPlayer: (showId: String, episodeIndex: Int) -> Unit,
+    onOpenSearch: () -> Unit,
+    onOpenHistory: () -> Unit,
+    onOpenSaved: () -> Unit,
+    onOpenLanguage: () -> Unit,
+    onOpenLicenses: () -> Unit,
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     val pagerState = rememberPagerState(initialPage = viewState.selectedTab.ordinal) { tabs.size }
@@ -54,30 +57,37 @@ fun MainScreen(
     MainContent(
         viewState = viewState,
         pagerState = pagerState,
-        onIntent = { intent -> viewModel.processIntent(intent) },
+        onTabSelected = { tab -> viewModel.processIntent(MainIntent.SelectTab(tab)) },
         tabContent = { tab ->
             // ViewModel của tab lấy bằng koinViewModel() mặc định → scope theo back stack entry
             // của Main, nên sống qua mọi lần đổi tab và chỉ bị huỷ khi Main bị pop.
-            val isSelected = viewState.selectedTab == tab
-            val switchTab: (MainTab) -> Unit = { viewModel.processIntent(MainIntent.SelectTab(it)) }
             when (tab) {
                 MainTab.Home -> HomeScreen(
-                    watchRoutes = watchRoutes,
-                    onNavigate = onNavigate,
-                    onSwitchTab = switchTab,
+                    onOpenShowDetail = onOpenShowDetail,
+                    onOpenPlayer = onOpenPlayer,
+                    onOpenSearch = onOpenSearch,
+                    onOpenBrowseTab = { viewModel.processIntent(MainIntent.SelectTab(MainTab.Browse)) },
+                    onOpenSettingsTab = { viewModel.processIntent(MainIntent.SelectTab(MainTab.Settings)) },
                 )
                 MainTab.Reels -> ReelsScreen(
-                    watchRoutes = watchRoutes,
-                    onNavigate = onNavigate,
-                    isSelected = isSelected,
+                    isSelected = viewState.selectedTab == MainTab.Reels,
+                    onOpenPlayer = onOpenPlayer,
                 )
                 MainTab.Browse -> BrowseScreen(
-                    watchRoutes = watchRoutes,
-                    onNavigate = onNavigate,
-                    isSelected = isSelected,
+                    isSelected = viewState.selectedTab == MainTab.Browse,
+                    onOpenShowDetail = onOpenShowDetail,
+                    onOpenPlayer = onOpenPlayer,
+                    onOpenSearch = onOpenSearch,
                 )
-                MainTab.Library -> LibraryScreen(watchRoutes = watchRoutes, onNavigate = onNavigate)
-                MainTab.Settings -> SettingsScreen(onNavigate = onNavigate)
+                MainTab.Library -> LibraryScreen(
+                    onOpenHistory = onOpenHistory,
+                    onOpenSaved = onOpenSaved,
+                    onOpenPlayer = onOpenPlayer,
+                )
+                MainTab.Settings -> SettingsScreen(
+                    onOpenLanguage = onOpenLanguage,
+                    onOpenLicenses = onOpenLicenses,
+                )
             }
         },
     )
@@ -100,7 +110,7 @@ fun MainScreen(
 private fun MainContent(
     viewState: MainViewState,
     pagerState: PagerState,
-    onIntent: (MainIntent) -> Unit,
+    onTabSelected: (MainTab) -> Unit,
     tabContent: @Composable (tab: MainTab) -> Unit,
 ) {
     Column(
@@ -127,7 +137,7 @@ private fun MainContent(
 
         MainBottomNavBar(
             selectedTab = viewState.selectedTab,
-            onTabSelected = { tab -> onIntent(MainIntent.SelectTab(tab)) },
+            onTabSelected = onTabSelected,
         )
     }
 }
@@ -139,7 +149,7 @@ private fun MainContentPreview() {
         MainContent(
             viewState = MainViewState(),
             pagerState = rememberPagerState { tabs.size },
-            onIntent = {},
+            onTabSelected = {},
             tabContent = { tab ->
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(

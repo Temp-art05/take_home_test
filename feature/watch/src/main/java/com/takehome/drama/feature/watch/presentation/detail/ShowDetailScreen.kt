@@ -79,7 +79,6 @@ import com.takehome.drama.core.designsystem.ext.applyIf
 import com.takehome.drama.core.designsystem.icon.AppIcons
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
-import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.ui.foundation.error.ErrorKind
 import com.takehome.drama.core.ui.foundation.error.body
 import com.takehome.drama.core.ui.foundation.error.retryLabel
@@ -91,7 +90,6 @@ import com.takehome.drama.domain.usecase.watch.EpisodeCell
 import com.takehome.drama.domain.usecase.watch.EpisodeCellState
 import com.takehome.drama.domain.usecase.watch.EpisodeRange
 import com.takehome.drama.feature.watch.R
-import com.takehome.drama.feature.watch.navigation.PlayerScreenProvider
 import com.takehome.drama.feature.watch.presentation.common.EpisodeGridCell
 import com.takehome.drama.feature.watch.presentation.common.UnlockEpisodeSheetContent
 import org.koin.compose.koinInject
@@ -105,7 +103,8 @@ private val CellGap = 9.dp
 @Composable
 fun ShowDetailScreen(
     viewModel: ShowDetailViewModel,
-    onNavigate: (NavigationRequest) -> Unit,
+    onBack: () -> Unit,
+    onOpenPlayer: (showId: String, episodeIndex: Int) -> Unit,
     rewardAdManager: RewardAdManager = koinInject(),
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
@@ -116,10 +115,8 @@ fun ShowDetailScreen(
 
     viewModel.singleEvent.CollectAsEffect { event ->
         when (event) {
-            ShowDetailSingleEvent.NavigateBack -> onNavigate(NavigationRequest.PopBackStack)
-            is ShowDetailSingleEvent.OpenPlayer -> onNavigate(
-                NavigationRequest.NavigateTo(PlayerScreenProvider.Player(event.showId, event.episodeIndex))
-            )
+            ShowDetailSingleEvent.NavigateBack -> onBack()
+            is ShowDetailSingleEvent.OpenPlayer -> onOpenPlayer(event.showId, event.episodeIndex)
             is ShowDetailSingleEvent.ShowToast -> toastState.show(
                 text = event.formatArg?.let { resources.getString(event.messageRes, it) } ?: resources.getString(event.messageRes),
                 success = event.success,
@@ -138,10 +135,25 @@ fun ShowDetailScreen(
         ShowDetailContent(
             viewState = viewState,
             gridState = gridState,
-            onIntent = viewModel::processIntent,
+            onBackClick = { viewModel.processIntent(ShowDetailIntent.BackClick) },
+            onRetryClick = { viewModel.processIntent(ShowDetailIntent.RetryClick) },
+            onSynopsisToggle = { viewModel.processIntent(ShowDetailIntent.ToggleSynopsis) },
+            onContinueClick = { viewModel.processIntent(ShowDetailIntent.ContinueClick) },
+            onSaveClick = { viewModel.processIntent(ShowDetailIntent.SaveClick) },
+            onRangeSheetOpen = { viewModel.processIntent(ShowDetailIntent.RangeSheetOpen) },
+            onRetryEpisodesClick = { viewModel.processIntent(ShowDetailIntent.RetryEpisodesClick) },
+            onEpisodeClick = { index -> viewModel.processIntent(ShowDetailIntent.EpisodeClick(index)) },
         )
-        UnlockSheet(sheet = viewState.unlockSheet, onIntent = viewModel::processIntent)
-        RangeSheet(viewState, onIntent = viewModel::processIntent)
+        UnlockSheet(
+            sheet = viewState.unlockSheet,
+            onWatchAdClick = { viewModel.processIntent(ShowDetailIntent.UnlockWithAdClick) },
+            onDismiss = { viewModel.processIntent(ShowDetailIntent.UnlockSheetDismiss) },
+        )
+        RangeSheet(
+            viewState = viewState,
+            onRangeSelect = { range -> viewModel.processIntent(ShowDetailIntent.RangeSelect(range)) },
+            onDismiss = { viewModel.processIntent(ShowDetailIntent.RangeSheetDismiss) },
+        )
         AppToastHost(
             state = toastState,
             modifier = Modifier
@@ -154,18 +166,18 @@ fun ShowDetailScreen(
 
 /** Sheet "xem quảng cáo để mở tập"; giữ nội dung cũ trong lúc animation đóng. */
 @Composable
-private fun UnlockSheet(sheet: UnlockSheet?, onIntent: (ShowDetailIntent) -> Unit) {
+private fun UnlockSheet(sheet: UnlockSheet?, onWatchAdClick: () -> Unit, onDismiss: () -> Unit) {
     // Ô nhớ thường, không phải snapshot state: ghi trong composition không gây recompose thêm.
     val last = remember { arrayOfNulls<UnlockSheet>(1) }
     if (sheet != null) last[0] = sheet
     val shown = sheet ?: last[0]
-    AppBottomSheet(visible = sheet != null, onDismiss = { onIntent(ShowDetailIntent.UnlockSheetDismiss) }) {
+    AppBottomSheet(visible = sheet != null, onDismiss = onDismiss) {
         shown?.let {
             UnlockEpisodeSheetContent(
                 episodeNumber = it.episodeNumber,
                 ad = it.ad,
-                onWatchAd = { onIntent(ShowDetailIntent.UnlockWithAdClick) },
-                onNotNow = { onIntent(ShowDetailIntent.UnlockSheetDismiss) },
+                onWatchAd = onWatchAdClick,
+                onNotNow = onDismiss,
             )
         }
     }
@@ -175,23 +187,40 @@ private fun UnlockSheet(sheet: UnlockSheet?, onIntent: (ShowDetailIntent) -> Uni
 private fun ShowDetailContent(
     viewState: ShowDetailViewState,
     gridState: LazyGridState,
-    onIntent: (ShowDetailIntent) -> Unit,
+    onBackClick: () -> Unit,
+    onRetryClick: () -> Unit,
+    onSynopsisToggle: () -> Unit,
+    onContinueClick: () -> Unit,
+    onSaveClick: () -> Unit,
+    onRangeSheetOpen: () -> Unit,
+    onRetryEpisodesClick: () -> Unit,
+    onEpisodeClick: (index: Int) -> Unit,
 ) {
     when {
-        viewState.isLoading -> DetailSkeleton(onBack = { onIntent(ShowDetailIntent.BackClick) })
+        viewState.isLoading -> DetailSkeleton(onBack = onBackClick)
         viewState.error != null -> Column(Modifier.fillMaxSize()) {
-            BackButton(onClick = { onIntent(ShowDetailIntent.BackClick) }, modifier = Modifier.statusBarsPadding())
+            BackButton(onClick = onBackClick, modifier = Modifier.statusBarsPadding())
             // Show không còn: thử lại vô ích — nút đưa về màn trước.
             val notFound = viewState.error.kind == ErrorKind.NotFound
             ErrorBlankState(
                 title = viewState.error.title(),
                 body = viewState.error.body(),
                 retryLabel = if (notFound) stringResource(R.string.watch_back) else retryLabel(),
-                onRetry = { onIntent(if (notFound) ShowDetailIntent.BackClick else ShowDetailIntent.RetryClick) },
+                onRetry = if (notFound) onBackClick else onRetryClick,
                 offline = viewState.error.kind == ErrorKind.Offline,
             )
         }
-        else -> DetailGrid(viewState, gridState, onIntent)
+        else -> DetailGrid(
+            viewState = viewState,
+            gridState = gridState,
+            onBackClick = onBackClick,
+            onSynopsisToggle = onSynopsisToggle,
+            onContinueClick = onContinueClick,
+            onSaveClick = onSaveClick,
+            onRangeSheetOpen = onRangeSheetOpen,
+            onRetryEpisodesClick = onRetryEpisodesClick,
+            onEpisodeClick = onEpisodeClick,
+        )
     }
 }
 
@@ -199,7 +228,13 @@ private fun ShowDetailContent(
 private fun DetailGrid(
     viewState: ShowDetailViewState,
     gridState: LazyGridState,
-    onIntent: (ShowDetailIntent) -> Unit,
+    onBackClick: () -> Unit,
+    onSynopsisToggle: () -> Unit,
+    onContinueClick: () -> Unit,
+    onSaveClick: () -> Unit,
+    onRangeSheetOpen: () -> Unit,
+    onRetryEpisodesClick: () -> Unit,
+    onEpisodeClick: (index: Int) -> Unit,
 ) {
     val gutter = AppTheme.dimensions.screenGutter
     // Một LazyVerticalGrid cho cả trang: header là item full-span, lưới tập cuộn chung.
@@ -215,22 +250,22 @@ private fun DetailGrid(
         horizontalArrangement = Arrangement.spacedBy(CellGap),
         verticalArrangement = Arrangement.spacedBy(CellGap),
     ) {
-        fullSpan { Hero(viewState, gutter, onBack = { onIntent(ShowDetailIntent.BackClick) }) }
+        fullSpan { Hero(viewState, gutter, onBack = onBackClick) }
         fullSpan { Stats(viewState) }
         fullSpan {
             Synopsis(
                 text = viewState.synopsis,
                 expanded = viewState.synopsisExpanded,
-                onToggle = { onIntent(ShowDetailIntent.ToggleSynopsis) },
+                onToggle = onSynopsisToggle,
             )
         }
-        fullSpan { CtaRow(viewState, onIntent) }
+        fullSpan { CtaRow(viewState, onContinueClick = onContinueClick, onSaveClick = onSaveClick) }
         fullSpan {
             EpisodesHeader(
                 ranges = viewState.ranges,
                 selected = viewState.selectedRange,
                 episodeCount = viewState.cells.size,
-                onOpenRanges = { onIntent(ShowDetailIntent.RangeSheetOpen) },
+                onOpenRanges = onRangeSheetOpen,
             )
         }
         if (viewState.episodesErrorRes != null) {
@@ -244,7 +279,7 @@ private fun DetailGrid(
                     Spacer(Modifier.height(AppTheme.dimensions.s3))
                     OutlinePillButton(
                         text = stringResource(R.string.watch_retry),
-                        onClick = { onIntent(ShowDetailIntent.RetryEpisodesClick) },
+                        onClick = onRetryEpisodesClick,
                     )
                 }
             }
@@ -252,7 +287,7 @@ private fun DetailGrid(
             fullSpan { SkeletonHost { EpisodesSkeleton() } }
         } else {
             items(viewState.visibleCells, key = { it.index }) { cell ->
-                EpisodeGridCell(cell = cell, onClick = { onIntent(ShowDetailIntent.EpisodeClick(it)) })
+                EpisodeGridCell(cell = cell, onClick = onEpisodeClick)
             }
         }
     }
@@ -401,7 +436,7 @@ private fun Synopsis(text: String, expanded: Boolean, onToggle: () -> Unit) {
 }
 
 @Composable
-private fun CtaRow(viewState: ShowDetailViewState, onIntent: (ShowDetailIntent) -> Unit) {
+private fun CtaRow(viewState: ShowDetailViewState, onContinueClick: () -> Unit, onSaveClick: () -> Unit) {
     Row(
         modifier = Modifier.padding(top = AppTheme.dimensions.s4, bottom = AppTheme.dimensions.s1),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -416,7 +451,7 @@ private fun CtaRow(viewState: ShowDetailViewState, onIntent: (ShowDetailIntent) 
                 cta.isResume -> stringResource(R.string.watch_continue_episode, cta.episodeNumber)
                 else -> stringResource(R.string.watch_play_episode, cta.episodeNumber)
             },
-            onClick = { onIntent(ShowDetailIntent.ContinueClick) },
+            onClick = onContinueClick,
             enabled = cta != null,
             modifier = Modifier.weight(1f),
             leadingIcon = {
@@ -428,7 +463,7 @@ private fun CtaRow(viewState: ShowDetailViewState, onIntent: (ShowDetailIntent) 
                 )
             },
         )
-        GhostIconButton(onClick = { onIntent(ShowDetailIntent.SaveClick) }) {
+        GhostIconButton(onClick = onSaveClick) {
             Icon(
                 imageVector = if (viewState.isSaved) Icons.Filled.Check else Icons.Filled.Add,
                 contentDescription = stringResource(if (viewState.isSaved) R.string.watch_saved_cd else R.string.watch_save_cd),
@@ -491,8 +526,12 @@ private fun EpisodesHeader(
 
 /** Sheet chọn dải tập của nút "1–20 ⌄": mỗi dải một hàng, dải đang xem có dấu ✓. */
 @Composable
-private fun RangeSheet(viewState: ShowDetailViewState, onIntent: (ShowDetailIntent) -> Unit) {
-    AppBottomSheet(visible = viewState.rangeSheetVisible, onDismiss = { onIntent(ShowDetailIntent.RangeSheetDismiss) }) {
+private fun RangeSheet(
+    viewState: ShowDetailViewState,
+    onRangeSelect: (EpisodeRange) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AppBottomSheet(visible = viewState.rangeSheetVisible, onDismiss = onDismiss) {
         Text(
             text = stringResource(R.string.watch_episodes),
             style = AppTypography.titleSmall,
@@ -508,7 +547,7 @@ private fun RangeSheet(viewState: ShowDetailViewState, onIntent: (ShowDetailInte
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 52.dp)
                         .clip(AppTheme.shapes.md)
-                        .selectable(selected = selected, role = Role.RadioButton) { onIntent(ShowDetailIntent.RangeSelect(range)) },
+                        .selectable(selected = selected, role = Role.RadioButton) { onRangeSelect(range) },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
@@ -547,7 +586,14 @@ private fun ShowDetailContentPreview() {
                     continueCta = ContinueCta(4, 5, isResume = true, isLocked = false),
                 ),
                 gridState = rememberLazyGridState(),
-                onIntent = {},
+                onBackClick = {},
+                onRetryClick = {},
+                onSynopsisToggle = {},
+                onContinueClick = {},
+                onSaveClick = {},
+                onRangeSheetOpen = {},
+                onRetryEpisodesClick = {},
+                onEpisodeClick = {},
             )
         }
     }

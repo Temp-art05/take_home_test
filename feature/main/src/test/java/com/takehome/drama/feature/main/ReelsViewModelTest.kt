@@ -18,10 +18,10 @@ import com.takehome.drama.domain.usecase.reels.GetReelClipUseCase
 import com.takehome.drama.domain.usecase.reels.GetReelsFeedUseCase
 import com.takehome.drama.domain.usecase.watch.GetShowEpisodesUseCase
 import com.takehome.drama.domain.usecase.watch.PickVideoSourceUseCase
-import com.takehome.drama.feature.main.presentation.reels.ClipStatus
-import com.takehome.drama.feature.main.presentation.reels.ReelsIntent
-import com.takehome.drama.feature.main.presentation.reels.ReelsSingleEvent
-import com.takehome.drama.feature.main.presentation.reels.ReelsViewModel
+import com.takehome.drama.feature.main.presentation.main.reels.ClipStatus
+import com.takehome.drama.feature.main.presentation.main.reels.ReelsIntent
+import com.takehome.drama.feature.main.presentation.main.reels.ReelsSingleEvent
+import com.takehome.drama.feature.main.presentation.main.reels.ReelsViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest

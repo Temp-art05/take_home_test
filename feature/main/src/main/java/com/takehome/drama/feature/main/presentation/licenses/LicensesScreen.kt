@@ -15,7 +15,6 @@ import com.takehome.drama.core.designsystem.component.AppTopBar
 import com.takehome.drama.core.designsystem.component.SettingsRow
 import com.takehome.drama.core.designsystem.component.SettingsRows
 import com.takehome.drama.core.designsystem.theme.AppTheme
-import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.feature.main.R
 
@@ -38,10 +37,10 @@ private val libraries = listOf(
 
 /** Open-source licenses (từ SCR-0501). */
 @Composable
-fun LicensesScreen(viewModel: LicensesViewModel, onNavigate: (NavigationRequest) -> Unit) {
+fun LicensesScreen(viewModel: LicensesViewModel, onBack: () -> Unit) {
     viewModel.singleEvent.CollectAsEffect { event ->
         when (event) {
-            LicensesSingleEvent.NavigateBack -> onNavigate(NavigationRequest.PopBackStack)
+            LicensesSingleEvent.NavigateBack -> onBack()
         }
     }
     Column(

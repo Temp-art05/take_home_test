@@ -5,7 +5,7 @@ import com.takehome.drama.core.ui.foundation.error.UiError
 import com.takehome.drama.core.ui.foundation.vm.SingleEvent
 import com.takehome.drama.core.ui.foundation.vm.ViewIntent
 import com.takehome.drama.core.ui.foundation.vm.ViewState
-import com.takehome.drama.feature.main.presentation.library.model.HistoryRow
+import com.takehome.drama.feature.main.presentation.main.library.model.HistoryRow
 
 enum class HistoryTab { Watching, Finished }
 

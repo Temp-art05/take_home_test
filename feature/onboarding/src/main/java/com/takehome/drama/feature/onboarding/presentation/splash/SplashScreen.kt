@@ -31,25 +31,21 @@ import com.takehome.drama.core.designsystem.component.rememberToastState
 import com.takehome.drama.core.designsystem.ext.clickableNoRipple
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
-import com.takehome.drama.core.navigation.core.NavigationRequest
-import com.takehome.drama.core.navigation.destination.Destination
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.feature.onboarding.R
-import com.takehome.drama.feature.onboarding.navigation.OnboardingScreenProvider
 
 @Composable
 fun SplashScreen(
     viewModel: SplashViewModel,
-    home: Destination,
-    onNavigate: (NavigationRequest) -> Unit,
+    onOpenOnboarding: () -> Unit,
+    onOpenHome: () -> Unit,
 ) {
     val resources = LocalResources.current
     val toastState = rememberToastState()
     viewModel.singleEvent.CollectAsEffect { event ->
         when (event) {
-            SplashSingleEvent.GoHome -> onNavigate(NavigationRequest.NavigateToAndClearBackStack(home))
-            SplashSingleEvent.GoOnboarding ->
-                onNavigate(NavigationRequest.NavigateToAndClearBackStack(OnboardingScreenProvider.Onboarding()))
+            SplashSingleEvent.GoHome -> onOpenHome()
+            SplashSingleEvent.GoOnboarding -> onOpenOnboarding()
             is SplashSingleEvent.ShowToast -> toastState.show(resources.getString(event.messageRes), success = true)
         }
     }
@@ -67,7 +63,7 @@ fun SplashScreen(
 
 /** `.splash`: glow cam 14% sau logo, mark 78dp, wordmark 30sp, tag `text3`. Không progress bar. */
 @Composable
-private fun SplashContent(onLogoTap: () -> Unit = {}) {
+private fun SplashContent(onLogoTap: () -> Unit) {
     val glow = AppTheme.colors.splashGlow
     Box(
         modifier = Modifier
@@ -107,5 +103,5 @@ private fun SplashContent(onLogoTap: () -> Unit = {}) {
 @Preview
 @Composable
 private fun SplashPreview() {
-    AppTheme { SplashContent() }
+    AppTheme { SplashContent(onLogoTap = {}) }
 }

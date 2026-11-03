@@ -12,9 +12,9 @@ import com.takehome.drama.domain.usecase.catalog.GetCatalogUseCase
 import com.takehome.drama.domain.usecase.catalog.ResolveContentLanguageUseCase
 import com.takehome.drama.domain.usecase.onboarding.GetLanguageChoiceUseCase
 import com.takehome.drama.domain.usecase.onboarding.SetContentLanguageUseCase
-import com.takehome.drama.feature.onboarding.presentation.language.OnboardingLanguageIntent
-import com.takehome.drama.feature.onboarding.presentation.language.OnboardingLanguageSingleEvent
-import com.takehome.drama.feature.onboarding.presentation.language.OnboardingLanguageViewModel
+import com.takehome.drama.feature.onboarding.presentation.flow.language.OnboardingLanguageIntent
+import com.takehome.drama.feature.onboarding.presentation.flow.language.OnboardingLanguageSingleEvent
+import com.takehome.drama.feature.onboarding.presentation.flow.language.OnboardingLanguageViewModel
 import java.util.Locale
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest

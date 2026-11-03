@@ -129,7 +129,8 @@ class ProfileViewModel(private val profileUseCase: ProfileUseCase) :
 // presentation/profile/ProfileScreen.kt
 ProfileContent(
     viewState = viewState,
-    onIntent = { intent -> viewModel.processIntent(intent) },
+    onRetryClick = { viewModel.processIntent(ProfileIntent.RetryClick) },
+    onRenameConfirm = { name -> viewModel.processIntent(ProfileIntent.RenameConfirm(name)) },
 )
 
 // di/MainModule.kt

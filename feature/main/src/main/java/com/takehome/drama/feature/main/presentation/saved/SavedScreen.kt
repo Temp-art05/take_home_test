@@ -36,28 +36,25 @@ import com.takehome.drama.core.designsystem.component.rememberToastState
 import com.takehome.drama.core.designsystem.icon.AppIcons
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
-import com.takehome.drama.core.navigation.core.NavigationRequest
-import com.takehome.drama.core.navigation.destination.WatchRoutes
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.domain.model.ShowStatus
 import com.takehome.drama.domain.usecase.library.SavedFilter
 import com.takehome.drama.feature.main.R
-import com.takehome.drama.feature.main.navigation.MainScreenProvider
 import com.takehome.drama.feature.main.presentation.common.HeaderTextAction
 import com.takehome.drama.feature.main.presentation.common.RowActionsSheet
 import com.takehome.drama.feature.main.presentation.common.SheetAction
 import com.takehome.drama.feature.main.presentation.common.UiErrorState
-import com.takehome.drama.feature.main.presentation.library.SkeletonListRow
-import com.takehome.drama.feature.main.presentation.library.model.SavedRow
-import com.takehome.drama.feature.main.presentation.library.model.meta
-import com.takehome.drama.feature.main.presentation.main.model.MainTab
+import com.takehome.drama.feature.main.presentation.main.library.SkeletonListRow
+import com.takehome.drama.feature.main.presentation.main.library.model.SavedRow
+import com.takehome.drama.feature.main.presentation.main.library.model.meta
 
 /** SCR-0403 — show đã lưu; chưa lưu gì → SCR-0602. */
 @Composable
 fun SavedScreen(
     viewModel: SavedViewModel,
-    watchRoutes: WatchRoutes,
-    onNavigate: (NavigationRequest) -> Unit,
+    onBack: () -> Unit,
+    onOpenShowDetail: (showId: String) -> Unit,
+    onOpenBrowseTab: () -> Unit,
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     val toastState = rememberToastState()
@@ -65,11 +62,10 @@ fun SavedScreen(
 
     viewModel.singleEvent.CollectAsEffect { event ->
         when (event) {
-            SavedSingleEvent.NavigateBack -> onNavigate(NavigationRequest.PopBackStack)
-            is SavedSingleEvent.OpenDetail -> onNavigate(NavigationRequest.NavigateTo(watchRoutes.showDetail(event.showId)))
+            SavedSingleEvent.NavigateBack -> onBack()
+            is SavedSingleEvent.OpenDetail -> onOpenShowDetail(event.showId)
             is SavedSingleEvent.ShowToast -> toastState.show(resources.getString(event.messageRes), event.success)
-            SavedSingleEvent.GoBrowse ->
-                onNavigate(NavigationRequest.NavigateUp(fallBackDestination = MainScreenProvider.Main(MainTab.Browse.name)))
+            SavedSingleEvent.GoBrowse -> onOpenBrowseTab()
         }
     }
 
@@ -78,7 +74,17 @@ fun SavedScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        SavedContent(viewState = viewState, onIntent = viewModel::processIntent)
+        SavedContent(
+            viewState = viewState,
+            onBackClick = { viewModel.processIntent(SavedIntent.Back) },
+            onEditToggle = { viewModel.processIntent(SavedIntent.ToggleEdit) },
+            onRetry = { viewModel.processIntent(SavedIntent.Retry) },
+            onFindNext = { viewModel.processIntent(SavedIntent.FindNext) },
+            onFilterSelect = { filter -> viewModel.processIntent(SavedIntent.SelectFilter(filter)) },
+            onRowClick = { showId -> viewModel.processIntent(SavedIntent.OpenRow(showId)) },
+            onRowRemove = { showId -> viewModel.processIntent(SavedIntent.Remove(showId)) },
+            onRowMenuClick = { row -> viewModel.processIntent(SavedIntent.OpenMenu(row)) },
+        )
         AppToastHost(
             state = toastState,
             modifier = Modifier
@@ -109,24 +115,31 @@ fun SavedScreen(
 @Composable
 private fun SavedContent(
     viewState: SavedViewState,
-    onIntent: (SavedIntent) -> Unit,
+    onBackClick: () -> Unit,
+    onEditToggle: () -> Unit,
+    onRetry: () -> Unit,
+    onFindNext: () -> Unit,
+    onFilterSelect: (SavedFilter) -> Unit,
+    onRowClick: (showId: String) -> Unit,
+    onRowRemove: (showId: String) -> Unit,
+    onRowMenuClick: (SavedRow) -> Unit,
 ) {
     Column(Modifier.fillMaxSize()) {
         AppTopBar(
             title = stringResource(R.string.library_saved),
-            onBack = { onIntent(SavedIntent.Back) },
+            onBack = onBackClick,
             backContentDescription = stringResource(R.string.common_back),
             actions = {
                 if (viewState.items.isNotEmpty()) {
                     HeaderTextAction(
                         text = stringResource(if (viewState.editing) R.string.common_done else R.string.common_edit),
-                        onClick = { onIntent(SavedIntent.ToggleEdit) },
+                        onClick = onEditToggle,
                     )
                 }
             },
         )
         when {
-            viewState.error != null -> UiErrorState(error = viewState.error, onRetry = { onIntent(SavedIntent.Retry) })
+            viewState.error != null -> UiErrorState(error = viewState.error, onRetry = onRetry)
             viewState.isLoading -> SkeletonHost {
                 Column(Modifier.padding(horizontal = AppTheme.dimensions.s4, vertical = AppTheme.dimensions.s5)) {
                     repeat(5) { SkeletonListRow(Modifier.padding(bottom = AppTheme.dimensions.s6)) }
@@ -138,10 +151,10 @@ private fun SavedContent(
                 title = stringResource(R.string.saved_empty_title),
                 body = stringResource(R.string.saved_empty_body),
                 actionLabel = stringResource(R.string.common_find_next),
-                onAction = { onIntent(SavedIntent.FindNext) },
+                onAction = onFindNext,
             )
             else -> {
-                FilterChips(viewState.filter, viewState.totalCount, onSelect = { onIntent(SavedIntent.SelectFilter(it)) })
+                FilterChips(viewState.filter, viewState.totalCount, onSelect = onFilterSelect)
                 if (viewState.items.isEmpty()) {
                     Text(
                         text = stringResource(
@@ -157,7 +170,13 @@ private fun SavedContent(
                 } else {
                     LazyColumn(Modifier.fillMaxSize().padding(top = 2.dp)) {
                         items(viewState.items, key = { it.showId }) { row ->
-                            SavedListRow(row = row, editing = viewState.editing, onIntent = onIntent)
+                            SavedListRow(
+                                row = row,
+                                editing = viewState.editing,
+                                onClick = { onRowClick(row.showId) },
+                                onRemove = { onRowRemove(row.showId) },
+                                onMenuClick = { onRowMenuClick(row) },
+                            )
                         }
                     }
                 }
@@ -191,24 +210,30 @@ private fun FilterChips(selected: SavedFilter, total: Int, onSelect: (SavedFilte
 }
 
 @Composable
-private fun SavedListRow(row: SavedRow, editing: Boolean, onIntent: (SavedIntent) -> Unit) {
+private fun SavedListRow(
+    row: SavedRow,
+    editing: Boolean,
+    onClick: () -> Unit,
+    onRemove: () -> Unit,
+    onMenuClick: () -> Unit,
+) {
     MediaListRow(
         imageUrl = row.posterUrl,
         title = row.title,
         meta = row.meta(),
-        onClick = { onIntent(SavedIntent.OpenRow(row.showId)) },
+        onClick = onClick,
         trailing = {
             if (editing) {
                 RowEndButton(
                     icon = AppIcons.Close,
                     contentDescription = stringResource(R.string.common_remove_cd, row.title),
-                    onClick = { onIntent(SavedIntent.Remove(row.showId)) },
+                    onClick = onRemove,
                 )
             } else {
                 RowEndButton(
                     icon = AppIcons.More,
                     contentDescription = stringResource(R.string.common_more_cd, row.title),
-                    onClick = { onIntent(SavedIntent.OpenMenu(row)) },
+                    onClick = onMenuClick,
                 )
             }
         },
@@ -222,7 +247,14 @@ private fun SavedContentPreview() {
     AppTheme {
         SavedContent(
             viewState = SavedViewState(isLoading = false, items = listOf(row, row.copy(showId = "b")), totalCount = 2),
-            onIntent = {},
+            onBackClick = {},
+            onEditToggle = {},
+            onRetry = {},
+            onFindNext = {},
+            onFilterSelect = {},
+            onRowClick = {},
+            onRowRemove = {},
+            onRowMenuClick = {},
         )
     }
 }
@@ -230,5 +262,17 @@ private fun SavedContentPreview() {
 @Preview(heightDp = 700)
 @Composable
 private fun SavedEmptyPreview() {
-    AppTheme { SavedContent(viewState = SavedViewState(isLoading = false), onIntent = {}) }
+    AppTheme {
+        SavedContent(
+            viewState = SavedViewState(isLoading = false),
+            onBackClick = {},
+            onEditToggle = {},
+            onRetry = {},
+            onFindNext = {},
+            onFilterSelect = {},
+            onRowClick = {},
+            onRowRemove = {},
+            onRowMenuClick = {},
+        )
+    }
 }

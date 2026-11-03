@@ -71,11 +71,11 @@ import com.takehome.drama.core.media.PlaybackProgress
 import com.takehome.drama.core.media.PlaybackState
 import com.takehome.drama.core.media.VideoSlot
 import com.takehome.drama.core.media.VideoSurface
-import com.takehome.drama.core.navigation.core.NavigationRequest
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.core.ui.foundation.format.formatCompactCount
 import com.takehome.drama.core.utils.extension.findActivity
 import com.takehome.drama.domain.usecase.watch.EndAction
+import com.takehome.drama.domain.usecase.watch.EpisodeRange
 import com.takehome.drama.feature.watch.R
 import com.takehome.drama.feature.watch.presentation.common.RewardedAdState
 import com.takehome.drama.feature.watch.presentation.common.RewardedUnlockButton
@@ -102,7 +102,7 @@ private const val AUTO_SCROLL_MS = 650
 @Composable
 fun PlayerScreen(
     viewModel: PlayerViewModel,
-    onNavigate: (NavigationRequest) -> Unit,
+    onBack: () -> Unit,
     rewardAdManager: RewardAdManager = koinInject(),
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
@@ -118,7 +118,7 @@ fun PlayerScreen(
 
     viewModel.singleEvent.CollectAsEffect { event ->
         when (event) {
-            PlayerSingleEvent.NavigateBack -> onNavigate(NavigationRequest.PopBackStack)
+            PlayerSingleEvent.NavigateBack -> onBack()
             is PlayerSingleEvent.ShowToast -> toastState.show(
                 text = event.formatArg?.let { resources.getString(event.messageRes, it) } ?: resources.getString(event.messageRes),
                 success = event.success,
@@ -168,9 +168,29 @@ fun PlayerScreen(
             pagerState = pagerState,
             progress = { progress.value },
             slots = slots,
-            onIntent = viewModel::processIntent,
+            onBackClick = { viewModel.processIntent(PlayerIntent.BackClick) },
+            onRetryClick = { viewModel.processIntent(PlayerIntent.RetryClick) },
+            onTogglePlay = { viewModel.processIntent(PlayerIntent.TogglePlay) },
+            onToggleDescription = { viewModel.processIntent(PlayerIntent.ToggleDescription) },
+            onEpisodesClick = { viewModel.processIntent(PlayerIntent.EpisodesClick) },
+            onUnlockWithAdClick = { viewModel.processIntent(PlayerIntent.UnlockWithAdClick) },
+            onSwitchBackToHd = { viewModel.processIntent(PlayerIntent.SwitchBackToHd) },
+            onEpisodeSelect = { index -> viewModel.processIntent(PlayerIntent.EpisodeSelect(index)) },
+            onLikeClick = { viewModel.processIntent(PlayerIntent.LikeClick) },
+            onSpeedClick = { viewModel.processIntent(PlayerIntent.SpeedClick) },
+            onSpeedLongPress = { viewModel.processIntent(PlayerIntent.SpeedLongPress) },
+            onSeek = { positionMs -> viewModel.processIntent(PlayerIntent.SeekTo(positionMs)) },
         )
-        PlayerSheets(viewState, onIntent = viewModel::processIntent)
+        PlayerSheets(
+            viewState = viewState,
+            onDismiss = { viewModel.processIntent(PlayerIntent.DismissSheet) },
+            onRangeSelect = { range -> viewModel.processIntent(PlayerIntent.RangeSelect(range)) },
+            onEpisodeSelect = { index -> viewModel.processIntent(PlayerIntent.EpisodeSelect(index)) },
+            onSpeedSelect = { speed -> viewModel.processIntent(PlayerIntent.SpeedSelect(speed)) },
+            onQualitySelect = { quality -> viewModel.processIntent(PlayerIntent.QualitySelect(quality)) },
+            onLanguageSelect = { language -> viewModel.processIntent(PlayerIntent.LanguageSelect(language)) },
+            onAutoplayToggle = { viewModel.processIntent(PlayerIntent.AutoplayToggle) },
+        )
         // Sheet vẽ cùng cửa sổ (AppBottomSheet) → toast đặt sau nó vẫn nổi trên scrim.
         AppToastHost(
             state = toastState,
@@ -183,12 +203,21 @@ fun PlayerScreen(
 
 /** Sheet 0303 / 0304. Giữ sheet vừa đóng để animation thoát còn nội dung. */
 @Composable
-private fun PlayerSheets(viewState: PlayerViewState, onIntent: (PlayerIntent) -> Unit) {
+private fun PlayerSheets(
+    viewState: PlayerViewState,
+    onDismiss: () -> Unit,
+    onRangeSelect: (EpisodeRange) -> Unit,
+    onEpisodeSelect: (index: Int) -> Unit,
+    onSpeedSelect: (Float) -> Unit,
+    onQualitySelect: (String?) -> Unit,
+    onLanguageSelect: (String) -> Unit,
+    onAutoplayToggle: () -> Unit,
+) {
     var shownSheet by remember { mutableStateOf(viewState.sheet) }
     if (viewState.sheet != PlayerSheet.None) shownSheet = viewState.sheet
     AppBottomSheet(
         visible = viewState.sheet != PlayerSheet.None,
-        onDismiss = { onIntent(PlayerIntent.DismissSheet) },
+        onDismiss = onDismiss,
     ) {
         when (shownSheet) {
             PlayerSheet.None -> Unit
@@ -197,8 +226,8 @@ private fun PlayerSheets(viewState: PlayerViewState, onIntent: (PlayerIntent) ->
                 ranges = viewState.ranges,
                 selectedRange = viewState.selectedRange,
                 watchedCount = viewState.watchedCount,
-                onRangeSelect = { onIntent(PlayerIntent.RangeSelect(it)) },
-                onEpisodeSelect = { onIntent(PlayerIntent.EpisodeSelect(it)) },
+                onRangeSelect = onRangeSelect,
+                onEpisodeSelect = onEpisodeSelect,
             )
             PlayerSheet.Options -> PlaybackOptionsSheet(
                 speed = viewState.speed,
@@ -207,10 +236,10 @@ private fun PlayerSheets(viewState: PlayerViewState, onIntent: (PlayerIntent) ->
                 languages = viewState.languages,
                 language = viewState.language,
                 autoplayNext = viewState.autoplayNext,
-                onSpeedSelect = { onIntent(PlayerIntent.SpeedSelect(it)) },
-                onQualitySelect = { onIntent(PlayerIntent.QualitySelect(it)) },
-                onLanguageSelect = { onIntent(PlayerIntent.LanguageSelect(it)) },
-                onAutoplayToggle = { onIntent(PlayerIntent.AutoplayToggle) },
+                onSpeedSelect = onSpeedSelect,
+                onQualitySelect = onQualitySelect,
+                onLanguageSelect = onLanguageSelect,
+                onAutoplayToggle = onAutoplayToggle,
             )
         }
     }
@@ -222,7 +251,18 @@ private fun PlayerContent(
     pagerState: PagerState,
     progress: () -> PlaybackProgress,
     slots: Map<Int, VideoSlot>,
-    onIntent: (PlayerIntent) -> Unit,
+    onBackClick: () -> Unit,
+    onRetryClick: () -> Unit,
+    onTogglePlay: () -> Unit,
+    onToggleDescription: () -> Unit,
+    onEpisodesClick: () -> Unit,
+    onUnlockWithAdClick: () -> Unit,
+    onSwitchBackToHd: () -> Unit,
+    onEpisodeSelect: (index: Int) -> Unit,
+    onLikeClick: () -> Unit,
+    onSpeedClick: () -> Unit,
+    onSpeedLongPress: () -> Unit,
+    onSeek: (positionMs: Long) -> Unit,
 ) {
     Box(Modifier.fillMaxSize()) {
         if (viewState.pages.isNotEmpty()) {
@@ -242,7 +282,18 @@ private fun PlayerContent(
                     progress = progress,
                     // Overlay mờ dần theo độ lệch trang; đọc trong lambda của graphicsLayer → không recompose mỗi frame.
                     overlayAlpha = { (1f - abs(pagerState.getOffsetDistanceInPages(page)) * OVERLAY_FADE).coerceIn(0f, 1f) },
-                    onIntent = onIntent,
+                    onBackClick = onBackClick,
+                    onRetryClick = onRetryClick,
+                    onTogglePlay = onTogglePlay,
+                    onToggleDescription = onToggleDescription,
+                    onEpisodesClick = onEpisodesClick,
+                    onUnlockWithAdClick = onUnlockWithAdClick,
+                    onSwitchBackToHd = onSwitchBackToHd,
+                    onEpisodeSelect = onEpisodeSelect,
+                    onLikeClick = onLikeClick,
+                    onSpeedClick = onSpeedClick,
+                    onSpeedLongPress = onSpeedLongPress,
+                    onSeek = onSeek,
                 )
             }
         }
@@ -253,7 +304,7 @@ private fun PlayerContent(
             title = viewState.showTitle,
             episodeNumber = viewState.episodeNumber,
             episodeTotal = viewState.episodeTotal,
-            onBack = { onIntent(PlayerIntent.BackClick) },
+            onBack = onBackClick,
             modifier = Modifier
                 .statusBarsPadding()
                 .padding(top = AppTheme.dimensions.s2, end = AppTheme.dimensions.s3),
@@ -264,7 +315,7 @@ private fun PlayerContent(
             viewState.errorRes != null -> CenterMessage(
                 title = stringResource(viewState.errorRes),
                 actionLabel = stringResource(R.string.watch_retry),
-                onAction = { onIntent(PlayerIntent.RetryClick) },
+                onAction = onRetryClick,
             )
         }
     }
@@ -284,7 +335,18 @@ private fun EpisodePage(
     viewState: PlayerViewState,
     progress: () -> PlaybackProgress,
     overlayAlpha: () -> Float,
-    onIntent: (PlayerIntent) -> Unit,
+    onBackClick: () -> Unit,
+    onRetryClick: () -> Unit,
+    onTogglePlay: () -> Unit,
+    onToggleDescription: () -> Unit,
+    onEpisodesClick: () -> Unit,
+    onUnlockWithAdClick: () -> Unit,
+    onSwitchBackToHd: () -> Unit,
+    onEpisodeSelect: (index: Int) -> Unit,
+    onLikeClick: () -> Unit,
+    onSpeedClick: () -> Unit,
+    onSpeedLongPress: () -> Unit,
+    onSeek: (positionMs: Long) -> Unit,
 ) {
     val media = AppTheme.colors.media
     val playback = viewState.playback
@@ -317,7 +379,7 @@ private fun EpisodePage(
             Box(
                 Modifier
                     .fillMaxSize()
-                    .clickableNoRipple(onClickLabel = label, role = Role.Button) { onIntent(PlayerIntent.TogglePlay) }
+                    .clickableNoRipple(onClickLabel = label, role = Role.Button, onClick = onTogglePlay)
                     .semantics { contentDescription = label },
             )
         }
@@ -328,7 +390,7 @@ private fun EpisodePage(
                 Modifier
                     .fillMaxSize()
                     .background(media.bufferingDim)
-                    .clickableNoRipple { onIntent(PlayerIntent.ToggleDescription) },
+                    .clickableNoRipple(onClick = onToggleDescription),
             )
         }
 
@@ -340,13 +402,13 @@ private fun EpisodePage(
                         title = stringResource(R.string.watch_locked_title, page.episodeNumber),
                         body = stringResource(if (unlockAd != null) R.string.watch_locked_body_ad else R.string.watch_locked_body),
                         actionLabel = stringResource(R.string.watch_episodes),
-                        onAction = { onIntent(PlayerIntent.EpisodesClick) },
+                        onAction = onEpisodesClick,
                         primaryAction = unlockAd?.let { state ->
                             {
                                 RewardedUnlockButton(
                                     text = stringResource(R.string.watch_unlock_with_ad),
                                     state = state,
-                                    onClick = { onIntent(PlayerIntent.UnlockWithAdClick) },
+                                    onClick = onUnlockWithAdClick,
                                 )
                                 if (state == RewardedAdState.Unavailable) {
                                     Text(
@@ -364,15 +426,20 @@ private fun EpisodePage(
                 viewState.sourceUnavailable -> CenterMessage(
                     title = stringResource(R.string.watch_error_no_source),
                     actionLabel = stringResource(R.string.watch_episodes),
-                    onAction = { onIntent(PlayerIntent.EpisodesClick) },
+                    onAction = onEpisodesClick,
                 )
                 viewState.hasPlaybackError -> CenterMessage(
                     title = stringResource(R.string.watch_error_playback),
                     actionLabel = stringResource(R.string.watch_retry),
-                    onAction = { onIntent(PlayerIntent.RetryClick) },
+                    onAction = onRetryClick,
                 )
-                viewState.endAction != null -> EndCard(viewState.endAction, onIntent)
-                buffering -> BufferingOverlay(viewState.qualityDropped, onSwitchBack = { onIntent(PlayerIntent.SwitchBackToHd) })
+                viewState.endAction != null -> EndCard(
+                    action = viewState.endAction,
+                    onEpisodesClick = onEpisodesClick,
+                    onEpisodeSelect = onEpisodeSelect,
+                    onBackClick = onBackClick,
+                )
+                buffering -> BufferingOverlay(viewState.qualityDropped, onSwitchBack = onSwitchBackToHd)
                 !playback.playWhenReady -> CenterPlayIcon(AppIcons.Play, Modifier.align(Alignment.Center))
             }
             if (!viewState.isLoading && viewState.errorRes == null) {
@@ -385,7 +452,12 @@ private fun EpisodePage(
                     positionMs = { progress().positionFor(itemId) },
                     durationMs = if (playback.itemId == itemId && playback.durationMs > 0) playback.durationMs else page.durationMs,
                     buffering = buffering,
-                    onIntent = onIntent,
+                    onToggleDescription = onToggleDescription,
+                    onLikeClick = onLikeClick,
+                    onSpeedClick = onSpeedClick,
+                    onSpeedLongPress = onSpeedLongPress,
+                    onEpisodesClick = onEpisodesClick,
+                    onSeek = onSeek,
                 )
             }
         }
@@ -401,7 +473,12 @@ private fun BoxScope.BottomControls(
     positionMs: () -> Long,
     durationMs: Long,
     buffering: Boolean,
-    onIntent: (PlayerIntent) -> Unit,
+    onToggleDescription: () -> Unit,
+    onLikeClick: () -> Unit,
+    onSpeedClick: () -> Unit,
+    onSpeedLongPress: () -> Unit,
+    onEpisodesClick: () -> Unit,
+    onSeek: (positionMs: Long) -> Unit,
 ) {
     val gutter = AppTheme.dimensions.screenGutter
     // SCR-0604: đang buffering chỉ còn top bar + spinner + track mờ. Mờ dần thay vì gỡ khỏi layout: track không nhảy chỗ,
@@ -420,7 +497,7 @@ private fun BoxScope.BottomControls(
                 episodeNumber = page.episodeNumber,
                 description = viewState.description,
                 expanded = expanded,
-                onToggle = { if (isCurrent && !buffering) onIntent(PlayerIntent.ToggleDescription) },
+                onToggle = { if (isCurrent && !buffering) onToggleDescription() },
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = AppTheme.dimensions.s4),
@@ -430,10 +507,10 @@ private fun BoxScope.BottomControls(
                     likeCount = formatCompactCount(page.likeCount, Locale.current.platformLocale),
                     isLiked = page.isLiked,
                     speed = viewState.speed,
-                    onLike = { if (isCurrent && !buffering) onIntent(PlayerIntent.LikeClick) },
-                    onSpeedClick = { if (isCurrent && !buffering) onIntent(PlayerIntent.SpeedClick) },
-                    onSpeedLongPress = { if (isCurrent && !buffering) onIntent(PlayerIntent.SpeedLongPress) },
-                    onEpisodes = { if (!buffering) onIntent(PlayerIntent.EpisodesClick) },
+                    onLike = { if (isCurrent && !buffering) onLikeClick() },
+                    onSpeedClick = { if (isCurrent && !buffering) onSpeedClick() },
+                    onSpeedLongPress = { if (isCurrent && !buffering) onSpeedLongPress() },
+                    onEpisodes = { if (!buffering) onEpisodesClick() },
                     modifier = Modifier.padding(bottom = AppTheme.dimensions.s6),
                 )
             }
@@ -444,12 +521,12 @@ private fun BoxScope.BottomControls(
                 durationMs = durationMs,
                 dimmed = buffering,
                 seekable = isCurrent,
-                onSeek = { onIntent(PlayerIntent.SeekTo(it)) },
+                onSeek = onSeek,
                 modifier = Modifier.padding(top = AppTheme.dimensions.s3),
             )
         }
         EpisodesPill(
-            onClick = { if (!buffering) onIntent(PlayerIntent.EpisodesClick) },
+            onClick = { if (!buffering) onEpisodesClick() },
             modifier = Modifier
                 .padding(top = AppTheme.dimensions.s2)
                 .graphicsLayer { alpha = chromeAlpha },
@@ -545,13 +622,18 @@ private fun BoxScope.CenterMessage(
 
 /** Hết tập mà không tự sang được: tập kế khoá, user tắt autoplay, hoặc hết show. */
 @Composable
-private fun BoxScope.EndCard(action: EndAction, onIntent: (PlayerIntent) -> Unit) {
+private fun BoxScope.EndCard(
+    action: EndAction,
+    onEpisodesClick: () -> Unit,
+    onEpisodeSelect: (index: Int) -> Unit,
+    onBackClick: () -> Unit,
+) {
     when (action) {
         is EndAction.NextLocked -> CenterMessage(
             title = stringResource(R.string.watch_locked_title, action.episodeNumber),
             body = stringResource(R.string.watch_locked_body),
             actionLabel = stringResource(R.string.watch_episodes),
-            onAction = { onIntent(PlayerIntent.EpisodesClick) },
+            onAction = onEpisodesClick,
         )
         is EndAction.NextAvailable -> Column(
             modifier = Modifier.align(Alignment.Center),
@@ -564,7 +646,7 @@ private fun BoxScope.EndCard(action: EndAction, onIntent: (PlayerIntent) -> Unit
             )
             GradientButton(
                 text = stringResource(R.string.watch_play_next, action.episodeNumber),
-                onClick = { onIntent(PlayerIntent.EpisodeSelect(action.index)) },
+                onClick = { onEpisodeSelect(action.index) },
                 modifier = Modifier.padding(top = AppTheme.dimensions.s4),
                 leadingIcon = {
                     Icon(AppIcons.Play, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(18.dp))
@@ -574,7 +656,7 @@ private fun BoxScope.EndCard(action: EndAction, onIntent: (PlayerIntent) -> Unit
         EndAction.ShowFinished -> CenterMessage(
             title = stringResource(R.string.watch_show_finished),
             actionLabel = stringResource(R.string.watch_back),
-            onAction = { onIntent(PlayerIntent.BackClick) },
+            onAction = onBackClick,
         )
         is EndAction.PlayNext -> Unit
     }
@@ -600,7 +682,18 @@ private fun PlayerContentPreview() {
                 pagerState = rememberPagerState { 1 },
                 progress = { PlaybackProgress(itemId = "12", positionMs = 42_000, durationMs = 91_000) },
                 slots = emptyMap(),
-                onIntent = {},
+                onBackClick = {},
+                onRetryClick = {},
+                onTogglePlay = {},
+                onToggleDescription = {},
+                onEpisodesClick = {},
+                onUnlockWithAdClick = {},
+                onSwitchBackToHd = {},
+                onEpisodeSelect = {},
+                onLikeClick = {},
+                onSpeedClick = {},
+                onSpeedLongPress = {},
+                onSeek = {},
             )
         }
     }

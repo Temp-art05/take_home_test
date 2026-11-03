@@ -6,7 +6,7 @@ import com.takehome.drama.core.ui.foundation.vm.SingleEvent
 import com.takehome.drama.core.ui.foundation.vm.ViewIntent
 import com.takehome.drama.core.ui.foundation.vm.ViewState
 import com.takehome.drama.domain.usecase.library.SavedFilter
-import com.takehome.drama.feature.main.presentation.library.model.SavedRow
+import com.takehome.drama.feature.main.presentation.main.library.model.SavedRow
 
 data class SavedViewState(
     val isLoading: Boolean = true,

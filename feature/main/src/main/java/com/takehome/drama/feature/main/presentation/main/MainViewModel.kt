@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.takehome.drama.core.ui.foundation.vm.BaseViewModel
-import com.takehome.drama.feature.main.navigation.MainScreenProvider
 import com.takehome.drama.feature.main.presentation.main.model.MainTab
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch

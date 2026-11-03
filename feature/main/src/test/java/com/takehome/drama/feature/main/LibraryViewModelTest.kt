@@ -16,9 +16,9 @@ import com.takehome.drama.domain.usecase.history.GetContinueTargetUseCase
 import com.takehome.drama.domain.usecase.history.ObserveWatchHistoryUseCase
 import com.takehome.drama.domain.usecase.library.ObserveLibrarySummaryUseCase
 import com.takehome.drama.domain.usecase.watch.GetShowEpisodesUseCase
-import com.takehome.drama.feature.main.presentation.library.LibraryIntent
-import com.takehome.drama.feature.main.presentation.library.LibrarySingleEvent
-import com.takehome.drama.feature.main.presentation.library.LibraryViewModel
+import com.takehome.drama.feature.main.presentation.main.library.LibraryIntent
+import com.takehome.drama.feature.main.presentation.main.library.LibrarySingleEvent
+import com.takehome.drama.feature.main.presentation.main.library.LibraryViewModel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals

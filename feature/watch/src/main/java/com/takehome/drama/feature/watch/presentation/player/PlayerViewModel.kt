@@ -38,7 +38,7 @@ import com.takehome.drama.domain.usecase.watch.PlaybackQualityPolicy
 import com.takehome.drama.domain.usecase.watch.UnlockEpisodeUseCase
 import com.takehome.drama.domain.usecase.watch.isWatchable
 import com.takehome.drama.feature.watch.R
-import com.takehome.drama.feature.watch.navigation.PlayerScreenProvider.Player
+import com.takehome.drama.feature.watch.presentation.player.PlayerScreenProvider.Player
 import com.takehome.drama.feature.watch.presentation.common.RewardedAdState
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerPage
 import com.takehome.drama.feature.watch.presentation.player.model.PlayerSheet

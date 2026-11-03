@@ -63,8 +63,6 @@ import com.takehome.drama.core.designsystem.component.KeyArt
 import com.takehome.drama.core.designsystem.icon.AppIcons
 import com.takehome.drama.core.designsystem.theme.AppTheme
 import com.takehome.drama.core.designsystem.theme.AppTypography
-import com.takehome.drama.core.navigation.core.NavigationRequest
-import com.takehome.drama.core.navigation.destination.WatchRoutes
 import com.takehome.drama.core.ui.foundation.ext.CollectAsEffect
 import com.takehome.drama.core.ui.foundation.format.bidiIsolated
 import com.takehome.drama.domain.model.ShowStatus
@@ -75,21 +73,37 @@ import com.takehome.drama.feature.main.presentation.common.UiErrorState
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel,
-    watchRoutes: WatchRoutes,
-    onNavigate: (NavigationRequest) -> Unit,
+    onBack: () -> Unit,
+    onOpenShowDetail: (showId: String) -> Unit,
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     viewModel.singleEvent.CollectAsEffect { event ->
         when (event) {
-            is SearchSingleEvent.OpenShow -> onNavigate(NavigationRequest.NavigateTo(watchRoutes.showDetail(event.showId)))
-            SearchSingleEvent.NavigateBack -> onNavigate(NavigationRequest.PopBackStack)
+            is SearchSingleEvent.OpenShow -> onOpenShowDetail(event.showId)
+            SearchSingleEvent.NavigateBack -> onBack()
         }
     }
-    SearchContent(viewState = viewState, onIntent = viewModel::processIntent)
+    SearchContent(
+        viewState = viewState,
+        onQueryChange = { query -> viewModel.processIntent(SearchIntent.QueryChanged(query)) },
+        onQueryFill = { text -> viewModel.processIntent(SearchIntent.FillQuery(text)) },
+        onClear = { viewModel.processIntent(SearchIntent.Clear) },
+        onBackClick = { viewModel.processIntent(SearchIntent.Back) },
+        onRetry = { viewModel.processIntent(SearchIntent.Retry) },
+        onShowClick = { showId -> viewModel.processIntent(SearchIntent.OpenShow(showId)) },
+    )
 }
 
 @Composable
-private fun SearchContent(viewState: SearchViewState, onIntent: (SearchIntent) -> Unit) {
+private fun SearchContent(
+    viewState: SearchViewState,
+    onQueryChange: (query: String) -> Unit,
+    onQueryFill: (text: String) -> Unit,
+    onClear: () -> Unit,
+    onBackClick: () -> Unit,
+    onRetry: () -> Unit,
+    onShowClick: (showId: String) -> Unit,
+) {
     val focusManager = LocalFocusManager.current
     // Ô nhập giữ text cục bộ (đồng bộ từng phím) — đi vòng qua StateFlow của VM thì gõ nhanh có thể
     // mất ký tự. Điền gợi ý / xoá đặt chữ ở đây với con trỏ cuối, rồi báo VM.
@@ -98,7 +112,7 @@ private fun SearchContent(viewState: SearchViewState, onIntent: (SearchIntent) -
     }
     val fill: (String) -> Unit = { text ->
         field = TextFieldValue(text, TextRange(text.length))
-        onIntent(SearchIntent.FillQuery(text))
+        onQueryFill(text)
     }
     Column(
         Modifier
@@ -113,16 +127,16 @@ private fun SearchContent(viewState: SearchViewState, onIntent: (SearchIntent) -
             onFieldChange = { value ->
                 val changed = value.text != field.text
                 field = value
-                if (changed) onIntent(SearchIntent.QueryChanged(value.text))
+                if (changed) onQueryChange(value.text)
             },
             onClear = {
                 field = TextFieldValue()
-                onIntent(SearchIntent.Clear)
+                onClear()
             },
-            onBack = { onIntent(SearchIntent.Back) },
+            onBack = onBackClick,
         )
         when {
-            viewState.error != null -> UiErrorState(error = viewState.error, onRetry = { onIntent(SearchIntent.Retry) })
+            viewState.error != null -> UiErrorState(error = viewState.error, onRetry = onRetry)
             viewState.phase == SearchPhase.NoResults -> BlankState(
                 glyph = AppIcons.Search,
                 title = stringResource(R.string.search_no_results, viewState.query.trim()),
@@ -142,13 +156,13 @@ private fun SearchContent(viewState: SearchViewState, onIntent: (SearchIntent) -
                     }
                     item(key = "matches") { SectionTitle(stringResource(R.string.search_matches)) }
                     items(viewState.matches, key = { it.id }) { show ->
-                        ShowRow(show, onClick = { onIntent(SearchIntent.OpenShow(show.id)) })
+                        ShowRow(show, onClick = { onShowClick(show.id) })
                     }
                 } else {
                     item(key = "genres") { GenreChips(viewState.genres) { fill(it) } }
                     item(key = "popular") { SectionTitle(stringResource(R.string.search_popular)) }
                     items(viewState.popular, key = { it.id }) { show ->
-                        ShowRow(show, onClick = { onIntent(SearchIntent.OpenShow(show.id)) })
+                        ShowRow(show, onClick = { onShowClick(show.id) })
                     }
                 }
             }
@@ -348,7 +362,12 @@ private fun SearchResultsPreview() {
                 suggestions = listOf("CEO", "CEO in disguise"),
                 matches = listOf(show, show.copy(id = "2", title = "The CEO's Contract Wife")),
             ),
-            onIntent = {},
+            onQueryChange = {},
+            onQueryFill = {},
+            onClear = {},
+            onBackClick = {},
+            onRetry = {},
+            onShowClick = {},
         )
     }
 }

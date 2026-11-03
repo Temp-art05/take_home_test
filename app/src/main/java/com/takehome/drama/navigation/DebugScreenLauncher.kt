@@ -2,15 +2,15 @@ package com.takehome.drama.navigation
 
 import android.content.Intent
 import com.takehome.drama.core.navigation.destination.Destination
-import com.takehome.drama.feature.main.navigation.HistoryScreenProvider
-import com.takehome.drama.feature.main.navigation.LanguageScreenProvider
-import com.takehome.drama.feature.main.navigation.MainScreenProvider
-import com.takehome.drama.feature.main.navigation.SavedScreenProvider
-import com.takehome.drama.feature.main.navigation.SearchScreenProvider
-import com.takehome.drama.feature.onboarding.navigation.OnboardingScreenProvider
-import com.takehome.drama.feature.onboarding.navigation.SplashScreenProvider
-import com.takehome.drama.feature.watch.navigation.PlayerScreenProvider
-import com.takehome.drama.feature.watch.navigation.ShowDetailScreenProvider
+import com.takehome.drama.feature.main.presentation.history.HistoryScreenProvider
+import com.takehome.drama.feature.main.presentation.language.LanguageScreenProvider
+import com.takehome.drama.feature.main.presentation.main.MainScreenProvider
+import com.takehome.drama.feature.main.presentation.saved.SavedScreenProvider
+import com.takehome.drama.feature.main.presentation.search.SearchScreenProvider
+import com.takehome.drama.feature.onboarding.presentation.flow.OnboardingScreenProvider
+import com.takehome.drama.feature.onboarding.presentation.splash.SplashScreenProvider
+import com.takehome.drama.feature.watch.presentation.player.PlayerScreenProvider
+import com.takehome.drama.feature.watch.presentation.detail.ShowDetailScreenProvider
 import timber.log.Timber
 
 /**

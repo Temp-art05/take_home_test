@@ -19,7 +19,7 @@ HomeScreen ──(lambda)──▶ HomeViewModel ──▶ PostFeedUseCase ─�
 | 6 | data/mapper | `data/.../mapper/PostMapper.kt` | DTO/Entity ↔ domain (extension function) |
 | 7 | data/repository | `data/.../repository/PostRepositoryImpl.kt` | `withCatching` + `mapError { toDomainException() }` |
 | 8 | data/di | `data/.../di/DataModule.kt` | bind theo interface, use case là `factory` |
-| 9 | presentation | `feature/main/.../presentation/home/` | Contract, ViewModel (hàm tên rõ), Screen + `component/PostItem` |
+| 9 | presentation | `feature/main/.../presentation/main/home/` | Contract, ViewModel (hàm tên rõ), Screen + `component/PostItem` |
 | 10 | feature/di | `feature/main/.../di/MainModule.kt` | `viewModelOf(::HomeViewModel)` |
 
 Những gì luồng này minh hoạ:
@@ -36,7 +36,7 @@ Những gì luồng này minh hoạ:
 - `data`: `remote/dto/PostDto.kt`, `remote/datasource/Post*`, `local/` (giữ `database/AppDatabase.kt` nếu dùng Room,
   thay entity/dao), `mapper/PostMapper.kt`, `repository/PostRepositoryImpl.kt`, các dòng SAMPLE trong `DataModule`
 - `data/schemas/` khi đổi entity (hoặc bump version + viết Migration)
-- `feature/main/.../presentation/home/` → thay bằng màn thật; string `home_*`
+- `feature/main/.../presentation/main/home/` → thay bằng màn thật; string `home_*`
 - `BASE_URL` trong `app/build.gradle.kts`
 
 Không dùng Room: bỏ plugin `ksp` + `androidx.room`, `room {}`, `bundles.room`, `room.compiler` khỏi
